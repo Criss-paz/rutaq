@@ -12,6 +12,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import { useApp } from '../useApp';
+import { useUiStore } from '../uiStore';
 import { CustomEdge } from './CustomEdge';
 import { CustomNode } from './CustomNode';
 
@@ -45,7 +46,18 @@ export default function Canvas() {
   const moveNodes = useApp((s) => s.moveNodes);
   const theme = useApp((s) => s.theme);
 
+  const isMobileExpanded = useUiStore((s) => s.isMobileExpanded);
+  const isDesktopCollapsed = useUiStore((s) => s.isDesktopCollapsed);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+
   const { fitView } = useReactFlow();
+
+  const handleFitView = useCallback(
+    (duration = 0) => {
+      fitView({ padding: 0.15, duration });
+    },
+    [fitView],
+  );
 
   // Determinar aristas y nodos en la ruta activa resaltada
   const activePathEdges = useMemo(() => {
@@ -160,16 +172,62 @@ export default function Canvas() {
     setLocalNodes(rfNodes);
   }
 
-  // Re-ajustar vista automáticamente al cambiar de plantilla
+  // 1. Al montar el lienzo
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFitView(0);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [handleFitView]);
+
+  // 2. Al cambiar de plantilla
   useEffect(() => {
     if (prevGraphNameRef.current !== graphName) {
       prevGraphNameRef.current = graphName;
-      const timer = setTimeout(() => {
-        fitView({ padding: 0.05, duration: 250 });
-      }, 60);
-      return () => clearTimeout(timer);
+      handleFitView(0);
     }
-  }, [graphName, fitView]);
+  }, [graphName, handleFitView]);
+
+  // 3. Al cambiar de modo (Quetzaltenango / Diseño)
+  const prevModeRef = useRef(mode);
+  useEffect(() => {
+    if (prevModeRef.current !== mode) {
+      prevModeRef.current = mode;
+      handleFitView(0);
+    }
+  }, [mode, handleFitView]);
+
+  // 4. Al importar un archivo o cambiar el número de nodos/aristas
+  const prevNodesCountRef = useRef(graph.nodes.length);
+  const prevEdgesCountRef = useRef(graph.edges.length);
+  useEffect(() => {
+    if (prevNodesCountRef.current !== graph.nodes.length || prevEdgesCountRef.current !== graph.edges.length) {
+      prevNodesCountRef.current = graph.nodes.length;
+      prevEdgesCountRef.current = graph.edges.length;
+      handleFitView(0);
+    }
+  }, [graph.nodes.length, graph.edges.length, handleFitView]);
+
+  // 5. Al abrir o cerrar la hoja inferior / colapsar el panel lateral
+  const prevExpandedRef = useRef(isMobileExpanded);
+  const prevCollapsedRef = useRef(isDesktopCollapsed);
+  useEffect(() => {
+    if (prevExpandedRef.current !== isMobileExpanded || prevCollapsedRef.current !== isDesktopCollapsed) {
+      prevExpandedRef.current = isMobileExpanded;
+      prevCollapsedRef.current = isDesktopCollapsed;
+      handleFitView(0);
+    }
+  }, [isMobileExpanded, isDesktopCollapsed, handleFitView]);
+
+  // 6. Al cambiar el tamaño del lienzo (ResizeObserver)
+  useEffect(() => {
+    if (!canvasWrapperRef.current) return;
+    const ro = new ResizeObserver(() => {
+      handleFitView(0);
+    });
+    ro.observe(canvasWrapperRef.current);
+    return () => ro.disconnect();
+  }, [handleFitView]);
 
   // Manejador durante el arrastre: actualiza ÚNICAMENTE el estado local de React Flow
   // para evitar saturar el historial de deshacer/rehacer y no recalcular el store en cada píxel.
@@ -271,7 +329,11 @@ export default function Canvas() {
   };
 
   return (
-    <div className="relative flex flex-col h-full w-full bg-slate-50 dark:bg-slate-950" data-testid="graph-canvas">
+    <div
+      ref={canvasWrapperRef}
+      className="relative flex flex-col h-full w-full bg-slate-50 dark:bg-slate-950"
+      data-testid="graph-canvas"
+    >
       {/* Barra Superior de Herramientas y Consulta del Lienzo */}
       <div
         data-testid="canvas-toolbar"
@@ -416,15 +478,16 @@ export default function Canvas() {
             </button>
 
             {/* Toggle Mantener Proporción */}
-            <label className="flex min-h-[44px] cursor-pointer items-center gap-1.5 px-2 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-1.5 px-2 text-xs font-medium text-slate-700 dark:text-slate-200">
               <input
                 type="checkbox"
                 data-testid="toggle-keep-proportion"
+                aria-label="Mantener proporción"
                 checked={keepProportion}
                 onChange={(e) => setKeepProportion(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="hidden sm:inline">Mantener proporción</span>
+              <span className="whitespace-nowrap">Mantener proporción</span>
             </label>
           </>
         )}
@@ -458,8 +521,8 @@ export default function Canvas() {
           onNodeDragStop={onNodeDragStop}
           onConnect={onConnect}
           fitView
-          fitViewOptions={{ padding: 0.05 }}
-          minZoom={0.25}
+          fitViewOptions={{ padding: 0.15 }}
+          minZoom={0.15}
           maxZoom={2.5}
           deleteKeyCode={mode === 'design' ? 'Delete' : null}
         >
