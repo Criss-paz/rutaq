@@ -186,8 +186,8 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     const firstRow = page.getByTestId('path-row-0');
     await expect(firstRow).toBeVisible({ timeout: 10000 });
     await expect(firstRow).toContainText('⭐');
-    await expect(firstRow).toContainText(`${expectedDijkstraDist} km`);
-    await expect(firstRow).toContainText('+0.0 km');
+    await expect(firstRow).toContainText(`${expectedDijkstraDist}`);
+    await expect(firstRow).toContainText('+0.0');
 
     // Clic en la fila para resaltar
     await firstRow.click();
@@ -342,6 +342,63 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-10-guardar-recargar.png`,
+    });
+  });
+
+  test('11. Empates en F3 (ejemplo6 de 6 nodos: A -> F con 2 rutas mínimas de 12)', async ({ page }, testInfo) => {
+    await page.goto('./');
+    await page.getByTestId('template-select').selectOption('ejemplo6');
+
+    // Activar modo ruta F3
+    await page.getByTestId('query-mode-path').click();
+    await page.getByTestId('select-source-node').selectOption('A');
+    await page.getByTestId('select-target-node').selectOption('F');
+
+    // Verificar indicador de distancia en el lienzo: "12 ... · 2 rutas empatadas"
+    const distBadge = page.getByTestId('path-distance-badge');
+    await expect(distBadge).toBeVisible();
+    await expect(distBadge).toContainText('12');
+    await expect(distBadge).toContainText('2 rutas empatadas');
+
+    // Verificar en la pestaña gráfica que se listan ambas rutas
+    await page.getByTestId('tab-grafica').click();
+    await expect(page.getByTestId('ties-alert')).toBeVisible();
+    await expect(page.getByTestId('ties-alert')).toContainText('2 rutas mínimas');
+
+    const path0 = page.getByTestId('shortest-path-0');
+    const path1 = page.getByTestId('shortest-path-1');
+    await expect(path0).toBeVisible();
+    await expect(path1).toBeVisible();
+
+    // Ambas tienen distancia 12
+    await expect(path0).toContainText('12');
+    await expect(path1).toContainText('12');
+
+    // Secuencias de ambas rutas
+    await expect(path0).toContainText('A → B → D → E → F');
+    await expect(path1).toContainText('A → C → E → F');
+
+    // Verificar en el lienzo que ambas rutas están resaltadas
+    // Ruta 1 (sólida): A-B
+    const edgeAB = page.locator('.react-flow__edge[data-id="A-B"] path').first();
+    await expect(edgeAB).toHaveCSS('stroke', 'rgb(147, 51, 234)');
+
+    // Ruta 2 (discontinua): A-C
+    const edgeAC = page.locator('.react-flow__edge[data-id="A-C"] path').first();
+    await expect(edgeAC).toHaveCSS('stroke', 'rgb(147, 51, 234)');
+
+    // Seleccionar la segunda ruta (Ruta 2)
+    await path1.click();
+    await expect(path1).toContainText('✓ Ruta resaltada en el mapa');
+
+    // Botón para volver a ver todas
+    const showAllBtn = page.getByTestId('btn-show-all-tied');
+    await expect(showAllBtn).toBeVisible();
+    await showAllBtn.click();
+    await expect(distBadge).toContainText('2 rutas empatadas');
+
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-11-f3-empates.png`,
     });
   });
 });

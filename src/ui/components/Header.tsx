@@ -274,7 +274,7 @@ export default function Header() {
                 className="fixed right-3 top-14 z-50 w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
                 role="menu"
               >
-                <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Acciones</div>
+                <div className="px-3 py-1 text-xs font-bold tracking-wider text-slate-400 uppercase">Acciones</div>
                 <button
                   type="button"
                   data-testid="btn-import-json-mobile"

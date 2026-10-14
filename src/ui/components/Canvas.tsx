@@ -46,7 +46,7 @@ export default function Canvas() {
   const moveNodes = useApp((s) => s.moveNodes);
   const theme = useApp((s) => s.theme);
 
-  const isMobileExpanded = useUiStore((s) => s.isMobileExpanded);
+  const mobileSheetPos = useUiStore((s) => s.mobileSheetPos);
   const isDesktopCollapsed = useUiStore((s) => s.isDesktopCollapsed);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -60,44 +60,50 @@ export default function Canvas() {
   );
 
   // Determinar aristas y nodos en la ruta activa resaltada
-  const activePathEdges = useMemo(() => {
-    const set = new Set<string>();
-    if (highlightedPath) {
-      if (highlightedPath.from === 'all' && allPaths.result?.paths[highlightedPath.index]) {
-        for (const e of allPaths.result.paths[highlightedPath.index]!.edges) {
-          set.add(e);
-        }
-      } else if (highlightedPath.from === 'shortest' && shortest?.[highlightedPath.index]) {
-        for (const e of shortest[highlightedPath.index]!.edges) {
-          set.add(e);
-        }
-      }
-    } else if (shortest && shortest.length > 0 && shortest[0]) {
-      for (const e of shortest[0].edges) {
-        set.add(e);
-      }
-    }
-    return set;
-  }, [highlightedPath, allPaths.result, shortest]);
+  // Si no hay selección explícita y hay empates en shortest (shortest.length > 1),
+  // se resaltan todas las rutas empatadas: la primera sólida y las demás discontinuas.
+  const { activePathEdges, dashedPathEdges, activePathNodes } = useMemo(() => {
+    const activeEdges = new Set<string>();
+    const dashedEdges = new Set<string>();
+    const activeNodes = new Set<string>();
 
-  const activePathNodes = useMemo(() => {
-    const set = new Set<string>();
     if (highlightedPath) {
       if (highlightedPath.from === 'all' && allPaths.result?.paths[highlightedPath.index]) {
-        for (const n of allPaths.result.paths[highlightedPath.index]!.nodes) {
-          set.add(n);
-        }
+        const p = allPaths.result.paths[highlightedPath.index]!;
+        for (const e of p.edges) activeEdges.add(e);
+        for (const n of p.nodes) activeNodes.add(n);
       } else if (highlightedPath.from === 'shortest' && shortest?.[highlightedPath.index]) {
-        for (const n of shortest[highlightedPath.index]!.nodes) {
-          set.add(n);
-        }
+        const p = shortest[highlightedPath.index]!;
+        for (const e of p.edges) activeEdges.add(e);
+        for (const n of p.nodes) activeNodes.add(n);
       }
-    } else if (shortest && shortest.length > 0 && shortest[0]) {
-      for (const n of shortest[0].nodes) {
-        set.add(n);
+    } else if (shortest && shortest.length > 0) {
+      // Sin selección explícita: primera ruta con trazo sólido
+      const first = shortest[0];
+      if (first) {
+        for (const e of first.edges) activeEdges.add(e);
+        for (const n of first.nodes) activeNodes.add(n);
+      }
+      // Rutas empatadas adicionales con trazo discontinuo
+      if (shortest.length > 1) {
+        for (let i = 1; i < shortest.length; i++) {
+          const other = shortest[i];
+          if (!other) continue;
+          for (const n of other.nodes) activeNodes.add(n);
+          for (const e of other.edges) {
+            if (!activeEdges.has(e)) {
+              dashedEdges.add(e);
+            }
+          }
+        }
       }
     }
-    return set;
+
+    return {
+      activePathEdges: activeEdges,
+      dashedPathEdges: dashedEdges,
+      activePathNodes: activeNodes,
+    };
   }, [highlightedPath, allPaths.result, shortest]);
 
   // Paso actual en reproducción
@@ -140,7 +146,10 @@ export default function Canvas() {
   // Mapear aristas de Graph a ReactFlow Edges
   const rfEdges: Edge[] = useMemo(() => {
     return graph.edges.map((e) => {
-      const isOnPath = activePathEdges.has(e.id);
+      const isSolidPath = activePathEdges.has(e.id);
+      const isDashedPath = dashedPathEdges.has(e.id);
+      const isOnPath = isSolidPath || isDashedPath;
+      const isTiedDashed = isDashedPath;
       const isTreeEdge = treeEdgesSet.has(e.id);
       const isEvaluated = evaluatedEdgesSet.has(e.id);
 
@@ -154,12 +163,14 @@ export default function Canvas() {
           shape: e.shape,
           shapeAuto: e.shapeAuto,
           isOnPath,
+          isTiedDashed,
           isTreeEdge,
           isEvaluated,
+          unit: graph.unit || 'km',
         },
       };
     });
-  }, [graph.edges, activePathEdges, treeEdgesSet, evaluatedEdgesSet]);
+  }, [graph.edges, graph.unit, activePathEdges, dashedPathEdges, treeEdgesSet, evaluatedEdgesSet]);
 
   const [prevRfNodes, setPrevRfNodes] = useState<Node[]>(rfNodes);
   const [localNodes, setLocalNodes] = useState<Node[]>(rfNodes);
@@ -208,16 +219,16 @@ export default function Canvas() {
     }
   }, [graph.nodes.length, graph.edges.length, handleFitView]);
 
-  // 5. Al abrir o cerrar la hoja inferior / colapsar el panel lateral
-  const prevExpandedRef = useRef(isMobileExpanded);
+  // 5. Al cambiar posición de la hoja inferior / colapsar el panel lateral
+  const prevSheetPosRef = useRef(mobileSheetPos);
   const prevCollapsedRef = useRef(isDesktopCollapsed);
   useEffect(() => {
-    if (prevExpandedRef.current !== isMobileExpanded || prevCollapsedRef.current !== isDesktopCollapsed) {
-      prevExpandedRef.current = isMobileExpanded;
+    if (prevSheetPosRef.current !== mobileSheetPos || prevCollapsedRef.current !== isDesktopCollapsed) {
+      prevSheetPosRef.current = mobileSheetPos;
       prevCollapsedRef.current = isDesktopCollapsed;
       handleFitView(0);
     }
-  }, [isMobileExpanded, isDesktopCollapsed, handleFitView]);
+  }, [mobileSheetPos, isDesktopCollapsed, handleFitView]);
 
   // 6. Al cambiar el tamaño del lienzo (ResizeObserver)
   useEffect(() => {
@@ -300,7 +311,8 @@ export default function Canvas() {
     (params: Connection) => {
       if (mode !== 'design') return;
       if (!params.source || !params.target) return;
-      const weightStr = prompt('Ingrese el peso de la carretera en km:', '5.0');
+      const unit = graph.unit || 'km';
+      const weightStr = prompt(`Ingrese el peso de la carretera en ${unit}:`, '5.0');
       if (weightStr === null) return;
       const weight = parseFloat(weightStr);
       if (isNaN(weight) || weight <= 0) {
@@ -318,7 +330,7 @@ export default function Canvas() {
         }
       }
     },
-    [mode, addEdge],
+    [mode, addEdge, graph.unit],
   );
 
   const handleAddNodeClick = () => {
@@ -388,7 +400,7 @@ export default function Canvas() {
 
         {/* Selectores de Nodos */}
         <div className="flex items-center gap-1 pl-1">
-          <label htmlFor="select-source-node" className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          <label htmlFor="select-source-node" className="text-xs font-medium text-slate-500 dark:text-slate-400">
             De:
           </label>
           <select
@@ -415,10 +427,7 @@ export default function Canvas() {
 
           {query?.kind === 'path' && (
             <>
-              <label
-                htmlFor="select-target-node"
-                className="text-[11px] font-medium text-slate-500 dark:text-slate-400"
-              >
+              <label htmlFor="select-target-node" className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 A:
               </label>
               <select
@@ -445,8 +454,15 @@ export default function Canvas() {
 
         {/* Chip de resumen de distancia */}
         {query?.kind === 'path' && query.target && shortest && shortest.length > 0 && shortest[0] && (
-          <div className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-bold text-purple-700 shadow-xs dark:bg-purple-950 dark:text-purple-300">
-            {shortest[0].distance} km
+          <div
+            data-testid="path-distance-badge"
+            className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700 shadow-xs dark:bg-purple-950 dark:text-purple-300"
+          >
+            {highlightedPath?.from === 'shortest' && shortest[highlightedPath.index]
+              ? `${shortest[highlightedPath.index]!.distance} ${graph.unit || 'km'}${shortest.length > 1 ? ` · Ruta ${highlightedPath.index + 1} de ${shortest.length}` : ''}`
+              : !highlightedPath && shortest.length > 1
+                ? `${shortest[0].distance} ${graph.unit || 'km'} · ${shortest.length} rutas empatadas`
+                : `${shortest[0].distance} ${graph.unit || 'km'}`}
           </div>
         )}
 
@@ -495,15 +511,15 @@ export default function Canvas() {
         {/* Badges de Escala y Error de Ajuste (F6) */}
         <div
           data-testid="scale-badge"
-          className="hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-          title={`Magnitud: ${scale.magnitude} · Mediana: ${(160 / scale.pxPerUnit).toFixed(1)} km`}
+          className="hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+          title={`Magnitud: ${scale.magnitude} · Mediana: ${(160 / scale.pxPerUnit).toFixed(1)} ${graph.unit || 'km'}`}
         >
           Escala: {scale.range}
         </div>
 
         <div
           data-testid="stress-error-badge"
-          className="hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+          className="hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
           title="Error de proyección stress majorization: no todos los pesos son representables en un plano 2D"
         >
           Ajuste 2D: {layoutSuggestion?.stressError ?? 0}%

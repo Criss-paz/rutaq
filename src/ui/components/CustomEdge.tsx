@@ -16,8 +16,10 @@ export interface CustomEdgeData {
   shape: EdgeShape;
   shapeAuto: boolean;
   isOnPath?: boolean;
+  isTiedDashed?: boolean;
   isTreeEdge?: boolean;
   isEvaluated?: boolean;
+  unit?: string;
   [key: string]: unknown;
 }
 
@@ -42,10 +44,13 @@ function CustomEdgeComponent({
   const weight = edgeData.weight ?? 1;
   const shape = edgeData.shape ?? 'straight';
   const isOnPath = edgeData.isOnPath ?? false;
+  const isTiedDashed = edgeData.isTiedDashed ?? false;
   const isTreeEdge = edgeData.isTreeEdge ?? false;
   const isEvaluated = edgeData.isEvaluated ?? false;
 
   const mode = useApp((s) => s.mode);
+  const graphUnit = useApp((s) => s.graph.unit || 'km');
+  const unit = edgeData.unit ?? graphUnit;
   const setEdgeWeight = useApp((s) => s.setEdgeWeight);
   const setEdgeShape = useApp((s) => s.setEdgeShape);
   const resetEdgeShapeAuto = useApp((s) => s.resetEdgeShapeAuto);
@@ -193,6 +198,9 @@ function CustomEdgeComponent({
   if (isOnPath) {
     strokeColor = '#9333ea'; // purple-600
     strokeWidth = 4.5;
+    if (isTiedDashed) {
+      strokeDasharray = '6 4';
+    }
   } else if (isTreeEdge) {
     strokeColor = '#2563eb'; // blue-600
     strokeWidth = 3.5;
@@ -245,7 +253,7 @@ function CustomEdgeComponent({
             pointerEvents: 'all',
             zIndex: 1000,
           }}
-          className="nodrag nopan flex items-center gap-1 rounded-full border border-slate-300 bg-white/95 px-2 py-0.5 text-[11px] font-bold text-slate-800 shadow-xs backdrop-blur-xs hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500 dark:border-slate-600 dark:bg-slate-800/95 dark:text-slate-100"
+          className="nodrag nopan flex items-center gap-1 rounded-full border border-slate-300 bg-white/95 px-2 py-0.5 text-xs font-bold text-slate-800 shadow-xs backdrop-blur-xs hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500 dark:border-slate-600 dark:bg-slate-800/95 dark:text-slate-100"
         >
           {isEditingWeight ? (
             <input
@@ -273,7 +281,7 @@ function CustomEdgeComponent({
               className="cursor-pointer select-none px-0.5 hover:text-blue-600 dark:hover:text-blue-400"
               title="Doble clic para editar peso"
             >
-              {weight} km
+              {weight} {unit}
             </span>
           )}
 

@@ -81,9 +81,9 @@ export default function FloydTab() {
           </button>
         </div>
 
-        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
           {currentK === 0 ? (
-            <span>Matriz inicial de distancias directas</span>
+            <span>Matriz inicial de distancias directas ({graph.unit || 'km'})</span>
           ) : (
             <span>
               Intermedios evaluados: 1 a {currentK} (hasta {getNodeLabel(floyd.order[currentK - 1] ?? '')})
@@ -95,8 +95,10 @@ export default function FloydTab() {
       {/* Matriz D(k) */}
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-700 dark:bg-slate-900">
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-          <span>Matriz de Distancias D⁽{currentK}⁾</span>
-          <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400">
+          <span>
+            Matriz de Distancias D⁽{currentK}⁾ ({graph.unit || 'km'})
+          </span>
+          <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">
             {currentK > 0 && '■ Celdas resaltadas indican mejora respecto a D⁽ᵏ⁻¹⁾'}
           </span>
         </div>
@@ -108,7 +110,7 @@ export default function FloydTab() {
               {floyd.order.map((id) => (
                 <th key={id} className="p-2.5 font-bold text-slate-700 dark:text-slate-200">
                   <div>{id}</div>
-                  <div className="text-[10px] font-normal text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
+                  <div className="text-xs font-normal text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
                     {getNodeLabel(id)}
                   </div>
                 </th>
@@ -123,7 +125,7 @@ export default function FloydTab() {
               >
                 <td className="p-2.5 font-bold text-slate-700 dark:text-slate-200">
                   <div>{rowId}</div>
-                  <div className="text-[10px] font-normal text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
+                  <div className="text-xs font-normal text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
                     {getNodeLabel(rowId)}
                   </div>
                 </td>
@@ -147,14 +149,16 @@ export default function FloydTab() {
                     <td
                       key={colId}
                       className={cellClass}
-                      title={improved ? `Mejora: ${prevVal} → ${currVal}` : undefined}
+                      title={
+                        improved
+                          ? `Mejora: ${prevVal} ${graph.unit || 'km'} → ${currVal} ${graph.unit || 'km'}`
+                          : undefined
+                      }
                     >
                       <div className="flex flex-col items-center justify-center">
                         <span>{currVal === Infinity ? '∞' : `${currVal}`}</span>
                         {improved && (
-                          <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-300">
-                            ↓ {prevVal}
-                          </span>
+                          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">↓ {prevVal}</span>
                         )}
                       </div>
                     </td>

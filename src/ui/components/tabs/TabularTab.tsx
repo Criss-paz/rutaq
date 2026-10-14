@@ -17,6 +17,8 @@ export default function TabularTab() {
   const tabularConfig = useApp((s) => s.tabularConfig);
   const setTabularConfig = useApp((s) => s.setTabularConfig);
 
+  const unit = graph.unit || 'km';
+
   // Temporizador para reproducción automática
   useEffect(() => {
     if (!playback.playing) return;
@@ -235,8 +237,9 @@ export default function TabularTab() {
       {/* Matriz de Adyacencia Opcional */}
       {tabularConfig.showAdjacency && (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-700 dark:bg-slate-900">
-          <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-            Matriz de Adyacencia (Pesos Directos)
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+            <span>Matriz de Adyacencia (Pesos Directos)</span>
+            <span className="text-xs font-normal text-slate-500 dark:text-slate-400">Unidad: {unit}</span>
           </div>
           <table className="w-full border-collapse text-center">
             <thead>
@@ -275,7 +278,7 @@ export default function TabularTab() {
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-700 dark:bg-slate-900">
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
           <span>Tabla de Iteraciones — Dijkstra Paso a Paso</span>
-          <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
             Origen: {getNodeLabel(dijkstra.source)}
           </span>
         </div>
@@ -287,7 +290,7 @@ export default function TabularTab() {
               {tabular.order.map((id) => (
                 <th key={id} className="p-2.5 font-bold text-slate-700 dark:text-slate-200">
                   <div>{id}</div>
-                  <div className="text-[10px] font-normal text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
+                  <div className="text-xs font-normal text-slate-500 dark:text-slate-400 truncate max-w-[80px]">
                     {getNodeLabel(id)}
                   </div>
                 </th>
@@ -345,7 +348,7 @@ export default function TabularTab() {
                         <div className="flex flex-col items-center justify-center">
                           <span>{formatLabel(cell.label)}</span>
                           {badge && isSelectedRow && (
-                            <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{badge}</span>
+                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{badge}</span>
                           )}
                         </div>
                       </td>
@@ -386,7 +389,7 @@ export default function TabularTab() {
                     {getNodeLabel(id)} ({id})
                   </td>
                   <td className="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">
-                    {dist === Infinity ? 'Inalcanzable' : `${dist} km`}
+                    {dist === Infinity ? 'Inalcanzable' : `${dist} ${unit}`}
                     {isSource && ' (Origen)'}
                   </td>
                   <td className="p-2.5 text-slate-600 dark:text-slate-300">{buildPathString(id)}</td>

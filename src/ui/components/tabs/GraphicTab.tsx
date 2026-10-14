@@ -3,6 +3,8 @@ import { useApp } from '../../useApp';
 export default function GraphicTab() {
   const query = useApp((s) => s.query);
   const shortest = useApp((s) => s.shortest);
+  const highlightedPath = useApp((s) => s.highlightedPath);
+  const highlightPath = useApp((s) => s.highlightPath);
   const graph = useApp((s) => s.graph);
   const scale = useApp((s) => s.scale);
   const layoutSuggestion = useApp((s) => s.layoutSuggestion);
@@ -10,11 +12,11 @@ export default function GraphicTab() {
   const keepProportion = useApp((s) => s.keepProportion);
   const setKeepProportion = useApp((s) => s.setKeepProportion);
 
+  const unit = graph.unit || 'km';
+
   const getNodeLabel = (id: string): string => {
     return graph.nodes.find((n) => n.id === id)?.label ?? id;
   };
-
-  const firstPath = shortest && shortest.length > 0 ? shortest[0] : null;
 
   return (
     <div className="flex flex-col gap-4 p-4 text-xs">
@@ -37,21 +39,84 @@ export default function GraphicTab() {
               </span>
             </div>
 
-            {firstPath ? (
-              <div className="mt-2 flex flex-col gap-2 rounded-lg bg-purple-50 p-3 text-purple-950 dark:bg-purple-950/40 dark:text-purple-100">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-base font-bold">Distancia Total: {firstPath.distance} km</span>
-                  <span className="text-xs font-semibold">{firstPath.nodes.length - 1} tramos de carretera</span>
-                </div>
-                <div className="font-medium">
-                  Secuencia:{' '}
-                  <span className="font-semibold">{firstPath.nodes.map((n) => getNodeLabel(n)).join(' → ')}</span>
-                </div>
-                {shortest && shortest.length > 1 && (
-                  <div className="mt-1 text-[11px] font-bold text-amber-600 dark:text-amber-400">
-                    ℹ Existen {shortest.length} rutas mínimas empatadas con la misma distancia.
+            {shortest && shortest.length > 0 ? (
+              <div className="mt-2 flex flex-col gap-2.5">
+                {shortest.length > 1 && (
+                  <div
+                    data-testid="ties-alert"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-900 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200"
+                  >
+                    <span>
+                      ℹ Empate detectado: existen {shortest.length} rutas mínimas con la misma distancia (
+                      {shortest[0]?.distance} {unit}). Se muestran todas:
+                    </span>
+                    {highlightedPath?.from === 'shortest' && (
+                      <button
+                        type="button"
+                        data-testid="btn-show-all-tied"
+                        onClick={() => highlightPath(null)}
+                        className="min-h-[44px] rounded-md bg-amber-200/80 px-2.5 py-1 text-xs font-bold text-amber-950 hover:bg-amber-300 dark:bg-amber-900 dark:text-amber-100"
+                      >
+                        Ver todas en lienzo
+                      </button>
+                    )}
                   </div>
                 )}
+
+                {shortest.map((path, idx) => {
+                  const isSelected = highlightedPath?.from === 'shortest' && highlightedPath.index === idx;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      data-testid={`shortest-path-${idx}`}
+                      onClick={() => {
+                        if (isSelected) {
+                          highlightPath(null);
+                        } else {
+                          highlightPath({ from: 'shortest', index: idx });
+                        }
+                      }}
+                      className={`flex min-h-[44px] w-full flex-col gap-1.5 rounded-lg border p-3 text-left transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-hidden ${
+                        isSelected
+                          ? 'border-purple-600 bg-purple-100 ring-2 ring-purple-500 text-purple-950 dark:bg-purple-900/60 dark:text-purple-100 dark:border-purple-400'
+                          : 'border-purple-200 bg-purple-50/80 text-purple-950 hover:bg-purple-100/70 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-100 dark:hover:bg-purple-900/40'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          {shortest.length > 1 && (
+                            <span className="rounded-md bg-purple-600 px-2 py-0.5 text-xs font-bold text-white">
+                              Ruta {idx + 1}
+                            </span>
+                          )}
+                          <span className="text-base font-bold">
+                            Distancia Total: {path.distance} {unit}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-purple-800 dark:text-purple-300">
+                            {path.nodes.length - 1} tramos
+                          </span>
+                          {shortest.length > 1 && (
+                            <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                              {idx === 0 ? '━ Trazo sólido' : '┅ Trazo discontinuo'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs font-medium">
+                        Secuencia:{' '}
+                        <span className="font-semibold">{path.nodes.map((n) => getNodeLabel(n)).join(' → ')}</span>
+                      </div>
+                      {isSelected && (
+                        <div className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                          ✓ Ruta resaltada en el mapa (clic para deseleccionar)
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             ) : query.target ? (
               <div className="mt-2 rounded-lg bg-rose-50 p-3 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200">
@@ -134,22 +199,24 @@ export default function GraphicTab() {
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="rounded-lg bg-slate-50 p-2.5 dark:bg-slate-800">
-            <div className="text-[10px] text-slate-500 dark:text-slate-400">Magnitud Detectada</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Magnitud Detectada</div>
             <div className="font-bold text-slate-800 dark:text-slate-100">{scale.range}</div>
           </div>
           <div className="rounded-lg bg-slate-50 p-2.5 dark:bg-slate-800">
-            <div className="text-[10px] text-slate-500 dark:text-slate-400">Píxeles por Unidad</div>
-            <div className="font-bold text-slate-800 dark:text-slate-100">~{Math.round(scale.pxPerUnit)} px / km</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Píxeles por Unidad</div>
+            <div className="font-bold text-slate-800 dark:text-slate-100">
+              ~{Math.round(scale.pxPerUnit)} px / {unit}
+            </div>
           </div>
           <div className="rounded-lg bg-slate-50 p-2.5 dark:bg-slate-800">
-            <div className="text-[10px] text-slate-500 dark:text-slate-400">Error de Ajuste (Stress)</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Error de Ajuste (Stress)</div>
             <div className="font-bold text-slate-800 dark:text-slate-100">{layoutSuggestion?.stressError ?? 0}%</div>
           </div>
         </div>
 
-        <p className="mt-3 text-[11px] text-slate-500 italic dark:text-slate-400">
+        <p className="mt-3 text-xs text-slate-500 italic dark:text-slate-400">
           Nota: No todos los pesos de carreteras son exactamente representables en un plano bidimensional euclidiano
-          debido a la curvatura geográfica y topología vial de Quetzaltenango.
+          debido a la topología y curvatura de la red.
         </p>
 
         <label className="mt-2 flex min-h-[44px] cursor-pointer items-center gap-2 text-slate-700 dark:text-slate-300">

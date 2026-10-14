@@ -723,8 +723,8 @@ export function createInitialState(template: 'quetzaltenango' | 'ejemplo6' | 'va
   const tabular = mockBuildTabular(graph, dijkstra);
   const floyd = mockFloydWarshall(graph);
   const allPathsRes = mockFindAllPaths(graph, sourceNode, targetNode);
-  const firstPath = allPathsRes.paths[0];
-  const shortest = firstPath ? [firstPath] : [];
+  const minDist = allPathsRes.paths[0]?.distance;
+  const shortest = minDist !== undefined ? allPathsRes.paths.filter((p) => Math.abs(p.distance - minDist) < 1e-6) : [];
   const layoutSuggestion = mockSuggestLayout(graph);
 
   return {
@@ -794,8 +794,8 @@ export const useMockStore = create<AppState>((set, get) => {
                 result: allRes,
                 error: null,
               };
-              const firstP = allRes.paths[0];
-              shortest = firstP ? [firstP] : [];
+              const minDist = allRes.paths[0]?.distance;
+              shortest = minDist !== undefined ? allRes.paths.filter((p) => Math.abs(p.distance - minDist) < 1e-6) : [];
             } else {
               shortest = [];
               allPaths = { status: 'idle', found: 0, result: null, error: null };
@@ -1204,7 +1204,7 @@ export const useMockStore = create<AppState>((set, get) => {
       });
 
       const res = mockFindAllPaths(graph, query.source, query.target, allPathsLimit);
-      const firstP = res.paths[0];
+      const minDist = res.paths[0]?.distance;
       set({
         allPaths: {
           status: 'done',
@@ -1212,7 +1212,7 @@ export const useMockStore = create<AppState>((set, get) => {
           result: res,
           error: null,
         },
-        shortest: firstP ? [firstP] : [],
+        shortest: minDist !== undefined ? res.paths.filter((p) => Math.abs(p.distance - minDist) < 1e-6) : [],
       });
     },
 
