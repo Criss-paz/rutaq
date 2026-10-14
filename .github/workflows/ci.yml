@@ -25,11 +25,15 @@ jobs:
       - run: npm run build
 
   verificacion-teorica:
-    # Se activa cuando Codex entregue verification/verify.py (comparación con networkx).
-    if: ${{ hashFiles('verification/verify.py') != '' }}
+    # Comparación del programa con networkx en todos los pares (debe ser 100 %).
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'

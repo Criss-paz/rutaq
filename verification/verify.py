@@ -7,7 +7,8 @@ from pathlib import Path
 import networkx as nx
 
 ROOT = Path(__file__).resolve().parents[1]
-subprocess.run(['npx.cmd', '--yes', 'tsx', 'verification/export.ts'], cwd=ROOT, check=True)
+NPX = 'npx.cmd' if sys.platform == 'win32' else 'npx'
+subprocess.run([NPX, '--yes', 'tsx', 'verification/export.ts'], cwd=ROOT, check=True)
 data = json.loads((ROOT / 'verification/programa.json').read_text(encoding='utf-8'))
 (ROOT / 'verification/programa.json').unlink(missing_ok=True)
 rows, mismatches = [], []
