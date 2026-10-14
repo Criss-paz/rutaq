@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+/* Tema oscuro por clase en <html> (lo controla el store: light | dark | system). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  overflow: hidden; /* el lienzo gestiona su propio pan/zoom; nunca scroll horizontal de página */
+  overscroll-behavior: none;
+}
