@@ -140,3 +140,50 @@ describe('store: consultas', () => {
     expect(st().query).toBeNull();
   });
 });
+
+describe('store + núcleo: resultados derivados', () => {
+  function square() {
+    // A─B─C con atajo A─C más largo, y D colgando de C: A→C por B (2) gana a la directa (5).
+    const [a, b, c, d] = ['A', 'B', 'C', 'D'].map((l, i) => st().addNode({ x: i * 200, y: 0 }, l));
+    st().addEdge(a!, b!, 1);
+    st().addEdge(b!, c!, 1);
+    st().addEdge(a!, c!, 5);
+    st().addEdge(c!, d!, 2.5);
+    return { a: a!, b: b!, c: c!, d: d! };
+  }
+
+  it('F2: árbol de rutas, tabla y reproducción', () => {
+    const { a, d } = square();
+    expect(st().validation.ok).toBe(true);
+    st().setTreeQuery(a);
+    const dj = st().dijkstra!;
+    expect(dj.labels[d]).toEqual({ dist: 4.5, pred: st().graph.nodes[2]!.id });
+    expect(dj.treeEdges).toHaveLength(3);
+    expect(st().tabular!.rows).toHaveLength(dj.steps.length);
+    expect(st().playback.stepIndex).toBe(dj.steps.length - 1);
+    st().stepTo(0);
+    st().nextStep();
+    expect(st().playback.stepIndex).toBe(1);
+    st().toEnd();
+    expect(st().playback.stepIndex).toBe(dj.steps.length - 1);
+  });
+
+  it('F3: ruta mínima y "no existe ruta"', () => {
+    const { a, c } = square();
+    st().setPathQuery(a, c);
+    expect(st().shortest).toHaveLength(1);
+    expect(st().shortest![0]!.distance).toBe(2);
+    const e = st().addNode({ x: 0, y: 300 }, 'E');
+    st().setPathQuery(a, e);
+    expect(st().validation.issues.map((i) => i.code)).toContain('DISCONNECTED');
+    expect(st().shortest).toEqual([]);
+  });
+
+  it('las aristas que cruzan nodos se curvan solas', () => {
+    const a = st().addNode({ x: 0, y: 0 });
+    st().addNode({ x: 300, y: 0 });
+    const c = st().addNode({ x: 600, y: 0 });
+    st().addEdge(a, c, 3);
+    expect(st().graph.edges[0]!.shape).not.toBe('straight');
+  });
+});
