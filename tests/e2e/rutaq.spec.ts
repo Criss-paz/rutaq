@@ -534,4 +534,33 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
       path: `docs/informe/capturas/${testInfo.project.name}-14-aviso-varios-problemas.png`,
     });
   });
+
+  test('15. Sincronización robusta del lienzo al alternar plantillas sin carreras', async ({ page }, testInfo) => {
+    await page.goto('./');
+
+    // Alternar 5 veces seguidas, sin esperas, entre Quetzaltenango y ejemplo6 (terminando en ejemplo6)
+    for (let i = 0; i < 5; i++) {
+      await page.getByTestId('template-select').selectOption('quetzaltenango');
+      await page.getByTestId('template-select').selectOption('ejemplo6');
+    }
+
+    // Al final verifica que el número de .react-flow__node visibles es exactamente el del grafo activo (6) y que hay 9 .react-flow__edge
+    await expect(page.locator('.react-flow__node')).toHaveCount(6);
+    await expect(page.locator('.react-flow__edge')).toHaveCount(9);
+    await expect(page.locator('.react-flow__node').first()).toBeVisible();
+
+    // Luego lo mismo terminando en Quetzaltenango (24 nodos, 55 aristas)
+    for (let i = 0; i < 5; i++) {
+      await page.getByTestId('template-select').selectOption('ejemplo6');
+      await page.getByTestId('template-select').selectOption('quetzaltenango');
+    }
+
+    await expect(page.locator('.react-flow__node')).toHaveCount(24);
+    await expect(page.locator('.react-flow__edge')).toHaveCount(55);
+    await expect(page.locator('.react-flow__node').first()).toBeVisible();
+
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-15-sincronizacion-lienzo.png`,
+    });
+  });
 });
