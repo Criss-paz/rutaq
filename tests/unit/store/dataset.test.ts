@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Dataset } from '../../../src/core/types';
-import { DEFAULT_NODE_SIZE, datasetToGraph } from '../../../src/store/dataset';
+import { DATASET_NODE_SIZE, datasetToGraph } from '../../../src/store/dataset';
 
 const ds: Dataset = {
   meta: { nombre: 'prueba', unidad: 'km', fuentes: [], fecha: '2026-10' },
@@ -36,7 +36,7 @@ describe('datasetToGraph', () => {
     expect(center('A').x).toBeCloseTo(0, 0);
     expect(center('B').x).toBeCloseTo(1000, 0);
     expect(center('C').y).toBeLessThan(center('A').y);
-    expect(g.nodes[0]).toMatchObject(DEFAULT_NODE_SIZE);
+    expect(g.nodes[0]).toMatchObject(DATASET_NODE_SIZE);
   });
 
   it('usa km como peso y conserva los metadatos de trazabilidad', () => {
