@@ -1,0 +1,986 @@
+{
+  "code": "Ok",
+  "routes": [
+    {
+      "legs": [
+        {
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    98
+                  ],
+                  "location": [
+                    -91.543314,
+                    14.924393
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    285
+                  ],
+                  "location": [
+                    -91.542916,
+                    14.924337
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    15,
+                    75,
+                    255
+                  ],
+                  "location": [
+                    -91.541723,
+                    14.924298
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    0,
+                    75,
+                    255
+                  ],
+                  "location": [
+                    -91.540667,
+                    14.924454
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    60,
+                    210,
+                    255
+                  ],
+                  "location": [
+                    -91.538489,
+                    14.924803
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    75,
+                    255,
+                    285
+                  ],
+                  "location": [
+                    -91.537065,
+                    14.925447
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    75,
+                    255,
+                    315
+                  ],
+                  "location": [
+                    -91.536998,
+                    14.925473
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    75,
+                    150,
+                    255
+                  ],
+                  "location": [
+                    -91.536059,
+                    14.925644
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    90,
+                    150,
+                    270
+                  ],
+                  "location": [
+                    -91.534387,
+                    14.925941
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    75,
+                    240,
+                    300
+                  ],
+                  "location": [
+                    -91.53331,
+                    14.926017
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "geometry": "m|azAtpvmPHmAPcDIkA]qEi@eFUeDEg@KS_@c@IUKk@]mAa@sACMCEGu@Cq@QmAESe@wDO{A?e@?i@D}ACg@Qg@GS",
+              "maneuver": {
+                "bearing_after": 98,
+                "bearing_before": 0,
+                "location": [
+                  -91.543314,
+                  14.924393
+                ],
+                "modifier": "right",
+                "type": "depart"
+              },
+              "name": "",
+              "mode": "driving",
+              "weight": 161.3,
+              "duration": 161.3,
+              "distance": 1120.3
+            },
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    45,
+                    75,
+                    255
+                  ],
+                  "location": [
+                    -91.533205,
+                    14.926059
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    15,
+                    45,
+                    225
+                  ],
+                  "location": [
+                    -91.532937,
+                    14.926372
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    45,
+                    225,
+                    300
+                  ],
+                  "location": [
+                    -91.530971,
+                    14.928114
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    60,
+                    135,
+                    225
+                  ],
+                  "location": [
+                    -91.530809,
+                    14.928253
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "geometry": "{fbzApqtmP}@u@i@g@sAyAmBoCoBwB[_@yBuDUc@",
+              "maneuver": {
+                "bearing_after": 39,
+                "bearing_before": 67,
+                "location": [
+                  -91.533205,
+                  14.926059
+                ],
+                "modifier": "slight left",
+                "type": "turn"
+              },
+              "name": "",
+              "mode": "driving",
+              "weight": 71.5,
+              "duration": 71.5,
+              "distance": 496
+            },
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    30,
+                    90,
+                    240
+                  ],
+                  "location": [
+                    -91.529721,
+                    14.928965
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    345
+                  ],
+                  "location": [
+                    -91.529409,
+                    14.930766
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    60,
+                    195,
+                    240
+                  ],
+                  "location": [
+                    -91.521885,
+                    14.933434
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "geometry": "aybzAv{smPc@UsCUk@QYUc@EYDk@Ta@D[Q]YOc@[wCg@uFw@wEe@sE}@gFg@kB_DgG{AqC",
+              "maneuver": {
+                "bearing_after": 28,
+                "bearing_before": 59,
+                "location": [
+                  -91.529721,
+                  14.928965
+                ],
+                "modifier": "slight left",
+                "type": "fork"
+              },
+              "name": "",
+              "mode": "driving",
+              "weight": 176.2,
+              "duration": 176.2,
+              "distance": 1199.6
+            },
+            {
+              "intersections": [
+                {
+                  "out": 3,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    60,
+                    165,
+                    240,
+                    345
+                  ],
+                  "location": [
+                    -91.521163,
+                    14.933889
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    150,
+                    165,
+                    330
+                  ],
+                  "location": [
+                    -91.521827,
+                    14.935647
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    45,
+                    150,
+                    330
+                  ],
+                  "location": [
+                    -91.521887,
+                    14.935759
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    0,
+                    75,
+                    180
+                  ],
+                  "location": [
+                    -91.522963,
+                    14.938557
+                  ]
+                },
+                {
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    90,
+                    180,
+                    255,
+                    345
+                  ],
+                  "location": [
+                    -91.523089,
+                    14.941283
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    150,
+                    315,
+                    345
+                  ],
+                  "location": [
+                    -91.524205,
+                    14.943954
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    30,
+                    120,
+                    300
+                  ],
+                  "location": [
+                    -91.524698,
+                    14.946827
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    120,
+                    285,
+                    345
+                  ],
+                  "location": [
+                    -91.524864,
+                    14.946909
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    150,
+                    210,
+                    330
+                  ],
+                  "location": [
+                    -91.526932,
+                    14.948448
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    150,
+                    240,
+                    330
+                  ],
+                  "location": [
+                    -91.526973,
+                    14.948528
+                  ]
+                },
+                {
+                  "out": 3,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    90,
+                    135,
+                    285,
+                    315
+                  ],
+                  "location": [
+                    -91.527585,
+                    14.949352
+                  ]
+                },
+                {
+                  "out": 1,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    0,
+                    75,
+                    240
+                  ],
+                  "location": [
+                    -91.52943,
+                    14.95762
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    75,
+                    255,
+                    300
+                  ],
+                  "location": [
+                    -91.529204,
+                    14.957698
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "maneuver": {
+                "bearing_after": 338,
+                "bearing_before": 56,
+                "location": [
+                  -91.521163,
+                  14.933889
+                ],
+                "modifier": "left",
+                "type": "turn"
+              },
+              "geometry": "ywczAffrmPw@TkAZ{ErAUJaDhA}DpAyAd@g@JYFs@?c@@qG@iFTuBT]Jc@PgBz@]Hg@Bo@DQFUDY\\WXe@T{@JgAB_@I]OYW_A_Ai@_@c@Ie@?c@J]VW\\uAjDO^EZAJ@HBJDHFFFDj@^FLDL@NAPALGNIJKHMFsIlDOFuAj@_@X[\\QVOTiAxAg@\\i@Xu@Ro@Pc@Pg@p@e@`@c@Li@AsCc@q@?k@Nc@VYb@[`@m@Jg@Ei@Jk@b@gAt@eDjAy@Jw@OcAe@_Ag@kAYm@]c@SWUQ]Om@K_@W]i@Qk@K{@SwAw@QEMA",
+              "ref": "RN-9N",
+              "name": "Carretera Quetzaltenango - San Carlos Sija",
+              "mode": "driving",
+              "weight": 223.9,
+              "duration": 223.9,
+              "distance": 3409.5
+            },
+            {
+              "intersections": [
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    30,
+                    195,
+                    330
+                  ],
+                  "location": [
+                    -91.528322,
+                    14.959206
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    15,
+                    180,
+                    240
+                  ],
+                  "location": [
+                    -91.532283,
+                    14.968616
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    105,
+                    120,
+                    285
+                  ],
+                  "location": [
+                    -91.542718,
+                    14.97648
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    15,
+                    120,
+                    270
+                  ],
+                  "location": [
+                    -91.54631,
+                    14.980435
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    90,
+                    195,
+                    270
+                  ],
+                  "location": [
+                    -91.546616,
+                    14.980421
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 0,
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "bearings": [
+                    135,
+                    240,
+                    315
+                  ],
+                  "location": [
+                    -91.547702,
+                    14.980726
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    120,
+                    135,
+                    345
+                  ],
+                  "location": [
+                    -91.547877,
+                    14.980945
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "maneuver": {
+                "bearing_after": 323,
+                "bearing_before": 7,
+                "location": [
+                  -91.528322,
+                  14.959206
+                ],
+                "modifier": "left",
+                "type": "continue"
+              },
+              "geometry": "avhzA~rsmPKHILIn@?f@b@zC@LAj@ALYn@WZWLWDq@CeAEW?iANq@B[Cc@SWUeAeAc@[i@Cu@H_Bd@uAp@o@`@e@Ry@Dw@FgEPc@F_@\\aArASXe@J{EpAWJ}@n@UJWFeBK]E{Aa@a@MWQ_@[SKWEUDWHUPeAvAs@~@a@\\m@`@OLGPQlA?R@jA?bACRENKJq@T]PaAt@i@d@kAjBe@p@_@b@k@b@c@l@Ip@N|@Dp@Sf@{@dAc@Zo@Lm@R_@^Oh@i@dBgAhCKh@Qv@c@r@e@r@c@n@YpASpAKjAEz@EZGd@Sx@c@d@q@Tq@Ti@Ve@n@kCnCc@b@k@r@_Al@s@\\gA\\o@Ps@l@g@`A@T@f@?j@Gp@Mt@Od@SZC@k@b@a@Fe@De@@Y?[@M@G@U@q@?",
+              "ref": "RN-9N",
+              "name": "Carretera Quetzaltenango - San Carlos Sija",
+              "mode": "driving",
+              "weight": 261.2,
+              "duration": 261.2,
+              "distance": 3941.6
+            },
+            {
+              "intersections": [
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    0,
+                    180,
+                    285
+                  ],
+                  "location": [
+                    -91.547996,
+                    14.982236
+                  ]
+                },
+                {
+                  "out": 2,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    15,
+                    105,
+                    285
+                  ],
+                  "location": [
+                    -91.548824,
+                    14.982478
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "geometry": "_fmzA~mwmPMp@a@pBSrA",
+              "maneuver": {
+                "bearing_after": 285,
+                "bearing_before": 0,
+                "location": [
+                  -91.547996,
+                  14.982236
+                ],
+                "modifier": "left",
+                "type": "turn"
+              },
+              "name": "Carretera Sibilia - San Carlos Sija",
+              "mode": "driving",
+              "weight": 13.8,
+              "duration": 13.8,
+              "distance": 139.2
+            },
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "in": 1,
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    0,
+                    105,
+                    270
+                  ],
+                  "location": [
+                    -91.54924,
+                    14.98258
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "bearings": [
+                    0,
+                    105,
+                    180
+                  ],
+                  "location": [
+                    -91.549207,
+                    14.983016
+                  ]
+                },
+                {
+                  "out": 0,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "bearings": [
+                    0,
+                    90,
+                    180,
+                    270
+                  ],
+                  "location": [
+                    -91.549212,
+                    14.983462
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "geometry": "chmzAvuwmPwAEwA?i@D",
+              "maneuver": {
+                "bearing_after": 2,
+                "bearing_before": 284,
+                "location": [
+                  -91.54924,
+                  14.98258
+                ],
+                "modifier": "right",
+                "type": "turn"
+              },
+              "name": "",
+              "mode": "driving",
+              "weight": 17.5,
+              "duration": 17.5,
+              "distance": 121
+            },
+            {
+              "intersections": [
+                {
+                  "in": 0,
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    174
+                  ],
+                  "location": [
+                    -91.549235,
+                    14.983671
+                  ]
+                }
+              ],
+              "driving_side": "right",
+              "geometry": "}nmzAvuwmP",
+              "maneuver": {
+                "bearing_after": 0,
+                "bearing_before": 354,
+                "location": [
+                  -91.549235,
+                  14.983671
+                ],
+                "modifier": "right",
+                "type": "arrive"
+              },
+              "name": "",
+              "mode": "driving",
+              "weight": 0,
+              "duration": 0,
+              "distance": 0
+            }
+          ],
+          "weight": 925.4,
+          "summary": "Carretera Quetzaltenango - San Carlos Sija, Carretera Quetzaltenango - San Carlos Sija",
+          "duration": 925.4,
+          "distance": 10427.2
+        }
+      ],
+      "weight_name": "routability",
+      "geometry": "m|azAtpvmPHmAPcDIkA]qEi@eFUeDEg@KS_@c@IUKk@]mAa@sACMCEGu@Cq@QmAESe@wDO{A?e@?i@D}ACg@Qg@GS}@u@i@g@sAyAmBoCoBwB[_@yBuDUc@c@UsCUk@QYUc@EYDk@Ta@D[Q]YOc@[wCg@uFw@wEe@sE}@gFg@kB_DgG{AqCw@TkAZ{ErAUJaDhA}DpAyAd@g@JYFs@?c@@qG@iFTuBT]Jc@PgBz@]Hg@Bo@DQFUDY\\WXe@T{@JgAB_@I]OYW_A_Ai@_@c@Ie@?c@J]VW\\uAjDO^EZAJ@HBJDHFFFDj@^FLDL@NAPALGNIJKHMFsIlDOFuAj@_@X[\\QVOTiAxAg@\\i@Xu@Ro@Pc@Pg@p@e@`@c@Li@AsCc@q@?k@Nc@VYb@[`@m@Jg@Ei@Jk@b@gAt@eDjAy@Jw@OcAe@_Ag@kAYm@]c@SWUQ]Om@K_@W]i@Qk@K{@SwAw@QEMAKHILIn@?f@b@zC@LAj@ALYn@WZWLWDq@CeAEW?iANq@B[Cc@SWUeAeAc@[i@Cu@H_Bd@uAp@o@`@e@Ry@Dw@FgEPc@F_@\\aArASXe@J{EpAWJ}@n@UJWFeBK]E{Aa@a@MWQ_@[SKWEUDWHUPeAvAs@~@a@\\m@`@OLGPQlA?R@jA?bACRENKJq@T]PaAt@i@d@kAjBe@p@_@b@k@b@c@l@Ip@N|@Dp@Sf@{@dAc@Zo@Lm@R_@^Oh@i@dBgAhCKh@Qv@c@r@e@r@c@n@YpASpAKjAEz@EZGd@Sx@c@d@q@Tq@Ti@Ve@n@kCnCc@b@k@r@_Al@s@\\gA\\o@Ps@l@g@`A@T@f@?j@Gp@Mt@Od@SZC@k@b@a@Fe@De@@Y?[@M@G@U@q@?Mp@a@pBSrAwAEwA?i@D",
+      "weight": 925.4,
+      "duration": 925.4,
+      "distance": 10427.2
+    }
+  ],
+  "waypoints": [
+    {
+      "hint": "xC1LhswtS4Y-AAAABAAAAAAAAABGAAAAWxAtQtdANUAAAAAAWc9DQj4AAAAEAAAAAAAAAEYAAABxfwAA7iiL-mm64wDeKIv6ArrjAAAAbxEAAAAA",
+      "location": [
+        -91.543314,
+        14.924393
+      ],
+      "name": "",
+      "distance": 11.52601159
+    },
+    {
+      "hint": "0XBzhdxwc4VgAAAAIgAAAAAAAAAAAAAAkVyFQlIPukEAAAAAAAAAAGAAAAAiAAAAAAAAAAAAAABxfwAAzRGL-veh5ACGEov6CqLkAAAA3woAAAAA",
+      "location": [
+        -91.549235,
+        14.983671
+      ],
+      "name": "",
+      "distance": 20.00989585
+    }
+  ]
+}
