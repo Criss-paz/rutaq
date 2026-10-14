@@ -36,6 +36,13 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Hecho
 
+- **Ronda 4 — Aplicación de la Validación Externa de Google Maps y Actualización Integral:**
+  - **Transcripción exacta de mediciones (`docs/datos/validacion_google.csv`):** Se creó el archivo CSV transcribiendo con precisión las 20 mediciones de la tabla 5.1 de `docs/datos/VALIDACION.md` (`arista,km_google,via_google,fecha`).
+  - **Actualización de `scripts/build_dataset.py`:** Se implementó la lectura de `validacion_google.csv` al final de la construcción de aristas. Se asignó `verificado_google = true` y `km_google` a las 20 aristas. Para las 7 aristas con discrepancia $> 10\,\%$ (`COL-PAL`, `CAN-HUI`, `SAL-ZUN`, `ESP-SAL`, `CAN-SAL`, `ALM-SAL` y `QTZ-ZUN`), se actualizó el peso de la red al valor de Google Maps ($km = km_{\text{Google}}$) y se incorporó en `nota` la leyenda `"Distancia de Google Maps (OSRM: X km, diferencia Y %)"`. Las 13 aristas dentro de tolerancia conservan su distancia OSRM, y las 35 restantes se mantienen sin cambios con `verificado_google = false` y `km_google = null`.
+  - **Reproducibilidad y verificación diferencial:** Se regeneró el dataset dos veces consecutivas desde la caché offline, verificándose reproducibilidad determinista idéntica. Mediante `git diff` se constató que exactamente 20 aristas cambiaron en `src/data/quetzaltenango.json` (7 con ajuste de peso y 13 con atributos de validación), sin tocar ningún nodo ni metadato.
+  - **Actualización documental (`METODOLOGIA.md` e `INFORME.md`):** Se redactó la Sección 6 en `docs/datos/METODOLOGIA.md` explicando el protocolo y resultados de la validación. En `docs/informe/INFORME.md`, se reemplazó el marcador `[PENDIENTE: resultado de la validación Google Maps]` por el resumen real en el Resumen Ejecutivo, y `[PENDIENTE: tabla de validación Google Maps]` por la tabla consolidada oficial y análisis técnico de causas en la Sección 6.4, preservando intactos los 5 marcadores de capturas.
+  - **Verificación matemática con NetworkX (`verification/verify.py`):** Se ejecutó la verificación teórica completa contra NetworkX sobre los 648 pares (576 pares de Quetzaltenango + 72 del grafo de control), arrojando **100.0 % de coincidencia (648/648)** en `verification/resultados.csv` y `verification/reporte.md`. Se comprobó que las tres rutas de ejemplo citadas en el informe (`QTZ-COA` 59.9 km, `QTZ-ALM` 7.0 km, `QTZ-CAB` 41.7 km) mantienen sus trayectorias y kilometrajes intactos con sumas exactas de tramos.
+  - **Validaciones técnicas:** `npm run ci`, `npm run format:check` y `python scripts/verify_dataset.py` aprobados al 100 % en verde.
 - **Ronda 3 — Ajuste menor de datos y borrador completo del informe académico:**
   - **Tarea A — Ajuste de carretera en `scripts/build_dataset.py`:** Se refinó la función `derive_carretera_from_steps()` para descartar marcadores genéricos de OSRM (`'unknown'`, `'unnamed'`, `'sin nombre'`, `'none'`). Al regenerar el dataset desde la caché offline, la arista `CAJ-FLU` pasó de `carretera: "Unknown"` a `carretera: ""` sin afectar ninguna otra arista ni métrica topológica, confirmándose como el único cambio en `src/data/quetzaltenango.json` mediante `git diff --stat`.
   - **Tarea B — Redacción de `docs/informe/INFORME.md`:** Redacción íntegra y exhaustiva del informe técnico-académico en español siguiendo la estructura de la sección 6 del plan (`docs/PLAN.md`):
@@ -62,7 +69,7 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Pendiente
 
-- **Validación con Google Maps y Capturas de Pantalla:** En proceso por parte del agente Antigravity (mediciones en navegador y capturas reales de la aplicación web).
+- **Capturas de Pantalla del Sistema:** En proceso por parte del agente Antigravity (capturas reales de la aplicación web en los 4 dispositivos).
 - **Exportación documental:** Conversión de `docs/informe/INFORME.md` a formatos .docx y PDF en la Fase 5 una vez incorporadas las capturas definitivas.
 
 ### Decisiones

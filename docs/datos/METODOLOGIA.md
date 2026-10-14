@@ -117,17 +117,53 @@ El relieve quebrado de la Sierra Madre y los cañones del río Samalá obligan a
 
 ---
 
-## 6. Verificación de Integridad y Reproducibilidad
+## 6. Validación Externa con Google Maps y Ajuste de Pesos
+
+Conforme al protocolo de aseguramiento de calidad vial del Plan Maestro (Sección 3.2, paso 6), se realizó una validación externa con la plataforma de navegación vehicular comercial Google Maps sobre una muestra representativa de **20 aristas prioritarias**, la cual incluye obligatoriamente las 5 aristas más largas de toda la red, ejes troncales intermunicipales y corredores limítrofes.
+
+### 6.1 Protocolo de Aplicación Automatizada en `scripts/build_dataset.py`
+
+Las 20 mediciones obtenidas y verificadas de forma independiente por el orquestador (`docs/datos/VALIDACION.md`) se transcribieron en `docs/datos/validacion_google.csv` (columnas: `arista,km_google,via_google,fecha`).
+
+El script constructor `scripts/build_dataset.py` procesa dicho archivo al finalizar la determinación geométrica de las aristas y aplica las siguientes reglas de ajuste:
+
+1. **Atributos de verificación:** Para cada arista registrada en el CSV, se asigna `verificado_google = true` y `km_google = <valor>`.
+2. **Evaluación de discrepancia:** Se calcula la discrepancia relativa respecto a OSRM:
+   $$\text{Diferencia \%} = \frac{|km_{\text{OSRM}} - km_{\text{Google}}|}{km_{\text{OSRM}}} \times 100$$
+3. **Aristas fuera de tolerancia ($> 10\,\%$):** Si la discrepancia supera el umbral de aceptación del $10\,\%$, el peso oficial del grafo pasa a ser el provisto por Google Maps ($km = km_{\text{Google}}$). En el campo `nota` se concatena (separado por « · » si ya existía una anotación previa):
+   `"Distancia de Google Maps (OSRM: X km, diferencia Y %)"`
+4. **Aristas dentro de tolerancia ($\le 10\,\%$):** Se conserva el peso original derivado de OSRM ($km = km_{\text{OSRM}}$).
+5. **Aristas no evaluadas:** Las 35 aristas restantes conservan su distancia OSRM con `verificado_google = false` y `km_google = null`.
+
+### 6.2 Resultados de la Validación
+
+- **Aristas dentro de tolerancia (13 aristas, 65 % de la muestra):**
+  - Conservan el valor de OSRM: `FCC-ZUN` ($70.9\text{ km}$), `PAL-SMA` ($70.0\text{ km}$), `COA-PAL` ($58.4\text{ km}$), `PAL-ZUN` ($57.2\text{ km}$), `FCC-PAL` ($53.1\text{ km}$), `HUI-SAL` ($42.4\text{ km}$), `COA-SMA` ($40.3\text{ km}$), `FCC-SMA` ($39.9\text{ km}$), `SAL-SIJ` ($24.7\text{ km}$), `HUI-PLA` ($24.4\text{ km}$), `COL-SMA` ($23.7\text{ km}$), `CAB-PLA` ($21.5\text{ km}$) y `OST-PLA` ($18.0\text{ km}$).
+  - 4 aristas troncales mostraron coincidencia exacta ($0.00\,\%$): `COA-SMA`, `FCC-SMA`, `SAL-SIJ` y `COL-SMA`.
+  - 4 de las 5 aristas más largas del departamento cumplieron holgadamente la cota (diferencias de $0.42\,\%$ a $6.64\,\%$).
+- **Aristas ajustadas con valor de Google Maps (7 aristas, 35 % de la muestra):**
+  - Superaron el umbral del $10\,\%$ debido a la elección de rutas urbanas céntricas en Google Maps frente a circunvalaciones periféricas de alta velocidad en OSRM:
+    1. `COL-PAL`: $46.6\text{ km}$ (OSRM: $60.5\text{ km}$, dif. $22.98\,\%$)
+    2. `CAN-HUI`: $54.9\text{ km}$ (OSRM: $49.6\text{ km}$, dif. $10.69\,\%$)
+    3. `SAL-ZUN`: $17.9\text{ km}$ (OSRM: $22.8\text{ km}$, dif. $21.49\,\%$)
+    4. `ESP-SAL`: $15.0\text{ km}$ (OSRM: $19.7\text{ km}$, dif. $23.86\,\%$)
+    5. `CAN-SAL`: $13.8\text{ km}$ (OSRM: $18.4\text{ km}$, dif. $25.00\,\%$)
+    6. `ALM-SAL`: $13.2\text{ km}$ (OSRM: $17.5\text{ km}$, dif. $24.57\,\%$)
+    7. `QTZ-ZUN`: $10.9\text{ km}$ (OSRM: $17.3\text{ km}$, dif. $36.99\,\%$)
+
+---
+
+## 7. Verificación de Integridad y Reproducibilidad
 
 El dataset cumple rigurosamente con el contrato TypeScript `Dataset` de `src/core/types.ts`:
 
 - `nodes`: 24 objetos `{id, label, lat, lon, fuente}`.
-- `edges`: 55 objetos `{id, source, target, km, carretera, fuente, verificado_google: false, km_google: null, nota, geometry}`.
+- `edges`: 55 objetos `{id, source, target, km, carretera, fuente, verificado_google, km_google, nota, geometry}` (20 aristas con `verificado_google: true`, de las cuales 7 adoptan el peso de Google Maps por discrepancia $> 10\,\%$, y 35 con `verificado_google: false` y `km_google: null`).
 - `meta`: unidad `'km'`, fuentes oficiales y fecha `'2026-10-14'`.
 
 ### Ejecución 100 % Reproducible desde Caché
 
-El script `scripts/build_dataset.py` puede ejecutarse de manera offline y determinista utilizando los archivos cacheados en `scripts/cache/`:
+El script `scripts/build_dataset.py` puede ejecutarse de manera offline y determinista utilizando los archivos cacheados en `scripts/cache/` y la tabla `docs/datos/validacion_google.csv`:
 
 ```bash
 python scripts/build_dataset.py
