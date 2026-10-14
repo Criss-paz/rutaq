@@ -28,7 +28,7 @@ _Modelado Matemático, Implementación Algorítmica (Dijkstra, Floyd-Warshall, Y
 
 El presente trabajo de investigación aplicada y desarrollo tecnológico aborda la formulación matemática, diseño arquitectónico, implementación de software y verificación rigurosa del problema de la ruta más corta (_Shortest Path Problem_) aplicado a la red vial del departamento de Quetzaltenango, Guatemala. Se desarrolló la plataforma web reactiva **RutaQ**, la cual integra dos enfoques fundamentales de optimización sobre grafos ponderados: el algoritmo de Dijkstra para rutas desde origen único (_Single-Source Shortest Path_, SSSP) y el algoritmo de Floyd-Warshall para rutas entre todos los pares de vértices (_All-Pairs Shortest Path_, APSP), complementados con el algoritmo de Yen para la enumeración de los $K$ caminos más cortos sin lazos y técnicas de majorización de estrés métrico (SMACOF) para la proyección visual del grafo en dos dimensiones.
 
-El modelo se alimenta de un dataset de 24 cabeceras municipales oficiales del departamento de Quetzaltenango, construido mediante metodologías 100 % guiadas por datos a partir de OpenStreetMap, Nominatim y el motor Open Source Routing Machine (OSRM). Dicho grafo consta de 55 aristas directas aceptadas tras evaluar exhaustivamente los 276 pares candidatos posibles y filtrar aquellos con intermediaciones urbanas a menos de 1.0 km. La solución algorítmica fue sometida a un proceso de verificación exhaustivo de tres niveles: (1) validación paso a paso de la trazabilidad tabular contra una resolución analítica manual sobre un grafo de control de 6 nodos, (2) verificación cruzada automatizada al 100 % (576/576 pares) contra la librería científica NetworkX, y (3) contraste de una muestra de distancias con Google Maps [PENDIENTE: resultado de la validación Google Maps]. Los resultados demuestran la exactitud absoluta de las implementaciones, evidenciando cómo la interacción armónica entre teoría de grafos, estructuras de datos eficientes (montículos binarios) y arquitecturas desacopladas mediante Web Workers permite resolver redes viales complejas, garantizando fluidez interactiva y trazabilidad pedagógica.
+El modelo se alimenta de un dataset de 24 cabeceras municipales oficiales del departamento de Quetzaltenango, construido mediante metodologías 100 % guiadas por datos a partir de OpenStreetMap, Nominatim y el motor Open Source Routing Machine (OSRM). Dicho grafo consta de 55 aristas directas aceptadas tras evaluar exhaustivamente los 276 pares candidatos posibles y filtrar aquellos con intermediaciones urbanas a menos de 1.0 km. La solución algorítmica fue sometida a un proceso de verificación exhaustivo de tres niveles: (1) validación paso a paso de la trazabilidad tabular contra una resolución analítica manual sobre un grafo de control de 6 nodos, (2) verificación cruzada automatizada al 100 % (576/576 pares) contra la librería científica NetworkX, y (3) contraste de una muestra de 20 distancias con Google Maps (13 aristas dentro de la tolerancia de $\pm 10\,\%$ y 7 corregidas con el valor de Google Maps al superar dicho umbral por selección de travesías urbanas). Los resultados demuestran la exactitud absoluta de las implementaciones, evidenciando cómo la interacción armónica entre teoría de grafos, estructuras de datos eficientes (montículos binarios) y arquitecturas desacopladas mediante Web Workers permite resolver redes viales complejas, garantizando fluidez interactiva y trazabilidad pedagógica.
 
 ---
 
@@ -471,7 +471,43 @@ Para erradicar cualquier sesgo subjetivo o trazado manual "a ojo", la construcci
 
 ### 6.4 Validación con Plataformas Cartográficas Externas
 
-[PENDIENTE: tabla de validación Google Maps]
+Conforme al protocolo de validación vial (Sección 3.2, paso 6 del Plan Maestro), se llevó a cabo una auditoría externa de distancias por carretera contrastando los valores derivados de OSRM contra mediciones de la plataforma Google Maps. Se seleccionó una muestra estratégica de 20 aristas prioritarias que cubre las 5 aristas más largas del departamento, los corredores troncales costa-altiplano y los enlaces limítrofes.
+
+#### Tabla Consolidada de Mediciones (20 Aristas Prioritarias)
+
+|  #  | ID Arista | Origen – Destino                             | km OSRM | km Google Maps | Dif. %  | Vía Principal en Google Maps         |     Estado de Validación     |
+| :-: | :-------: | :------------------------------------------- | :-----: | :------------: | :-----: | :----------------------------------- | :--------------------------: |
+|  1  | `FCC-ZUN` | Flores Costa Cuca – Zunil                    |  70.9   |      70.6      | 0.42 %  | por CA-2 y CITO-180                  |   ✅ Válida ($\le 10\,\%$)   |
+|  2  | `PAL-SMA` | El Palmar – San Martín Sacatepéquez          |  70.0   |      66.6      | 4.86 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+|  3  | `COL-PAL` | Colomba Costa Cuca – El Palmar               |  60.5   |      46.6      | 22.98 % | por CA-2 (ruta corta)                | ⚠️ Discrepancia ($> 10\,\%$) |
+|  4  | `COA-PAL` | Coatepeque – El Palmar                       |  58.4   |      55.0      | 5.82 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+|  5  | `PAL-ZUN` | El Palmar – Zunil                            |  57.2   |      53.4      | 6.64 %  | por CITO-180                         |   ✅ Válida ($\le 10\,\%$)   |
+|  6  | `FCC-PAL` | Flores Costa Cuca – El Palmar                |  53.1   |      49.7      | 6.40 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+|  7  | `CAN-HUI` | Cantel – Huitán                              |  49.6   |      54.9      | 10.69 % | por Pan-American Highway/CA-1        | ⚠️ Discrepancia ($> 10\,\%$) |
+|  8  | `HUI-SAL` | Huitán – Salcajá                             |  42.4   |      40.3      | 4.95 %  | por Pan-American Highway/CA-1        |   ✅ Válida ($\le 10\,\%$)   |
+|  9  | `COA-SMA` | Coatepeque – San Martín Sacatepéquez         |  40.3   |      40.3      | 0.00 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+| 10  | `FCC-SMA` | Flores Costa Cuca – San Martín Sacatepéquez  |  39.9   |      39.9      | 0.00 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+| 11  | `SAL-SIJ` | Salcajá – San Carlos Sija                    |  24.7   |      24.7      | 0.00 %  | por Pan-American Highway/CA-1        |   ✅ Válida ($\le 10\,\%$)   |
+| 12  | `HUI-PLA` | Huitán – Palestina de Los Altos              |  24.4   |      25.3      | 3.69 %  | por carreteras sin nombre / locales  |   ✅ Válida ($\le 10\,\%$)   |
+| 13  | `COL-SMA` | Colomba Costa Cuca – San Martín Sacatepéquez |  23.7   |      23.7      | 0.00 %  | por Diag. 2                          |   ✅ Válida ($\le 10\,\%$)   |
+| 14  | `SAL-ZUN` | Salcajá – Zunil                              |  22.8   |      17.9      | 21.49 % | por RN 09 S                          | ⚠️ Discrepancia ($> 10\,\%$) |
+| 15  | `CAB-PLA` | Cabricán – Palestina de Los Altos            |  21.5   |      23.5      | 9.30 %  | por carreteras sin nombre / RD-SM-13 |   ✅ Válida ($\le 10\,\%$)   |
+| 16  | `ESP-SAL` | La Esperanza – Salcajá                       |  19.7   |      15.0      | 23.86 % | por 9a Calle                         | ⚠️ Discrepancia ($> 10\,\%$) |
+| 17  | `CAN-SAL` | Cantel – Salcajá                             |  18.4   |      13.8      | 25.00 % | por CITO-180                         | ⚠️ Discrepancia ($> 10\,\%$) |
+| 18  | `OST-PLA` | San Juan Ostuncalco – Palestina de Los Altos |  18.0   |      16.5      | 8.33 %  | por carreteras sin nombre / RN-1     |   ✅ Válida ($\le 10\,\%$)   |
+| 19  | `ALM-SAL` | Almolonga – Salcajá                          |  17.5   |      13.2      | 24.57 % | por Calz. Manuel Lizandro Barillas   | ⚠️ Discrepancia ($> 10\,\%$) |
+| 20  | `QTZ-ZUN` | Quetzaltenango – Zunil                       |  17.3   |      10.9      | 36.99 % | por RN 09 S                          | ⚠️ Discrepancia ($> 10\,\%$) |
+
+#### Análisis y Diagnóstico de Discrepancias
+
+1. **Cumplimiento general:**
+   - **13 de las 20 aristas (65 %)** cumplen holgadamente el criterio de aceptación ($\le 10\,\%$ de discrepancia relativa), conservando el kilometraje derivado de OSRM.
+   - **4 de las 5 aristas más largas (Top 5)** están plenamente validadas con discrepancias mínimas: `FCC-ZUN` ($0.42\,\%$), `PAL-SMA` ($4.86\,\%$), `COA-PAL` ($5.82\,\%$) y `PAL-ZUN` ($6.64\,\%$).
+   - Se registraron 4 coincidencias exactas ($0.00\,\%$) en corredores departamentales primarios: `COA-SMA`, `FCC-SMA`, `SAL-SIJ` y `COL-SMA`.
+2. **Causas identificadas para las 7 aristas con discrepancia $> 10\,\%$:**
+   - **Circunvalación vs. Travesía Urbana Céntrica:** En el área metropolitana de Quetzaltenango (`QTZ-ZUN`, `SAL-ZUN`, `ESP-SAL`, `ALM-SAL`), el enrutamiento de OSRM priorizó anillos periféricos de alta velocidad (`CITO-180`, `RN-1B`), mientras que Google Maps seleccionó travesías vehiculares directas a través del casco urbano (p. ej. travesía por 9a Calle para `ESP-SAL` y cañón de Almolonga vía RN 09 S para `QTZ-ZUN`).
+   - **Rutas alternativas en la red troncal:** En `COL-PAL` ($46.6\text{ km}$ vs. $60.5\text{ km}$) y `CAN-SAL` ($13.8\text{ km}$ vs. $18.4\text{ km}$), Google Maps seleccionó atajos locales directos, mientras que en `CAN-HUI` ($54.9\text{ km}$ vs. $49.6\text{ km}$) Google Maps priorizó la autopista Panamericana CA-1.
+   - **Ajuste de pesos aplicado:** Siguiendo la regla de decisión del plan de aseguramiento de calidad, para estas 7 aristas se adoptó como peso oficial de la red el valor medido en Google Maps ($km = km_{\text{Google}}$), reflejando la distancia del trayecto más corto transitable y documentando la desviación en el campo `nota`.
 
 ---
 

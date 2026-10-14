@@ -29,6 +29,7 @@ CACHE_NOMINATIM = os.path.join(BASE_DIR, 'scripts', 'cache', 'nominatim')
 CACHE_OSRM = os.path.join(BASE_DIR, 'scripts', 'cache', 'osrm')
 OUTPUT_DATASET = os.path.join(BASE_DIR, 'src', 'data', 'quetzaltenango.json')
 OUTPUT_DISCARDED = os.path.join(BASE_DIR, 'docs', 'datos', 'aristas_descartadas.csv')
+INPUT_VALIDACION_GOOGLE = os.path.join(BASE_DIR, 'docs', 'datos', 'validacion_google.csv')
 
 os.makedirs(CACHE_NOMINATIM, exist_ok=True)
 os.makedirs(CACHE_OSRM, exist_ok=True)
@@ -518,7 +519,40 @@ def build():
         writer.writerows(discarded_pairs)
     print(f"  Guardado reporte de descarte: {OUTPUT_DISCARDED}")
 
-    # 5. Verificación de conexidad topológica
+    # 5. Aplicar validación externa de Google Maps
+    if os.path.exists(INPUT_VALIDACION_GOOGLE):
+        print(f"\n--- 4. Aplicando validación Google Maps desde {INPUT_VALIDACION_GOOGLE} ---")
+        google_measurements = {}
+        with open(INPUT_VALIDACION_GOOGLE, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                google_measurements[row['arista'].strip()] = float(row['km_google'].strip())
+
+        for edge in accepted_edges:
+            eid = edge['id']
+            km_g = google_measurements.get(eid)
+            if km_g is None:
+                u, v = eid.split('-')
+                km_g = google_measurements.get(f"{v}-{u}")
+
+            if km_g is not None:
+                edge['verificado_google'] = True
+                edge['km_google'] = km_g
+                km_osrm = edge['km']
+                dif = abs(km_osrm - km_g) / km_osrm
+                if dif > 0.10:
+                    dif_pct = dif * 100.0
+                    edge['km'] = km_g
+                    nota_google = f"Distancia de Google Maps (OSRM: {km_osrm:.1f} km, diferencia {dif_pct:.2f} %)"
+                    if edge['nota']:
+                        edge['nota'] = f"{edge['nota']} · {nota_google}"
+                    else:
+                        edge['nota'] = nota_google
+                    print(f"  [AJUSTE GOOGLE] {eid}: {km_osrm:.1f} km -> {km_g:.1f} km (dif: {dif_pct:.2f} %) | nota: {edge['nota']}")
+                else:
+                    print(f"  [VALIDA GOOGLE] {eid}: OSRM {km_osrm:.1f} km vs Google {km_g:.1f} km (<= 10 %)")
+
+    # 6. Verificación de conexidad topológica
     adj = {n['id']: [] for n in nodes}
     for e in accepted_edges:
         adj[e['source']].append(e['target'])

@@ -56,8 +56,10 @@ def verify_quetzaltenango():
         edge_ids.add(eid)
         assert e['km'] > 0, f"Distancia no positiva en {eid}: {e['km']}"
         assert round(e['km'], 1) == e['km'], f"km no tiene exactamente 1 decimal en {eid}: {e['km']}"
-        assert e['verificado_google'] is False, f"verificado_google debe ser false inicialmente en {eid}"
-        assert e['km_google'] is None, f"km_google debe ser null inicialmente en {eid}"
+        if e['verificado_google']:
+            assert isinstance(e['km_google'], (int, float)) and e['km_google'] > 0, f"km_google inválido en {eid}"
+        else:
+            assert e['km_google'] is None, f"km_google debe ser null si no está verificado en {eid}"
         assert len(e['geometry']) > 0, f"Geometría vacía en {eid}"
         assert isinstance(e['carretera'], str), f"Carretera no es string en {eid}"
         edge_pairs.append((src, tgt))
