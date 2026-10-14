@@ -1,5 +1,5 @@
 # Reporte de verificación
 
-Coincidencia: 36/36 (100.0 %).
+Coincidencia: 648/648 (100.0 %).
 
-Datasets opcionales no disponibles: src/data/ejemplo6.json, src/data/quetzaltenango.json.
+Datasets opcionales procesados.
