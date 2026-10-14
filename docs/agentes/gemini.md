@@ -36,8 +36,37 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Hecho
 
+- **Encargo 1 — Dataset de Quetzaltenango (`src/data/quetzaltenango.json`, tipo `Dataset`):**
+  - Verificación oficial de los 24 municipios contra catálogos del INE y SEGEPLAN. Asignación de 24 identificadores únicos, estables y de 3 letras mayúsculas (`QTZ`, `SAL`, `OLI`, `SIJ`, `SIB`, `CAB`, `CAJ`, `SIG`, `OST`, `MAT`, `CCH`, `SMA`, `ALM`, `CAN`, `HUI`, `ZUN`, `COL`, `FLU`, `PAL`, `COA`, `GEN`, `FCC`, `ESP`, `PLA`).
+  - Extracción y caché local de coordenadas geográficas de las 24 cabeceras municipales desde OpenStreetMap / Nominatim (`scripts/cache/nominatim/`) respetando el límite $\le 1$ req/s y cabecera descriptiva `RutaQ-proyecto-academico`.
+  - Construcción de `scripts/build_dataset.py` y `scripts/verify_dataset.py` en entorno `.venv` con dependencias en `scripts/requirements.txt` (`requests`, `networkx`, `polyline`).
+  - Cálculo de distancias reales de conducción mediante OSRM (`scripts/cache/osrm/`) y simplificación de geometrías con Ramer-Douglas-Peucker (precisión 5).
+  - Generación de `src/data/quetzaltenango.json`: 24 nodos, 36 aristas directas (criterio $< 1\text{ km}$ de cabeceras intermedias), pesos positivos $km > 0$, grafo 100 % conexo verificado con `networkx`, carreteras identificadas (CA-01, CA-02, RN-01, RN-10, Cito-180, RD-QUE-...), `verificado_google: false` y `km_google: null`.
+  - Documentación completa en `docs/datos/METODOLOGIA.md` (fuentes, fecha de consulta 2026-10-14, criterio de arista, tratamiento de vías interdepartamentales).
+  - Documentación en `docs/datos/VALIDACION.md` con tabla comparativa de las 36 aristas y lista de 18 aristas prioritarias (incluyendo las 5 más largas de la red) listas para la validación con Google Maps por Antigravity.
+- **Encargo 2 — Ejemplo didáctico de 6 nodos:**
+  - Generación de `src/data/ejemplo6.json` (tipo `GraphFile`): 6 nodos A–F con dimensiones estándar $132 \times 44\text{ px}$, pesos enteros, camino indirecto ventajoso ($A \to B \to D$ de peso 7 vs arista directa $A-D$ de peso 10), empate didáctico en iteración 2 ($B$ y $C$ con distancia 4, desempate $B < C$) y rutas empatadas hacia $F$.
+  - Elaboración exhaustiva de `docs/informe/solucion_teorica.md`: resolución manual analítica aplicando el método tabular tradicional desde A, con matriz de adyacencia, tabla de iteraciones detallada (etiqueta mínima, columna tachada, casillas actualizadas), justificación paso a paso y tabla resumen final de distancias y rutas.
+- **Verificaciones técnicas superadas:**
+  - `npm run lint` (0 advertencias, 0 errores).
+  - `npm run typecheck` (tsc limpio contra `CoreApi` y `Dataset`).
+  - `npm run test` (pruebas unitarias en verde).
+  - `npm run build` (build de Vite exitoso sin errores de empaquetado).
+  - `verify_dataset.py` (integridad topológica y de contratos superada al 100 %).
+  - Formateo con `npx prettier --write docs/datos docs/informe src/data scripts`.
+
 ### Pendiente
+
+- **Encargo 3 — Informe académico:** Redacción del informe final en `docs/informe/` y exportación a .docx y PDF tras la integración (F2) y con capturas de pantalla reales de la aplicación (F5), conforme a la planificación.
+- **Validación con Google Maps:** Toma de medidas en Google Maps por parte del agente Antigravity (mediante navegador automatizado) para completar `km_google` en las aristas prioritarias de `docs/datos/VALIDACION.md`.
 
 ### Decisiones
 
+1. **Corrección de la cabecera de Almolonga:** La consulta automática inicial devolvía la cima del Volcán Almolonga (`type=volcano`) en la zona rural 12 de Quetzaltenango. Se corrigió explícitamente para apuntar a la cabecera municipal en el valle agrícola (`14.81498, -91.49475`), resolviendo la conectividad real sobre la RN-10 hacia Xela y Zunil.
+2. **Conexiones interdepartamentales:** Las carreteras `PAL-ZUN` (Cito-180), `COL-PAL` (Cito-180/CA-02) y `SAL-SIJ` (CA-01) transitan brevemente por Retalhuleu o Totonicapán debido al relieve de la Sierra Madre. Se mantuvieron como aristas directas registrando la aclaración en el atributo `nota`, cumpliendo la sección 3.2 del plan maestro.
+3. **Nomenclatura uniforme:** Los identificadores de arista se ordenan lexicográficamente `min(u, v) - max(u, v)` (p. ej. `ALM-QTZ`), eliminando aristas duplicadas y garantizando unicidad en grafos no dirigidos.
+4. **Simplificación RDP:** Se aplicó tolerancia $\epsilon = 0.0001^\circ$ (~10 m), optimizando el tamaño del archivo JSON sin comprometer la precisión cartográfica.
+
 ### Dudas
+
+- Ninguna duda contractual. Los archivos generados se acoplan con total fidelidad a `src/core/types.ts` y `src/store/dataset.ts`.
