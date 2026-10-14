@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useApp } from '../../useApp';
 
@@ -14,6 +14,13 @@ export default function AllPathsTab() {
   const highlightPath = useApp((s) => s.highlightPath);
 
   const parentRef = useRef<HTMLDivElement>(null);
+
+  // Iniciar automáticamente la búsqueda si está en estado inactivo al entrar en la pestaña
+  useEffect(() => {
+    if (query?.kind === 'path' && query.target && allPaths.status === 'idle') {
+      runAllPaths();
+    }
+  }, [query, allPaths.status, runAllPaths]);
 
   const paths = allPaths.result?.paths ?? [];
   const minDistance = paths[0]?.distance ?? 0;
@@ -158,9 +165,17 @@ export default function AllPathsTab() {
 
         {/* Contenedor con scroll para virtualización */}
         <div ref={parentRef} data-testid="all-paths-virtual-list" className="h-[360px] overflow-auto">
-          {paths.length === 0 ? (
-            <div className="flex h-full items-center justify-center p-4 text-slate-500">
-              No se encontraron caminos simples entre estos dos nodos.
+          {allPaths.status === 'running' ? (
+            <div className="flex h-full items-center justify-center p-4 text-slate-500 dark:text-slate-400">
+              <span className="animate-pulse font-semibold">
+                Calculando caminos en segundo plano... ({allPaths.found} encontrados)
+              </span>
+            </div>
+          ) : paths.length === 0 ? (
+            <div className="flex h-full items-center justify-center p-4 text-slate-500 dark:text-slate-400">
+              {allPaths.status === 'cancelled'
+                ? 'Búsqueda cancelada por el usuario.'
+                : 'No se encontraron caminos simples entre estos dos nodos.'}
             </div>
           ) : (
             <div

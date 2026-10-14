@@ -151,7 +151,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
       )}
 
       {/* Contenido / Edición del nombre */}
-      <div className="flex-1 truncate pr-1">
+      <div className="flex h-full w-full items-center justify-center text-center">
         {isEditing ? (
           <input
             ref={inputRef}
@@ -162,17 +162,21 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
             onKeyDown={handleKeyDown}
             aria-label={`Editar nombre del nodo ${id}`}
             data-testid={`node-input-${id}`}
-            className="w-full rounded border border-blue-400 bg-white px-1 py-0.5 text-xs text-slate-900 focus-visible:outline-hidden dark:bg-slate-900 dark:text-white"
+            className="w-full rounded border border-blue-400 bg-white px-1 py-0.5 text-center text-xs font-bold text-slate-900 focus-visible:outline-hidden dark:bg-slate-900 dark:text-white"
           />
         ) : (
-          <span className="cursor-pointer truncate block" title={`${label} (Doble clic para renombrar)`}>
+          <span
+            data-testid={`node-label-${label}`}
+            className="block w-full cursor-pointer truncate text-xs font-bold leading-tight text-slate-900 dark:text-slate-100"
+            title={`${label} (Doble clic para renombrar)`}
+          >
             {label}
           </span>
         )}
       </div>
 
-      {/* Botones de acción rápida en hover/focus */}
-      <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100">
+      {/* Botones de acción rápida flotantes en hover/focus (no reducen el ancho del texto del nodo) */}
+      <div className="absolute -top-3.5 right-1 z-10 hidden items-center gap-0.5 rounded-full border border-slate-200 bg-white/95 px-1 py-0.5 shadow-xs group-hover:flex group-focus-within:flex dark:border-slate-700 dark:bg-slate-800/95">
         {/* Fijar como origen en F2/F3 */}
         <button
           type="button"
@@ -186,7 +190,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Fijar ${label} como origen`}
           title="Fijar como origen (A)"
-          className="flex h-5 w-5 items-center justify-center rounded bg-emerald-100 text-[10px] font-bold text-emerald-700 hover:bg-emerald-200 focus-visible:ring-1 focus-visible:ring-emerald-500 dark:bg-emerald-950 dark:text-emerald-300"
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700 hover:bg-emerald-200 focus-visible:ring-1 focus-visible:ring-emerald-500 dark:bg-emerald-950 dark:text-emerald-300"
         >
           A
         </button>
@@ -201,7 +205,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Fijar ${label} como destino`}
           title="Fijar como destino (B)"
-          className="flex h-5 w-5 items-center justify-center rounded bg-rose-100 text-[10px] font-bold text-rose-700 hover:bg-rose-200 focus-visible:ring-1 focus-visible:ring-rose-500 dark:bg-rose-950 dark:text-rose-300"
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-[10px] font-bold text-rose-700 hover:bg-rose-200 focus-visible:ring-1 focus-visible:ring-rose-500 dark:bg-rose-950 dark:text-rose-300"
         >
           B
         </button>
@@ -216,7 +220,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
             }}
             aria-label={`Eliminar nodo ${label}`}
             title="Eliminar nodo"
-            className="flex h-5 w-5 items-center justify-center rounded bg-slate-200 text-[10px] font-bold text-slate-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-1 focus-visible:ring-red-500 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-red-950"
+            className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-1 focus-visible:ring-red-500 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-red-950"
           >
             ×
           </button>
