@@ -3,6 +3,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import Canvas from './components/Canvas';
 import Header from './components/Header';
 import ResultsPanel from './components/ResultsPanel';
+import ValidationAlert from './components/ValidationAlert';
 import { useApp } from './useApp';
 import { useUiStore } from './uiStore';
 
@@ -12,7 +13,6 @@ export default function App() {
   const canUndo = useApp((s) => s.canUndo());
   const canRedo = useApp((s) => s.canRedo());
   const mode = useApp((s) => s.mode);
-  const validation = useApp((s) => s.validation);
   const mobileSheetPos = useUiStore((s) => s.mobileSheetPos);
 
   // Atajos de teclado globales (Ctrl+Z para deshacer, Ctrl+Y para rehacer)
@@ -52,15 +52,7 @@ export default function App() {
       <Header />
 
       {/* Alerta de validación en caso de advertencia o error en el grafo */}
-      {!validation.ok && (
-        <div
-          data-testid="validation-alert"
-          role="alert"
-          className="flex items-center justify-between border-b border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-800 dark:border-rose-900 dark:bg-rose-950/80 dark:text-rose-200"
-        >
-          <span>⚠️ {validation.issues[0]?.message ?? 'El grafo presenta inconsistencias.'}</span>
-        </div>
-      )}
+      <ValidationAlert />
 
       {/* Contenedor principal: en pantallas >= 1024px divide en lienzo a la izquierda y panel a la derecha */}
       <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">

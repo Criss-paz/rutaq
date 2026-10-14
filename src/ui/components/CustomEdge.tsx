@@ -277,6 +277,7 @@ function CustomEdgeComponent({
             />
           ) : (
             <span
+              data-testid={`edge-weight-${id}`}
               onDoubleClick={() => setIsEditingWeight(true)}
               className="cursor-pointer select-none px-0.5 hover:text-blue-600 dark:hover:text-blue-400"
               title="Doble clic para editar peso"

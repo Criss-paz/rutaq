@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Theme } from '../../store/types';
 import { useApp } from '../useApp';
+import Modal from './Modal';
 
 export default function Header() {
   const mode = useApp((s) => s.mode);
@@ -19,6 +20,7 @@ export default function Header() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -67,7 +69,7 @@ export default function Header() {
       if (content) {
         const res = importGraphFile(content);
         if (!res.ok) {
-          alert(`Error al importar: ${res.message}`);
+          setImportError(res.message);
         }
       }
     };
@@ -429,6 +431,30 @@ export default function Header() {
           </button>
         </div>
       </div>
+
+      {importError && (
+        <Modal
+          isOpen={Boolean(importError)}
+          onClose={() => setImportError(null)}
+          title="Error al importar"
+          role="alertdialog"
+          testId="modal-import-error"
+        >
+          <div className="space-y-4">
+            <p className="text-xs font-medium text-rose-600 dark:text-rose-400">{importError}</p>
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                data-testid="btn-close-import-error"
+                onClick={() => setImportError(null)}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </header>
   );
 }

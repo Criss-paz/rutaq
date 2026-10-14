@@ -401,4 +401,137 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
       path: `docs/informe/capturas/${testInfo.project.name}-11-f3-empates.png`,
     });
   });
+
+  test('12. Diálogo de arista con peso inválido y validación en vivo', async ({ page }, testInfo) => {
+    await page.goto('./');
+    await page.getByTestId('mode-design').click();
+    await page.getByTestId('template-select').selectOption('ejemplo6');
+
+    // Abrir diálogo de agregar arista
+    await page.getByTestId('btn-add-edge').click();
+    const modal = page.getByTestId('modal-add-edge');
+    await expect(modal).toBeVisible();
+
+    // Seleccionar origen y destino no conectados directamente (A y D)
+    await page.getByTestId('select-edge-source').selectOption('A');
+    await page.getByTestId('select-edge-target').selectOption('D');
+
+    // Introducir peso 0 (inválido)
+    const weightInput = page.getByTestId('input-edge-weight');
+    await weightInput.fill('0');
+    await expect(page.getByTestId('edge-weight-error')).toBeVisible();
+    await expect(page.getByTestId('edge-weight-error')).toContainText('El peso debe ser mayor que cero');
+
+    // El botón de enviar debe estar deshabilitado
+    const submitBtn = page.getByTestId('btn-submit-edge');
+    await expect(submitBtn).toBeDisabled();
+
+    // Probar número negativo
+    await weightInput.fill('-4');
+    await expect(page.getByTestId('edge-weight-error')).toContainText('El peso debe ser mayor que cero');
+    await expect(submitBtn).toBeDisabled();
+
+    // Probar cerrar con tecla Escape (accesibilidad con foco atrapado)
+    await page.keyboard.press('Escape');
+    await expect(modal).not.toBeVisible();
+
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-12-dialogo-peso-invalido.png`,
+    });
+  });
+
+  test('13. Arista duplicada ofrece editar la existente y actualiza la etiqueta', async ({ page }, testInfo) => {
+    await page.goto('./');
+    await page.getByTestId('mode-design').click();
+    await page.getByTestId('template-select').selectOption('ejemplo6');
+
+    // En ejemplo6 ya existe la arista A-B con peso 4
+    await expect(page.getByTestId('edge-weight-A-B')).toContainText('4');
+
+    // Intentar agregar arista entre A y B con nuevo peso 18
+    await page.getByTestId('btn-add-edge').click();
+    await page.getByTestId('select-edge-source').selectOption('A');
+    await page.getByTestId('select-edge-target').selectOption('B');
+    await page.getByTestId('input-edge-weight').fill('18');
+    await page.getByTestId('btn-submit-edge').click();
+
+    // Debe mostrarse el diálogo de duplicado con mensaje claro
+    const dupMsg = page.getByTestId('duplicate-edge-message');
+    await expect(dupMsg).toBeVisible();
+    await expect(dupMsg).toContainText('Ya existe una carretera entre A y B (peso 4)');
+
+    // Ofrece "Editar la existente" y "Cancelar"
+    const editBtn = page.getByTestId('btn-edit-existing-edge');
+    const cancelBtn = page.getByTestId('btn-cancel-edge');
+    await expect(editBtn).toBeVisible();
+    await expect(cancelBtn).toBeVisible();
+
+    // Tocar "Editar la existente"
+    await editBtn.click();
+    await expect(page.getByTestId('modal-add-edge')).not.toBeVisible();
+
+    // Verificar que la arista existente A-B actualizó su peso a 18 en la etiqueta del lienzo
+    await expect(page.getByTestId('edge-weight-A-B')).toContainText('18');
+
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-13-arista-duplicada.png`,
+    });
+  });
+
+  test('14. Aviso de validación con varios problemas (+N más desplegable y selección con select)', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('./');
+
+    // Importar un archivo con varios problemas (desconectado y peso no positivo)
+    const graphData = {
+      format: 'rutaq-graph',
+      version: 1,
+      name: 'Varios Problemas',
+      graph: {
+        nodes: [
+          { id: 'A', label: 'A', x: 0, y: 0, w: 132, h: 44 },
+          { id: 'B', label: 'B', x: 300, y: 0, w: 132, h: 44 },
+          { id: 'C', label: 'C', x: 600, y: 300, w: 132, h: 44 },
+        ],
+        edges: [{ id: 'A-B', source: 'A', target: 'B', weight: 0, shape: 'straight', shapeAuto: true }],
+        directed: false,
+        unit: 'km',
+      },
+    };
+
+    await page.getByTestId('input-file-json').setInputFiles({
+      name: 'varios_problemas.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(graphData)),
+    });
+
+    const alert = page.getByTestId('validation-alert');
+    await expect(alert).toBeVisible();
+
+    // Debe haber un botón "+1 más" o "+N más"
+    const toggleBtn = page.getByTestId('btn-toggle-issues');
+    await expect(toggleBtn).toBeVisible();
+    await expect(toggleBtn).toContainText('+1 más');
+
+    // Al hacer clic en "+1 más", se despliega la lista completa de problemas
+    await toggleBtn.click();
+    const issuesList = page.getByTestId('validation-issues-list');
+    await expect(issuesList).toBeVisible();
+
+    // Comprobar que contiene ambos problemas (peso mayor que cero y desconectado)
+    await expect(issuesList).toContainText(/mayor que cero/i);
+    await expect(issuesList).toContainText(/desconectado/i);
+
+    // Tocar el problema de grafo desconectado (afecta a nodo C): debe seleccionarlo con select
+    const disconnectedIssue = page.locator('[data-testid^="validation-issue-"]').filter({ hasText: /desconectado/i });
+    await disconnectedIssue.click();
+
+    // Verificar que el nodo C fue seleccionado en el lienzo (con anillo de selección azul)
+    await expect(page.getByTestId('node-C')).toHaveClass(/ring-2 ring-blue-600/);
+
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-14-aviso-varios-problemas.png`,
+    });
+  });
 });
