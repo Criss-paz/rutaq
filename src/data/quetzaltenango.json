@@ -1,0 +1,617 @@
+{
+  "meta": {
+    "nombre": "Red Vial del Departamento de Quetzaltenango",
+    "unidad": "km",
+    "fuentes": [
+      "Instituto Nacional de Estadística de Guatemala (INE)",
+      "OpenStreetMap / Nominatim (coordenadas de cabeceras)",
+      "Project OSRM Car Routing (distancias viales y geometrías)",
+      "Ministerio de Comunicaciones, Infraestructura y Vivienda (MICIVI / DGC)"
+    ],
+    "fecha": "2026-10-14"
+  },
+  "nodes": [
+    {
+      "id": "QTZ",
+      "label": "Quetzaltenango",
+      "lat": 14.84646,
+      "lon": -91.51942,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "SAL",
+      "label": "Salcajá",
+      "lat": 14.87911,
+      "lon": -91.45754,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "OLI",
+      "label": "Olintepeque",
+      "lat": 14.88514,
+      "lon": -91.51479,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "SIJ",
+      "label": "San Carlos Sija",
+      "lat": 14.98369,
+      "lon": -91.54905,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "SIB",
+      "label": "Sibilia",
+      "lat": 14.99416,
+      "lon": -91.62418,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "CAB",
+      "label": "Cabricán",
+      "lat": 15.0747,
+      "lon": -91.64844,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "CAJ",
+      "label": "Cajolá",
+      "lat": 14.92271,
+      "lon": -91.61495,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "SIG",
+      "label": "San Miguel Sigüilá",
+      "lat": 14.89629,
+      "lon": -91.60282,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "OST",
+      "label": "San Juan Ostuncalco",
+      "lat": 14.86882,
+      "lon": -91.62163,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "MAT",
+      "label": "San Mateo",
+      "lat": 14.85897,
+      "lon": -91.59253,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "CCH",
+      "label": "Concepción Chiquirichapa",
+      "lat": 14.85513,
+      "lon": -91.62396,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "SMA",
+      "label": "San Martín Sacatepéquez",
+      "lat": 14.82362,
+      "lon": -91.64263,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "ALM",
+      "label": "Almolonga",
+      "lat": 14.81498,
+      "lon": -91.49475,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "CAN",
+      "label": "Cantel",
+      "lat": 14.81879,
+      "lon": -91.43198,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "HUI",
+      "label": "Huitán",
+      "lat": 15.0495,
+      "lon": -91.63801,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "ZUN",
+      "label": "Zunil",
+      "lat": 14.7848,
+      "lon": -91.4848,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "COL",
+      "label": "Colomba Costa Cuca",
+      "lat": 14.70759,
+      "lon": -91.73194,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "FLU",
+      "label": "San Francisco La Unión",
+      "lat": 14.92429,
+      "lon": -91.54333,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "PAL",
+      "label": "El Palmar",
+      "lat": 14.69381,
+      "lon": -91.60183,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "COA",
+      "label": "Coatepeque",
+      "lat": 14.70263,
+      "lon": -91.86564,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "GEN",
+      "label": "Génova",
+      "lat": 14.6224,
+      "lon": -91.83562,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "FCC",
+      "label": "Flores Costa Cuca",
+      "lat": 14.65606,
+      "lon": -91.82563,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "ESP",
+      "label": "La Esperanza",
+      "lat": 14.86923,
+      "lon": -91.5713,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    },
+    {
+      "id": "PLA",
+      "label": "Palestina de Los Altos",
+      "lat": 14.93315,
+      "lon": -91.69398,
+      "fuente": "Nominatim / OpenStreetMap (cabecera municipal oficial)"
+    }
+  ],
+  "edges": [
+    {
+      "id": "ALM-QTZ",
+      "source": "ALM",
+      "target": "QTZ",
+      "km": 6.8,
+      "carretera": "RN-10",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Carretera hacia los baños termales y el cañón del Samalá.",
+      "geometry": "wwryA`{qmPHsApOnAcB~VjY~BlC}CxBiFlF_GrDmQ~GpAfV`H`BaI`HpBrBNpB_@pD}BvDkArL}@`GkAfPIxGkUZoCs@uOqG_IWaAb@mHr@cBxJoHzQiVpBoJuAwH_@_Gv@KPcDl@B"
+    },
+    {
+      "id": "ALM-ZUN",
+      "source": "ALM",
+      "target": "ZUN",
+      "km": 4.8,
+      "carretera": "RN-10",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Conexión turística y agrícola directa entre Almolonga y Zunil.",
+      "geometry": "uplyAhbmmPxGQ~@{BbQiVfHcDjCuBpLqN~CeHnEiCxGkJrDqDhBc@|GCtBiAnEu@bFyCjEPzLgDpKa@xDyCbCaA|@cBlAw@lCEt@t@lHx[AfGnChLl@^~GoC"
+    },
+    {
+      "id": "CAB-HUI",
+      "source": "CAB",
+      "target": "HUI",
+      "km": 4.5,
+      "carretera": "RD-QUE-11",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta departamental del altiplano norte entre Huitán y Cabricán.",
+      "geometry": "uizzAb`inPoFqPqDuE{OlA{@l@kAfDgAjAcJjEyANuDgAaCcBmANuBdBqCbEgDAaBfB{APiFhCuNg@oOdCcCaB]^?lHyBYwBvBgBq@i@P~BhCF~@eCnG{JaA}BHsBz@kChDa@nQzDnF"
+    },
+    {
+      "id": "CAJ-FLU",
+      "source": "CAJ",
+      "target": "FLU",
+      "km": 9.5,
+      "carretera": "RD-QUE-06",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Conexión transversal intermunicipal hacia San Francisco La Unión.",
+      "geometry": "m|azAvpvmPDxDwNdK_Bn@yBChA`AAp@}@nA_Bv@]pGaB|DKzCq@|@sBR~Ad@Rj@CxCmAxBpBtFwAhG@nBpCpFeKlKO`Cu@hBj@vXj@`CzC`FbD|[dGhAzItEfAjKAzB{@|CeMfDi@bAR|@|Al@{A~JfBzHcBnIqCPj@rCvEjDtAxFj@vFcChEi@tCkAtBKxDl@dDqBdBmBzIhA~GhC`FL`IlBbF@~DhElPCt@sBjBnBf@Zf@BvDvAhJh@|@Z`EvBjBi@p@lAlHvB|BeBfDdD`BjBnBm@lALbBjEzH"
+    },
+    {
+      "id": "CAJ-PLA",
+      "source": "CAJ",
+      "target": "PLA",
+      "km": 12.7,
+      "carretera": "RD-QUE-09",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Camino intermunicipal directo entre Cajolá y Palestina de Los Altos.",
+      "geometry": "uqazAzodnP[_@{FdCxDpJnAzAoB~BeANDjIoB|ATbCv@`@pFxQYxBcC`BtAr@r@|AvB|JnA`@vC~FbCzBzFhL~F`FG`BxBMnGnEvBJxCdAdC~CnBxH_AzGH`Cd@PnBpE\\zEtCrDSdGzAbGzDrEpIjAhDlAbEfH`B^f@`ArBdM[xDd@xCcAbFb@pBkGzOgJ`KuBbFRtBzBU\\ZcBzBnBjAdA|BkD`@i@~@v@IvA`BtBEkDjCuAW}@t@qAjF}AzAhAJiDlA`C\\eEv@CVdBJ{Ch@kCcEu@KqCr@gBdBQx@^j@zE`Bn@nBaLbFuDxFoEYsEzCkDjHQfFoExIqDbF}Ej@kHrDuBfCqCA_F`GyAvEaDbD__@zSJrDuDxELfJaB`B{@xBhDdJWjBsBdD"
+    },
+    {
+      "id": "CAJ-SIB",
+      "source": "CAJ",
+      "target": "SIB",
+      "km": 11.8,
+      "carretera": "RD-QUE-08",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta rural directa del altiplano central hacia Sibilia.",
+      "geometry": "uqazAzodnP[_@eOhGuCB}Cr@yHZwAeAuCEoCb@cAM}Ar@yD\\iF}@yShD}HkCUVZ|Ac@\\qE{DwFeBgAsAwEc@{AeAk@qAEmEWF[xCFfDeEbAwBm@m@s@wD_@{EsBgDYiC`@M|DkAh@iArBgBTgAYkBr@v@hBVpCy@rB`BvDrCpCL~@iFv@}A|AkBzFlBfE?~@a@`@oDVoAdE_C|Ak@tAyCJaHdE_J@iBr@ShCdDvCgApCd@pEeAjB_DnC{E~A]zAuAb@aAnBsQbIgAJ}B|BcEa@eD|BwF~@_IrDaQtEaFl@gD~BJvBWb@oD|@sAxA_H~@aBO{A_AiDQaDkEcCWyCiAaHMaB_@{IwG}E}BkAcB{CqIcKgPsJe]m@{FqKaFsADkCbAe@oB"
+    },
+    {
+      "id": "CAJ-SIG",
+      "source": "CAJ",
+      "target": "SIG",
+      "km": 3.9,
+      "carretera": "RD-QUE-07",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Conexión intermunicipal directa entre San Miguel Sigüilá y Cajolá.",
+      "geometry": "om|yAxdbnP_@|GXlAgRdL_@dDw@d@m`@iCoQF_\\~@eCGuD_Ay@zBUdD`CbCUj@oFgDqEOqWfZgMfIXbA"
+    },
+    {
+      "id": "CAN-QTZ",
+      "source": "CAN",
+      "target": "QTZ",
+      "km": 13.1,
+      "carretera": "RN-01 / Periférico Sur",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Acceso conurbado suroriental de Quetzaltenango a Cantel.",
+      "geometry": "wwryA`{qmPHsA~OnA`Dkb@jGsKjUaZaC_DwAuDiDo^yEo_@}GcViEwIqF{OcCoPD}BxAwDdNkKhHqH`B_ClA}DDaG{AgOh@aKlBmIiBoLu@ePPmBl@eArI{FnNcBdLkHlLeAdFgBxQcLnB_E|BoBxKcAp@_@fJ_PzCkBjP_BnGbA~Nf@xC_AtB}BzF_TO[t@}@aA}HkEwM}FgXaAq@\\m@cBAZm@s@OtB{AR}EkEgCx@eAIiBkEwAoOcMvBuCx@sD"
+    },
+    {
+      "id": "CAN-SAL",
+      "source": "CAN",
+      "target": "SAL",
+      "km": 18.6,
+      "carretera": "RD-QUE-04",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta directa oriental entre Cantel y Salcajá.",
+      "geometry": "gcyyA~wemP{@tDqOuDcAzAqADqj@_EkKgEiEeC{@_Bu@J_@xBsKvWMlCZpCrBrDto@xh@tGdErPrCtD?zFiBpDH`\\zLbKjBlCWpCaCtAiD`AaIx@_BfMqDlDWzMtDbNnBvDrBxYzXjUlPnEx@hQc@fDdAvAbCzJ~c@bDxHjC|BCbAq@_@z@gC[_GhAuE|AoBdLgIhHqH`B_ClA}DDaG{AgOh@aKlBmIqA{GgAoRAkCz@qBrI{FvPeC|IiGlLeAdFgBxQcLnB_E|BoBxKcAp@_@fJ_PzCkBjP_BnGbA~Nf@xC_AtB}BzF_TO[t@}@aA}HkEwM}FgXaAq@\\m@cBAZm@s@OtB{AR}EkEgCx@eAIiBkEwAoOcMvBuCx@sD"
+    },
+    {
+      "id": "CAN-ZUN",
+      "source": "CAN",
+      "target": "ZUN",
+      "km": 8.9,
+      "carretera": "Cito-180 / RN-10",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Enlace vial entre Cantel y Zunil.",
+      "geometry": "qgmyAfy`mPy@rDwBtCnObM`EhARvBy@dAjEfCS|EuBzAr@N[l@bB@]l@`Ap@|FfXxCxHrBnMu@hANZ|BuAhM{AlI}@pDR~h@jRrMnJlElEvAxFc@`MVjBv@nBvFnHh@dBsDvVdE`PhAhBjIxE`NzBxHf@fEhCbCtE`@hKpBbGn@~IbIlGxExIvAdEhFhS`@nEeBHmAsBcGbCyBu@j@nB_Bp@"
+    },
+    {
+      "id": "CCH-OST",
+      "source": "CCH",
+      "target": "OST",
+      "km": 1.7,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Tramo continuo y directo entre Ostuncalco y Concepción Chiquirichapa.",
+      "geometry": "eawyAxxenPbRUvF~ClDtDxIrD`FzC~DB`S_BxF_B^xA^Q"
+    },
+    {
+      "id": "CCH-SMA",
+      "source": "CCH",
+      "target": "SMA",
+      "km": 5.4,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Tramo de ascenso hacia la Laguna de Chicabal y San Martín Sacatepéquez.",
+      "geometry": "cktyAtifnPva@yHbTfAhCr@vChB~GvF~F`LjEtL~PjMjEx@nOXdA^~ArC~Aj@p@eAeBsED}Fd@s@pA@~GhMx@lJpCrFiAxQz@pItCrB`B`DhEhBjGOzN`DToBhBh@"
+    },
+    {
+      "id": "COA-COL",
+      "source": "COA",
+      "target": "COL",
+      "km": 16.7,
+      "carretera": "RN-13",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Corredor comercial directo entre Coatepeque y Colomba Costa Cuca.",
+      "geometry": "iswxAhk{nPJeAtCb@g@jJ_B`HUxIaD|FWdMcDfFaBvFqCrDh@zDrCf@p@lAg@~EmEpBeAfCC`D`AbISlRbDtItNxT`INnEfFGvBgHfXk@|HPpA|@jA|GzC^n@OdAeB`CExDiAnGhEtSN~HzBlQBhB_AjGdB`DXrDnDzNxD`G~@JhC{@n@p@o@bGoFbE{@`EZr@bDxA~FxJl@xCK|HpH~N~ApAtHhCbA`BHzAcBrICtB\\|NjB|BH|Pb@tF`B~FbR`b@`@nCOfCwMrg@JnCnDjLAfDqIhXkFbHe@~AFzAtBnFAtC{Uzg@cAj@{GtLaGfq@_Ijr@BrQxHEX`Ma@@"
+    },
+    {
+      "id": "COA-FCC",
+      "source": "COA",
+      "target": "FCC",
+      "km": 14.1,
+      "carretera": "CA-02 Occidente",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Tramo de la Carretera del Pacífico CA-2 entre Coatepeque y Flores Costa Cuca.",
+      "geometry": "mrvxA|ouoPsCJ]ah@aBQdHij@dGqp@zFaKpAgAr@qClTcd@@uCuBoFG{Ad@_BjFcHpIiX@gDoDkLKoCfNmj@a@}DcRab@aB_Gc@uFIe[jAmD`CaArBFba@vIfG@xDyAfXkTzDcAlGh@lBM~AiA|BiFzA]zEDno@lP~@z@L|@mBzG\\fCzKpLtKtEjEzDjA`C|DlQjFtMxC`GtH~G`@tC?zGfK~`@YfIlE\\Ez@"
+    },
+    {
+      "id": "COL-FCC",
+      "source": "COL",
+      "target": "FCC",
+      "km": 16.2,
+      "carretera": "RD-QUE-15",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta departamental directa que une Colomba con Flores Costa Cuca.",
+      "geometry": "iswxAhk{nPJeAtCb@g@jJ_B`HUxIaD|FWdMcDfFaBvFqCrDh@zDrCf@p@lAg@~EmEpBeAfCC`D`AbI]pPlDpK|M~S|An@zFEnEfFGvBgHfXk@|HPpA|@jA|GzC^n@OdAeB`CExDiAnGhEtSN~HzBlQBhBeAnFjB|DXrDnDzNxD`G~@JhC{@n@p@o@bGoFbEw@vCDhAtDlB~FxJl@xCK|HpH~N~ApAtHhCbA`B?lC_BjIn@pRr@Fd@a@ByFj@iBrAiA`B[bKrA|WlGbCPfDYtCoAfXkTzDcAlGh@lBM~AiA|BiFzA]zEDno@lP~@z@L|@mBzG\\fCzKpLtKtEjEzDjA`C|DlQjFtMxC`GtH~G`@tC?zGfK~`@YfIlE\\Ez@"
+    },
+    {
+      "id": "COL-PAL",
+      "source": "COL",
+      "target": "PAL",
+      "km": 60.5,
+      "carretera": "Cito-180 / CA-02 Occidente / RN-13",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Corredor costero interdepartamental que conecta El Palmar con Colomba transitando temporalmente por el departamento de Retalhuleu.",
+      "geometry": "mftxAxobnPuCpF{CnBeE`@qAt@Yf@HlAj@hB`A\\fBf@`C?|AiApEYjCv@vAKZsEt@FdApAdFTdDhAnM]xBkDtEk@rSuFBf@yAXvDzBsCrBQv@l@`@sAz@ClClDu@rBwAdDK_EzG{FlAmCzBU`A|@d@~Co@xB~@xA_AjBH|@VHz@pI{BiBbD}B\\fAh@fILeBtAqBj@\\~E~UkD~AL_B^i@n@l@dAgAxA@lAbGv@h@TAb@yN~CgGnF]z@L`ApBTGhG^^rAgA|@@pA`DkD^eDnBq@|AFbAVh@jCfALr@mErAAp@vRa@rHu@zMVlJ`AvHm@|BgAxGOxAZ|E[~DjBhHh@rPHpSx@rKuC|LiFvDo@dTy@nIfAfMq@vErAhLf@zBp@pO^tOcAnZ~@nIa@pJqBfAb@HxDbMfCzG`D~AlDzM`AbC]tMnFbCWnEiBr@F`Zfg@|v@~]l]zQxcBpi@|OfErt@jvFg@rGoEtFw@bD@pm@hCfIXhCShd@gBpEcKrI}Ar@{E^yAdAeEdZc@bIBtK~AvD~IhH|UtHpBpAb@nAYvSkFb_@z@r[iBlP`@nh@uAvJiTp]}AhEiJry@kD|eAmCdHkF|DyDx@qDD}sBgLaJoCkVaRwHeDepAeM_MFqb@dGwU|A{DvCi@hA?jAbBzGK`BoAxBoBv@}NtAyMfIaEv@oF_AmMyKqd@_T}^uC{HTwF|AyEzCax@z`AwC|CuOvJmCdCoC~GwBzXuAbJ}BvCsK~FaF`GuDr@gLaFyDJ{AlAeOp[_Cv@{Gm@mEj@aYrToCjA}FNqRqEmR_CgBj@cAjA_@tACxFcAf@e@u@_@iQ~AkI?mCcAaBuHiC_BqAqH_OJ}Hm@yC_GyJuDmBEiAv@wCnFcEn@cGo@q@iCz@_AKyDaGoD{NYsDkB}DdAoFCiB{BmQO_IiEuShAoGDyDdBaCNeA_@o@}G{C}@kAQqAj@}HfHgXFwBoEgF{FD}Ao@}M_TmDqK\\qPaAcIBaDdAgClEqBf@_Fq@mAsCg@i@{DpCsD`BwFbDgFVeM`D}FTyI~AaHf@kJuCc@KdA"
+    },
+    {
+      "id": "COL-SMA",
+      "source": "COL",
+      "target": "SMA",
+      "km": 23.7,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Descenso montañoso histórico de Los Altos (San Martín Sacatepéquez) a la Costa Cuca (Colomba).",
+      "geometry": "efnyAj|inPp@VWvA{Ba@PnD~FpD~JbMdEfCpCnDlIrF~@pA~F`\\VvElItQIjAaAbBL|FrExApBdBvIzBpDpCjAzDHtKhAhC`DjB|CHzCkAzAsBjBiGdFyI`Ao@rAXb@`Aq@tG~@hELfEjAfE~@|RfAjAvEpAlBhEzAtA~I~@jDnAp@t@TxDf@t@bAGNa@@aHz@w@dEfEpL`@vNeBlJmBzDdAhCu@lCEhA_Ak@qDl@q@h@JvDvEzEy@`F^fBy@`HiGnCq@`AyD|@FnA`BjC|AtFVx@w@[kCfA]xCbDpI~@`CfCdCa@nCrCp@WPaAyB{B@qAnAOvEzDfBAl@eDe@qEv@g@h@h@?~C`AzG`A[OwDz@wBpAGrDjArAvDn@Xh@_A{AyCdAg@nD~DzDpA`CdDrClA~@xCnDzB~AzCpEa@zGf@|FhFr@Sl@qCjD|@rDkA~HvE|Cx@j@j@vDzLz@r@p@UVaCl@Yh@\\p@xBx@Tv@UhFyIhBuG~Ai@xD|Ata@rX`AnBXzD|BdDs@`JzBhFxC`C|F`Ah@dBD`E~@bAfALrGiApF|@|AhASnHVhFYpAyCrBZjAhIv@hCjEdG~ElDhFfBd@lDk@nAnABjBwAnCsCnAo@pAwAbKT`Bt@dA~FjEeAnEXlHxHbJvA`@lIVfCbAfC`CnDR`C|GA~Dx@bHdEXnBbCxCZb@tC`ClAMjDnCxATp@uBvIlElK{@`GfDfGUnE|FjGw@jFbBbF`Ar@fK^pIkB`AJhStS|Dv@KdA"
+    },
+    {
+      "id": "ESP-MAT",
+      "source": "ESP",
+      "target": "MAT",
+      "km": 2.8,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Tramo conurbado sobre la Ruta Nacional 1 entre La Esperanza y San Mateo.",
+      "geometry": "qcwyAr`|mPfAKbIp^fNn`@zg@pr@[|OcBK?a@"
+    },
+    {
+      "id": "ESP-OLI",
+      "source": "ESP",
+      "target": "OLI",
+      "km": 10.1,
+      "carretera": "RD-QUE-05",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Anillo intermunicipal metropolitano norte-occidente.",
+      "geometry": "aezyAr}pmPZ|DfAPlKiEpK_BfeCwM`AXiEtx@uBnM_FxIqKlt@nExo@dLfX|CjDIrAaMti@o@z@kDl@q@`AcH~OaEvOY`HnA|XqGlMaB`LqBfGoIT"
+    },
+    {
+      "id": "ESP-QTZ",
+      "source": "ESP",
+      "target": "QTZ",
+      "km": 7.5,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Eje vial principal metropolitano de Quetzaltenango hacia el occidente.",
+      "geometry": "wwryA`{qmPHsApOnAsIhoAoA~FJhDs@fLiEd@uUVkZ_@}AnB{NhZmDx`@aMti@o@z@kDl@q@`AcH~OaEvOY`HnA|XqGlMaB`LqBfGoIT"
+    },
+    {
+      "id": "ESP-SIG",
+      "source": "ESP",
+      "target": "SIG",
+      "km": 5.7,
+      "carretera": "RD-QUE-07",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta local directa entre La Esperanza y San Miguel Sigüilá.",
+      "geometry": "qcwyAr`|mPfAKvB`JmN~`@s@fEAzFk@JmIwFm@?IxCZjA}@zBvBdEOrDb@pAcDvPy@fBaGnGuChBwC`BiNfEuLlJcPbJ}AvDaFlGuRrG_^nb@sH`@{FrEYmA^}G"
+    },
+    {
+      "id": "FCC-GEN",
+      "source": "FCC",
+      "target": "GEN",
+      "km": 5.1,
+      "carretera": "RD-QUE-16",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Conexión directa sur hacia la cabecera municipal de Génova Costa Cuca.",
+      "geometry": "}pmxA~tmoPD{@|QfBdG{@bHt@lj@fi@jOvClLVzBdBdF`ArD`CpGnG|F`PzBhAbRh@fLdErHg@hDx@~@Iv@kAm@{DfBsBZmAiCiI@sBt@eC|AqA`AMvBrChDD"
+    },
+    {
+      "id": "FLU-OLI",
+      "source": "FLU",
+      "target": "OLI",
+      "km": 10.1,
+      "carretera": "RD-QUE-02",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta de ascenso hacia San Francisco La Unión desde Olintepeque.",
+      "geometry": "aezyAr}pmPu@yCsBdAgMWq@u@oEeBBtBiEAU_@mCIqA{@BvAuCdFu@hJn@dCvC`BNlAs@XqKu@qBh@iDbGgDjN@vBfGtEpAdIOjA{MvGwCb@uBo@aDwFu@U}@TeA|H^xAnCfD]jAyASyBwAgFkFWwBx@eFQ}@cDwAcLyKJ_CbDyCDw@g@u@{Fc@w@P_AdAyBvHeBt@aJdAsBrDqAJ{EqCsYuAyOXiBoAqEiGoDfGsA`L@`CzAzFc@lAwBxA^fBc@pMlAbJjGrZqG_@m@XuDyAgBFy@d@j@~GaEjH{@lEcClG}AjBUzAY?InA"
+    },
+    {
+      "id": "FLU-SIJ",
+      "source": "FLU",
+      "target": "SIJ",
+      "km": 10.4,
+      "carretera": "RD-QUE-02",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Conexión de montaña entre San Francisco La Unión y San Carlos Sija.",
+      "geometry": "m|azAvpvmPZsFg@}GeAsLiCoHyA}M@uEoM{OoCyEaHyAgB`@y@k@oFea@cHeOqZfJiJB_Jj@iDxA}C`@q@v@aB`@eCUcCwBmB@{C`GA|@nArA_@tAgMhFgD~D{EnBmArAsGWeClB_CPyGdDqBCoEgBiBgAeAiCiGqB_@nB`@bFiAxA_IJeDkCi@CuCn@kDfB}If@uBjCeKlD_Fs@mBgAeAHoFvFa@fHgEnCaFrGGhE_B`B}B`A_DzJmBvCaBfLqDhBaGvG_HhDg@`ACzCq@vBqAl@_FNcAvFyE?"
+    },
+    {
+      "id": "HUI-SIB",
+      "source": "HUI",
+      "target": "SIB",
+      "km": 8.6,
+      "carretera": "RD-QUE-11",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta intermunicipal directa entre Sibilia y Huitán.",
+      "geometry": "aoozApifnPd@nB_TfKkDnC}FnAiCdGiDv@_DbBcCrFgGxIiJy@sS|@wHWoIbG{DSeLlCwBcAgBGO~B_DbCcAvBsEd@{CpBiCv@mGzMoBjIuL|I}@LoF{@AdCyAkCq@WFcAmAcFaCgBiCs@IdCaBLqAYv@kEvFuDwHf@uCvCuP|AwAm@oC~BmCJi@d@aFc@UsAi@C_A`Ag@hBIbCuAp@eKoBcAiC{F_@oEr@wBfAsBLsCnBiG_AoHr@oEgCuAcBeI}P"
+    },
+    {
+      "id": "HUI-SIJ",
+      "source": "HUI",
+      "target": "SIJ",
+      "km": 15.2,
+      "carretera": "RD-QUE-12",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Enlace directo entre Huitán y San Carlos Sija.",
+      "geometry": "uizzAb`inPeAmC\\wGp@oDlBwBfBu@hGS|DcFdAi@|AGtC`AhAKdF{GHkC|AGnG~@bBsCdCcAzBmKa@]iEOIo@~A_C|HaFnBs@nDJjE_FxAgEf@l@cAsHb@yDr@JL}@xEeB`@mHfF}FH}@a@u@z@IfSaOxAi@pGWp@ZP~@t@WW_A{EiC}DcF_@mBlJcEhM_OfGeDwBcG_@sCEmI}@eK`@cE~FiBfA{@xMaUdAgF_@YcBXYUu@kDwAoBcA_GaC{D{AiF{@wK`@iCy@_Ij@gElACTxAb@V|MKrA{B|M~@dEs@pAyDn@{J`CmKvNgEjB}Cj@{DtGeChAyGxMsPvPa`@bUwa@pFyHnd@wa@nGaDhEcA~LoHtC}E`Ao@bAuCpDQtAr@tCwAxErAVuAbG]"
+    },
+    {
+      "id": "MAT-OST",
+      "source": "MAT",
+      "target": "OST",
+      "km": 4.3,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Tramo principal sobre la RN-1 entre San Mateo y San Juan Ostuncalco.",
+      "geometry": "acuyAjd`nP?`@bBJFv@jBtCgBnBq@jC_AlZgBvDsAl@gKEiFhGqAJkEs@sMdEeFdF}DKq@`@EbHkBhF|B~DlEpOb@rMgCtHvC|Lj@fHQpAaBjBSpBcE@XdLj@C"
+    },
+    {
+      "id": "OLI-QTZ",
+      "source": "OLI",
+      "target": "QTZ",
+      "km": 6.2,
+      "carretera": "RD-QUE-02",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Avenida de conexión conurbada norte entre Quetzaltenango y Olintepeque.",
+      "geometry": "wwryA`{qmPH}AwTeBmAlTo@xAen@kEkBk@qAoD|Emp@`@aAbGTgH}@iOrAg{AfH_\\vBqK~AmKhEgAQ[}D"
+    },
+    {
+      "id": "OLI-SAL",
+      "source": "OLI",
+      "target": "SAL",
+      "km": 10.5,
+      "carretera": "RD-QUE-03",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta intermunicipal directa en el valle de Los Altos.",
+      "geometry": "gcyyA~wemP{@tDqOuDcAzAqADqj@_EkKgEiEeCqAeB_@PsAdFgInRc@bCXvErBrDps@`l@`ElBnPhCeFxRcFbHyCz@aBpD_@hDwBfDLtBm@|M`AnEFdEs@zWtBh`@kAnFlDx@z@dCEbEsEvAwAjB_BfFsAp@s@|DaBvCgCYDfNqElAdAtBcAhCTnMdIfABpKtAbApBNbArBtDv@dMvYrF`DHdDmEfBgAQ[}D"
+    },
+    {
+      "id": "OST-PLA",
+      "source": "OST",
+      "target": "PLA",
+      "km": 18.0,
+      "carretera": "RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta Nacional 1 de ascenso hacia Palestina de Los Altos y el departamento de San Marcos.",
+      "geometry": "eawyAxxenPvCIYyKgRD\\tLaBx@}@zAydBpaAw@pAwAdJsAbUfBxLtIfOvF~B`IbJbHlERr@[`D`FbB@~B`STjFdAjEjDlKuFn@NcCbFEfF_AtBkAl@eHXiAn@DdBfEzAz@hCKtAsCxDU~AfAlAtIaA`ItAzD|Df@rBo@r@}Cg@{Et@aJlCa@~AZnJkBvJgCk@aBqBsEf@sEpLkAZaEoC{KnA}GiAoD{DgAc@mBUaDPk@`@wAnF_FtBwCvC}HWwAf@eElLyEvB_CbEgFvCHbD[dAoNhDaCfBoDqAcFLuDyCmFTeAeASyEkAgB{Iw@mPyF{BIcGh@gFkAwJ|CsGzDgCnEoEYsEzCkDjHQfFoExIqDbF}Ej@kHrDuBfCqCA_F`GyAvEaDbD__@zSJrDuDxELfJaB`B{@xBhDdJWjBsBdD"
+    },
+    {
+      "id": "OST-SIG",
+      "source": "OST",
+      "target": "SIG",
+      "km": 4.6,
+      "carretera": "RD-QUE-07",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Enlace municipal directo entre San Juan Ostuncalco y San Miguel Sigüilá.",
+      "geometry": "eawyAxxenPvCIYyKgRDyCcG[{Dy@u@w@\\wCaAa\\_NaE_EuHcCuAmD_SyEkDuEoK{Df@aD}AHaCkBw@{AiFw@oAeAUwEoDkGkLkEgCfCyGR{FrEYmA^}G"
+    },
+    {
+      "id": "PAL-ZUN",
+      "source": "PAL",
+      "target": "ZUN",
+      "km": 57.2,
+      "carretera": "Cito-180",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta Cito-180 que desciende de Los Altos (Zunil) hacia la Bocacosta (El Palmar); sale temporalmente hacia el norte de Retalhuleu por razones orográficas.",
+      "geometry": "osfyApdkmP~Aq@k@oBxBt@bGcClArBdBIuDj]cEhJSdCPhApE|H`FnA`BpA^tEn@dBxBdAvJP~O}BdFvAjCjBPfDw@~I_@~BwBdERrAv@j@nA?zGuE`BK|@b@f@`BwAnGf@bBxATxC{AbAApE|AjH`@lIo@hDmApE}CpB]hLh@jNWtCb@nUbUzDdN`CrEtC|AdTtDxGxDfOxT`Bb@|FClAp@nNvMpFtLpWlOdGnH~BCz@}AkCqOb@}AdAU`JtElClC~BdEUlF`@`ApOzBhCbI`CrA`B@ze@aJ|CB~DdBlEpFb@dCOhAmAjBoK|EwAfC`CrNrC`CpJbCfHnD`En@bNYnToFrHgAnG`BbDVdGU~FoAbBtA|AzGm@bFbAvBtHbDrG@zJy@fEvAVfB[t@yF`Cm@pBbEzIbKjBrG~EbHhHvGpBZtAQtB_DbEFrBh@v@bCdA|C\\pCq@rGcF`DYvC`@tBhBjBbHjGhFnAhLrGdJ~RM`HgBjBThFzCbBbDtAlAlAVxJAvCn@pBvA|FnHzMxGbBn@nFDrCj@lJzHhPdDpDjHfDvBfD_@zJ_HfBc@vWpGvA|B?vMjElMxApAfHfAvCtA|IdKbH`MfBNdIa@rHrCbO~A`BpAzAxK~DtQZvMzAtBnNdE~Fj@jCi@rOiGnCe@dCd@nIfFnKp@fAf@lApCB`CiE~FSfCtGlQhBrZn@rB`BbBlSrJlFxDxQbUrErItApAxH~ElM|@tOpIfHlIvDvC|RfKnFdJbJbLpG|D~CzClI`BhH|DlRhEzA|@xIpUxCpDxp@xQx@v@N|B{H`YSdJxLx~@}OgEycBqi@m]{Q}v@_^aZgg@s@GoEhBcCVuMoFcC\\{MaA_BmD{GaDcMgCIyDgAc@qJpBoI`@oZ_AuObAqO_@{Bq@iLg@wEsAgMp@oIgAeTx@wDn@}LhFsKtCqSy@sPIiHi@_EkB}EZyA[yGN}BfAwHl@mJaA{MWsHt@wR`@@q@lEsAMs@kCgAWi@GcAp@}AdDoBjD_@qAaD}@AsAfA_@_@FiGqBUMaA\\{@fGoFxN_D@c@i@UcGw@AmAfAyAm@eAh@o@~A_@_BM_VjD]_FpBk@dBuAgIMgAi@|B]hBcDqIzBI{@}@WkBIyA~@yB_A_Dn@}@e@TaAlC{BzFmA~D{GeDJsBvAmDt@BmCrA{@m@a@Pw@rCsBwD{BxAYCg@sStFuEj@yBjDoM\\eDiAeFUeAqAu@G[rEwAJkCw@qEX}AhAaC?gBg@aA]k@iBImAXg@pAu@dEa@zCoBtCqF"
+    },
+    {
+      "id": "PLA-SIB",
+      "source": "PLA",
+      "target": "SIB",
+      "km": 14.5,
+      "carretera": "RD-QUE-08",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Ruta del altiplano occidental entre Palestina de Los Altos y Sibilia.",
+      "geometry": "}sczAx}snP}@xA[`D{GaAoD^cDcDqEqAiC{AsLgC}Ie@C[bCIPaA{NyTyGgGO}FmCeLhAcJuA}GHoDsDgGuGkFF_A`C_@Ji@{AeESwBgBnC}@Ny@aGx@sD{BkHDo@dAQlA}AcDmEMuFfE}DRyCnBsC^_CtDmCtByKScCqAgCQwDyCu@iEwDk@sJuHiBsEnCeEn@WUZoAYc@}DkBqMt@iDlBeLvAcIpBcC_@qEL{@[?g@b@wBdAkAb@sHi@gCgIaB_B?cDFqD|AmCR{CgDkLuB{ByCs@iDoCeFzF`AnAp@RKUgAkCwCkG{Ck@gAjE}C`BeGNoCdBHf@gAaAeFgDqH]CIlCsDn@{AcGwAoB_GcCsBnAwAHyEyFuDsC}Ek@sBoDsHmBaHMaB_@{IwG}E}BkAcB{CqIcKgPsJe]m@{FqKaFsADkCbAe@oB"
+    },
+    {
+      "id": "QTZ-SAL",
+      "source": "QTZ",
+      "target": "SAL",
+      "km": 14.0,
+      "carretera": "CA-01 Occidente / RN-01",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Eje troncal de cuatro carriles entre la cabecera departamental y Salcajá.",
+      "geometry": "wwryA`{qmPHsA~OnA`Dkb@jGsKjUqZ{AuA}BoFiDo^yEo_@}GcViEwIkGiQs@{DaEmDwByEoLwg@}AgBkBk@iR^eDa@sW_Ra]o[aXsEwFsB{QrE_A`Bs@fHsAtDcBnBiCp@_LiBs]gM_CCmGlBkCHeO_CaE_Bcw@ap@o@oCDqDrL{YzADhLhGjDbA|k@`EzAyBt@iFtFr@bIlCS|@"
+    },
+    {
+      "id": "SAL-SIJ",
+      "source": "SAL",
+      "target": "SIJ",
+      "km": 24.7,
+      "carretera": "CA-01 Occidente",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Carretera Panamericana que conecta Salcajá con San Carlos Sija, saliendo brevemente del departamento por el entronque de Cuatro Caminos (Totonicapán) hacia Calel.",
+      "geometry": "gcyyA~wemP{@tDqOuDcAzAqADqj@_EkKgEiEeC{@_BiHwBc`@oF{PaFwEkCmIw@wXyEq@gA@w@rH}]OuMsm@qVsE@_ZfF}DVwFSwJqAoUdGsAOu@w@sAsHsAkAaCSeO`BwJzFu@jAO`C`DjHBbCoA|BuE~CWhGq@rAeBlAmALyJB_HfDuGd@aG|BgCdEwFdSyA`AaLjCaGtN_H~FaEtH}BxA}JtBuUh\\mK`ByB`AeHlKcJnFwEtG{t@|_@aDrDoB|DRrF~BA|C}CfAGhAxFnGjDhEdAfMxAfG`BlIb@|B`UGhKaAjEoI~KyA`D_Jza@gJdPaFhG{AnE{DhH}MtNeB~HiEfFaHzP{GfGkEjBy@dAD~@rL~QdJbRSfQkEdKcGfUiDfIlCvAhErEhBhElBrBf@hBP`Cc@zBZdC~@~Ac@xAAdMsAjClCbDcBjFbAvCMjD_MrOkBdAuA~CHpCu@|DaGVcAvFyE?"
+    },
+    {
+      "id": "SIB-SIJ",
+      "source": "SIB",
+      "target": "SIJ",
+      "km": 9.9,
+      "carretera": "RD-QUE-10",
+      "fuente": "OSRM Car Routing (router.project-osrm.org)",
+      "verificado_google": false,
+      "km_google": null,
+      "nota": "Conexión transversal directa entre Sibilia y San Carlos Sija.",
+      "geometry": "aoozApifnP_@}A{Cf@uAiCeGcDmJwAoAs@sAeDK{DcA_E`DeMdEqEX}FvA{GtAoAfIiDvIyIlAaCS{H_B{BDkFkCmXNkLrBuCt@eCg@_GcB}CyBwAgFk@{AgDu@eE`DkIDoAuGyI{AeEtDuIUwFXaBdFoGtEgW|E{LnCcLhFoL\\kCdEeLfDiMtAmSbCwGuAwFwDiFxDqM~@qHO_DlDyIlA_BzCcAjDwCpASXoAg@mC~A{D~K_Bj@uIyE?"
+    }
+  ]
+}
