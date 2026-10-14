@@ -18,7 +18,9 @@ _Modelado Matemático, Implementación Algorítmica (Dijkstra, Floyd-Warshall, Y
 **Carné:** 2690245972  
 **Carrera:** Ingeniería en Sistemas de Información y Ciencias de la Computación  
 **Fecha:** 14 de octubre de 2026  
-**Lugar:** Quetzaltenango, Guatemala
+**Lugar:** Quetzaltenango, Guatemala  
+**Aplicación Desplegada:** https://criss-paz.github.io/rutaq/  
+**Repositorio de Código:** https://github.com/Criss-paz/rutaq
 
 ---
 
@@ -40,7 +42,7 @@ El transporte terrestre y la planificación de redes viales constituyen uno de l
 
 Desde el punto de vista de las ciencias de la computación y la investigación de operaciones, el problema de la ruta más corta representa uno de los problemas fundacionales de optimización combinatoria. Su resolución algorítmica abarca desde técnicas codiciosas (_greedy algorithms_) como el algoritmo propuesto por Edsger W. Dijkstra en 1959, hasta esquemas basados en programación dinámica de abajo hacia arriba (_bottom-up dynamic programming_) como los formulados independientemente por Robert W. Floyd y Stephen Warshall en 1962. A pesar de su madurez teórica, la traslación de estos algoritmos a sistemas de software interactivos modernos plantea desafíos no triviales: la elección adecuada de estructuras de datos para mantener cotas asintóticas óptimas, la necesidad de proporcionar una visualización pedagógica de las etapas intermedias de cómputo (animaciones paso a paso, matrices evolutivas de recurrencia), y la integración de arquitecturas concurrentes que eviten el bloqueo de la interfaz de usuario durante búsquedas exhaustivas combinatorias.
 
-El proyecto **RutaQ** surge como una respuesta técnica y académica a estas exigencias. Desarrollada como una plataforma interactiva web en TypeScript y React, la herramienta permite no solamente calcular de forma instantánea el camino de costo mínimo entre cualquier par de municipios del departamento de Quetzaltenango, sino también auditar minuciosamente el proceso analítico mediante cuatro modalidades de visualización:
+El proyecto **RutaQ** surge como una respuesta técnica y académica a estas exigencias. La plataforma se encuentra desplegada y disponible para acceso público en **https://criss-paz.github.io/rutaq/**, y su código fuente completo está versionado bajo licencia abierta en el repositorio **https://github.com/Criss-paz/rutaq**. Desarrollada como una plataforma interactiva web en TypeScript y React, la herramienta permite no solamente calcular de forma instantánea el camino de costo mínimo entre cualquier par de municipios del departamento de Quetzaltenango, sino también auditar minuciosamente el proceso analítico mediante cuatro modalidades de visualización:
 
 1. **Modalidad Tabular (S1):** Reproduce con exactitud la tabla de iteraciones clásica enseñada en cursos universitarios de Investigación de Operaciones y Teoría de Grafos, detallando la fijación de etiquetas temporales y permanentes, el tachado de columnas y la relajación de aristas.
 2. **Modalidad Gráfica (S2):** Destaca de forma animada el árbol de caminos mínimos (_Shortest Path Tree_, SPT) o la ruta directa sobre el lienzo interactivo del grafo departamental.
@@ -85,7 +87,7 @@ La elección de la estructura de datos interna impacta de manera directa en la c
 1. **Matriz de Adyacencia:** Matriz bidimensional $W \in \mathbb{R}^{n \times n}$ donde cada elemento $W[i][j]$ representa el costo de la arista directa entre $v_i$ y $v_j$:
    $$W[i][j] = \begin{cases} 0 & \text{si } i = j \\ w(v_i, v_j) & \text{si } (v_i, v_j) \in E \\ \infty & \text{si } (v_i, v_j) \notin E \end{cases}$$
    Esta representación requiere espacio de memoria $\Theta(V^2)$ y permite consultar la existencia de una arista en tiempo $O(1)$. Es la estructura óptima para grafos densos ($|E| \approx |V|^2$) y para el algoritmo de Floyd-Warshall.
-2. **Lista de Adyacencia:** Arreglo o tabla asociativa indexada por nodo, donde cada entrada almacena la lista de vecinos directos y el peso asociado:
+2. **Lista de Adyacencia:** Arreglo o estructura asociativa organizada por nodo, donde cada entrada almacena la lista de vecinos directos y el peso asociado:
    $$\text{Adj}[u] = \big\{(v, w(u, v)) \mid (u, v) \in E\big\}$$
    Requiere espacio de almacenamiento $\Theta(V + E)$ y permite recorrer los vecinos salientes de un vértice $u$ en tiempo proporcional a su grado $\text{deg}(u)$. Es la estructura predilecta para grafos dispersos ($|E| \ll |V|^2$), como las redes viales reales donde el grado promedio por nodo es acotado por una constante física pequeña.
 
@@ -164,7 +166,7 @@ La complejidad computacional de Dijkstra depende fundamentalmente de la estructu
 
 ### 3.4 Justificación de la Exigencia de Pesos No Negativos en Dijkstra
 
-El principio operativo de Dijkstra reside en la naturaleza codiciosa (_greedy choice property_): en cada iteración, el vértice $u^* = \arg\min_{u \in Q} d[u]$ es extraído de $Q$ y fijado permanentemente en $S$. La hipótesis inductiva fundamental establece que **ningún camino alternativo futuro puede alcanzar a $u^_$ con una distancia inferior a $d[u^_]$**.
+El principio operativo de Dijkstra reside en la naturaleza codiciosa (_greedy choice property_): en cada iteración, el vértice $u^* = \arg\min_{u \in Q} d[u]$ es extraído de $Q$ y fijado permanentemente en $S$. La hipótesis inductiva fundamental establece que **ningún camino alternativo futuro puede alcanzar a $u^{\ast}$ con una distancia inferior a $d[u^{\ast}]$**.
 
 Esta afirmación es matemáticamente verdadera **si y solo si** todos los pesos de las aristas son no negativos ($w(e) \ge 0$). Si existieran aristas de peso negativo, una trayectoria futura podría acumular un costo neto decreciente, invalidando la etiqueta permanente ya fijada y arrojando una solución subóptima.
 
@@ -388,15 +390,31 @@ graph TD
 
 ### 5.3 Capturas del Sistema en Ejecución
 
-[PENDIENTE: captura pantalla principal de RutaQ con el mapa de Quetzaltenango]
+A continuación se presentan las evidencias visuales del sistema en ejecución sobre la versión desplegada en producción, contrastando las vistas de escritorio con la experiencia responsiva en dispositivos móviles y documentando de manera fiel los elementos observados en cada interfaz:
 
-[PENDIENTE: captura vista tabular paso a paso de Dijkstra (modo S1)]
+![Figura 1. Pantalla principal de RutaQ en navegador de escritorio con la red vial de Quetzaltenango (24 cabeceras) y panel de análisis sincronizado.](capturas/desktop-chrome-02-quetzaltenango.png)
 
-[PENDIENTE: captura vista de matriz de Floyd-Warshall]
+En la barra superior se aprecian los selectores de modo («Quetzaltenango» activo en color azul y «Diseño»), la lista desplegable de plantillas preconfiguradas («Plantilla: Quetzaltenango (24 muns)») y los botones de acción para «Cargar», «Guardar», exportación «PNG» y maximizado. En la barra de control secundaria se ubican las acciones algorítmicas («Árbol (F2)», «Ruta (F3)», «Limpiar») y el selector de nodo origen («Quetzaltenango»), acompañados de las insignias de escala («Escala: 1-100») y compensación bidimensional («Ajuste 2D: 0%»). El lienzo interactivo renderiza los 24 vértices municipales interconectados por las 55 aristas viales con sus respectivos kilometrajes y controles de navegación en la esquina inferior izquierda. A la derecha, el panel sincronizado expone la pestaña «Gráfica (S2)» con la leyenda visual de estados y la tarjeta de escala geométrica reportando ~12 px / km.
 
-[PENDIENTE: captura pestaña de Todas las Rutas y caminos K-alternativos de Yen (modo S3)]
+![Figura 2. Adaptabilidad responsiva de la interfaz en dispositivo móvil (iPhone 13).](capturas/iphone-13-02-quetzaltenango.png)
 
-[PENDIENTE: captura modo diseño de grafos interactivo]
+La interfaz gráfica se reconfigura en pantallas compactas de 390 px de ancho. El encabezado preserva el acceso inmediato a las vistas «Quetzaltenango» y «Diseño», resguardando funciones secundarias bajo un menú de opciones (`...`). El selector de plantilla y la barra de herramientas («Árbol (F2)», «Ruta (F3)», «Limpiar» y selector de cabecera) se redistribuyen verticalmente ocupando el ancho completo, manteniendo el lienzo de grafo táctil y habilitando una hoja inferior deslizable (_bottom sheet_) para consultar los paneles analíticos sin perder el contexto espacial.
+
+![Figura 3. Módulo tabular paso a paso de Dijkstra (S1) sobre el grafo de control de 6 nodos.](capturas/desktop-chrome-05-tabla-s1.png)
+
+Se ilustra la resolución analítica para la consulta entre el nodo A (origen, borde verde) y el nodo F (destino, borde naranja). La barra de estado señala la existencia de la distancia mínima encontrada («12 unidades · 2 rutas empatadas»), destacando simultáneamente sobre el lienzo con aristas moradas las dos ramas óptimas concurrentes (A-B-D-F y A-C-E-F). En el panel derecho («Tabla (S1)») se observan los selectores de formato de celda y modo de tachado, los controles de reproducción en la iteración 6 de 6 con velocidad de 0.9s, la matriz de adyacencia directa con guiones de desconexión (`—`), y el inicio de la tabla cronológica de iteraciones.
+
+![Figura 4. Visualización de la matriz de distancias D^(1) en el algoritmo de Floyd-Warshall.](capturas/desktop-chrome-07-floyd.png)
+
+El panel derecho presenta la pestaña «Floyd» navegando en el paso intermedio $k = 1$ ($D^{(1)}$ — Vía A), con la indicación «Intermedios evaluados: 1 a 1 (hasta A)». En la matriz de distancias de 6×6, las celdas simétricas (C, D) y (D, C) se encuentran resaltadas en verde claro con el nuevo valor 14 y el indicador «↓ Infinity», evidenciando la relajación de la distancia indirecta mediante la trayectoria $C \to A \to D$ ($4 + 10 = 14$). A la izquierda, el lienzo interactivo conserva visibles los 6 nodos y pesos originales para facilitar el seguimiento visual del proceso matricial.
+
+![Figura 5. Módulo de análisis combinatorio de Todas las Rutas (S3) entre Quetzaltenango y Coatepeque.](capturas/desktop-chrome-06-s3-todas-rutas.png)
+
+Se presenta la consulta entre Quetzaltenango y Coatepeque (distancia óptima de 59.9 km). En el panel lateral («Rutas (S3)») se observa el selector de cota máxima configurado en «5 000 rutas», el botón de reejecución y la notificación de estado de exploración cancelada por el usuario. La tabla inferior dispone las columnas para enumerar el identificador de ruta, secuencia ordenada de municipios, conteo de tramos intermedios, distancia kilométrica total y diferencial porcentual respecto a la ruta mínima. En el lienzo, se resaltan las aristas del corredor troncal que desciende hacia la Costa Cuca.
+
+![Figura 6. Entorno interactivo de diseño y edición de grafos (F4).](capturas/desktop-chrome-08-modo-diseno.png)
+
+Con el modo «Diseño» seleccionado en el encabezado, la interfaz provee herramientas directas para la creación de topologías personalizadas mediante los botones `+ Nodo`, `+ Carretera` y `Distribuir`. El sistema activa un aviso preventivo en amarillo («El grafo está desconectado; algunas rutas no existen») ante la presencia de componentes inconexos en la cuadrícula de trabajo (nodos A, B, C, D, E), permitiendo trazar aristas arbitrarias, ingresar ponderaciones personalizadas y contrastar el comportamiento de los algoritmos sobre redes experimentales.
 
 ---
 
@@ -576,6 +594,25 @@ El resultado arrojó **coincidencia del 100.0 % (576 de 576 pares)** sin discrep
 
 ---
 
+### 7.3 Pruebas de Aceptación en Producción y Calidad Web
+
+Para asegurar que la solución opere de forma confiable, robusta y accesible en entornos reales de despliegue, se implementó una batería exhaustiva de pruebas de aceptación de extremo a extremo (_End-to-End_, E2E) y auditorías de calidad sobre la versión alojada en producción en GitHub Pages:
+
+1. **Pruebas E2E sobre la Aplicación Desplegada (`https://criss-paz.github.io/rutaq/`):**
+   - Se ejecutó la suite completa de Playwright contra la URL pública de producción, obteniendo un balance de **99 pruebas pasadas y 0 fallidas** (con 9 pruebas omitidas deliberadamente por diseño, dado que el indicador de escala gráfica se desactiva intencionalmente en pantallas con ancho inferior a dispositivos medianos).
+   - La matriz de pruebas evaluó la funcionalidad completa del sistema en cuatro perfiles de dispositivos representativos: **Desktop Chrome**, **iPhone 13**, **Pixel 7** e **iPad**.
+2. **Estabilidad y Repetibilidad Local:**
+   - La suite E2E automatizada fue evaluada localmente en ejecuciones consecutivas mediante la directiva `--repeat-each=3`, logrando **297 de 297 pruebas exitosas (100 %)**, comprobando la ausencia de condiciones de carrera (_race conditions_) en el ciclo de vida de los componentes reactivos y la persistencia de estado con Zustand.
+3. **Auditoría Lighthouse en Dispositivos Móviles:**
+   - Se evaluó el desempeño integral del despliegue en producción mediante la herramienta oficial Google Lighthouse bajo perfil móvil, alcanzando los siguientes puntajes:
+     - **Rendimiento (_Performance_):** 95 / 100
+     - **Accesibilidad (_Accessibility_):** 95 / 100
+     - **Buenas Prácticas (_Best Practices_):** 100 / 100
+     - **SEO:** 100 / 100
+   - Estas métricas acreditan que el sistema cumple con los más altos estándares de calidad web en tiempos de carga inicial, diseño responsivo, contraste cromático y estructuración semántica.
+
+---
+
 ## 8. Análisis y Discusión
 
 ### 8.1 Dijkstra frente a Floyd-Warshall: Criterios de Selección
@@ -591,7 +628,7 @@ Un hallazgo crítico del proyecto reside en la enorme discrepancia observada ent
 
 ### 8.3 Desempeño y Escalabilidad con Web Workers
 
-La delegación de los algoritmos de enumeración combinatoria (DFS y Yen en `allPaths.ts`) a un Web Worker dedicado mediante Comlink asegura que el hilo principal (_main UI thread_) mantenga una tasa constante de 60 cuadros por segundo (FPS). En situaciones donde un usuario solicita explorar rutas alternativas entre municipios lejanos, el árbol de caminos simples puede crecer exponencialmente; el sistema protege la experiencia de usuario limitando la búsqueda a 5 000 rutas o abortando tras un tiempo límite configurable, entregando las mejores alternativas mediante Yen sin congelar la pantalla.
+La delegación de los algoritmos de enumeración combinatoria (DFS y Yen en `allPaths.ts`) a un Web Worker dedicado mediante Comlink asegura que el hilo principal (_main UI thread_) permanezca fluido y libre de bloqueos durante cómputos combinatorios intensivos. En situaciones donde un usuario solicita explorar rutas alternativas entre municipios lejanos, el árbol de caminos simples puede crecer exponencialmente; el sistema protege la experiencia de usuario limitando la búsqueda a 5 000 rutas o abortando tras un tiempo límite configurable, entregando las mejores alternativas mediante Yen sin congelar la pantalla.
 
 ---
 
@@ -616,19 +653,27 @@ La delegación de los algoritmos de enumeración combinatoria (DFS y Yen en `all
 
 ## 11. Manual de Usuario Breve
 
-### 11.1 Requisitos del Entorno
+### 11.1 Acceso al Sistema y Repositorio Oficial
+
+- **Aplicación Web Desplegada en Producción:** **https://criss-paz.github.io/rutaq/**  
+  Disponible en línea sin necesidad de instalación previa. Totalmente responsiva y compatible con navegadores de escritorio, tabletas y teléfonos inteligentes.
+- **Repositorio de Código Fuente:** **https://github.com/Criss-paz/rutaq**  
+  Contiene la totalidad del código fuente en TypeScript/React, suites de pruebas unitarias y E2E, scripts de generación de datos y documentación técnica.
+
+### 11.2 Requisitos del Entorno (Ejecución Local)
 
 - Sistema Operativo: Windows 10/11, Linux o macOS.
 - Entorno de ejecución: Node.js (versión 18.0 o superior) y gestor de paquetes `npm`.
 - Navegador Web: Google Chrome, Mozilla Firefox, Microsoft Edge o Safari con soporte moderno de Canvas y Web Workers.
 
-### 11.2 Puesta en Marcha Local
+### 11.3 Puesta en Marcha Local
 
-Para clonar, instalar dependencias y ejecutar la aplicación en un servidor de desarrollo local:
+Para clonar el repositorio, instalar dependencias y ejecutar la aplicación en un servidor de desarrollo local:
 
 ```bash
-# 1. Acceder al directorio del proyecto
-cd "Ruta Mas Corta"
+# 1. Clonar el repositorio y acceder al directorio
+git clone https://github.com/Criss-paz/rutaq.git
+cd rutaq
 
 # 2. Instalar dependencias del proyecto
 npm install
@@ -639,7 +684,7 @@ npm run dev
 
 Al finalizar la compilación, la terminal mostrará la dirección local (típicamente `http://localhost:5173/`). Abra dicha URL en su navegador web.
 
-### 11.3 Guía de Operación
+### 11.4 Guía de Operación
 
 1. **Selección de Origen y Destino:**
    - En la barra superior, seleccione el municipio de **Origen** (ej. _Quetzaltenango_) y el municipio de **Destino** (ej. _Coatepeque_), o haga clic directamente sobre los nodos en el mapa.
