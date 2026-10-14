@@ -100,8 +100,8 @@ test.describe('QA — validaciones con mensajes claros', () => {
 test.describe('QA — escala automática y distribución sugerida', () => {
   for (const [maximo, rango] of [
     [80, '1–100'],
-    [800, /1[\s  ]?000/],
-    [8000, /10[\s  ]?000/],
+    [800, /1D?000/],
+    [8000, /10D?000/],
   ] as const) {
     test(`pesos hasta ${maximo}: detecta el rango y aplica la distribución`, async ({ page, isMobile }) => {
       test.skip(isMobile, 'El indicador de escala se muestra en pantallas ≥ md.');
