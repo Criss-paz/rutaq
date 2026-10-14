@@ -36,6 +36,12 @@ describe('núcleo de rutas', () => {
     const f = floydWarshall(g);
     expect(floydPath(g, f, '0', '3')?.distance).toBe(2);
     expect(f.matrices).toHaveLength(5);
+    const decimals = graph(3, [
+      [0, 1, 0.1],
+      [1, 2, 0.2],
+      [0, 2, 0.3],
+    ]);
+    expect(shortestPaths(decimals, '0', '2')).toHaveLength(2);
   });
   it('maneja un nodo, desconexión, decimal y s=t', () => {
     const g = graph(2, [[0, 1, 0.25]]);
@@ -134,7 +140,7 @@ describe('núcleo de rutas', () => {
     crossing.nodes[2]!.y = 100;
     crossing.nodes[3]!.x = 100;
     crossing.nodes[3]!.y = 0;
-    expect(autoEdgeShapes(crossing)).toEqual({ e0: 'bezier', e1: 'bezier' });
+    expect(autoEdgeShapes(crossing)).toEqual({ e0: 'straight', e1: 'straight' });
     crossing.edges[0]!.shapeAuto = false;
     expect(autoEdgeShapes(crossing)).not.toHaveProperty('e0');
     const through = graph(3, [[0, 1, 1]]);
@@ -142,6 +148,15 @@ describe('núcleo de rutas', () => {
     through.nodes[1]!.x = 100;
     through.nodes[2]!.x = 50;
     expect(autoEdgeShapes(through).e0).toBe('bezier');
+    const overlap = graph(4, [
+      [0, 1, 1],
+      [2, 3, 1],
+    ]);
+    overlap.nodes.forEach((n, i) => {
+      n.x = [-15, 85, 35, 135][i]!;
+      n.y = -15;
+    });
+    expect(autoEdgeShapes(overlap)).toEqual({ e0: 'arc', e1: 'arc' });
   });
   it('maneja entradas límite y componentes aislados', () => {
     const g = graph(3, [[0, 1, 2]]),
@@ -154,13 +169,22 @@ describe('núcleo de rutas', () => {
     expect(suggestLayout(g).positions['2']).toBeDefined();
     expect(detectScale([]).magnitude).toBe(1);
     expect(detectScale([-2, Number.NaN, 2]).magnitude).toBe(10);
+    expect(detectScale([100]).range).toBe('1–100');
+    expect(detectScale([1000]).range).toBe('1–1 000');
+    expect(detectScale([10000]).range).toBe('1–10 000');
     const parallel = graph(2, [
       [0, 1, 1],
       [0, 1, 3],
     ]);
     expect(floydWarshall(parallel).dist[0]?.[1]).toBe(1);
     expect(() => dijkstra(g, 'ausente')).toThrow();
-    expect(allSimplePaths(g, '0', '2', { limit: 2, timeoutMs: -1 }).method).toBe('yen');
+    const branched = graph(4, [
+      [0, 1, 1],
+      [1, 3, 1],
+      [0, 2, 1],
+      [2, 3, 1],
+    ]);
+    expect(allSimplePaths(branched, '0', '3', { limit: 1, timeoutMs: 100 }).method).toBe('yen');
     const dense = graph(
       7,
       Array.from({ length: 7 }, (_, a) =>
@@ -172,5 +196,76 @@ describe('núcleo de rutas', () => {
       326,
     );
     expect(reports).toContain(250);
+  });
+  it('escala Yen a 5 000 rutas en la rejilla 7×7', () => {
+    const nodes = Array.from({ length: 49 }, (_, i) => ({
+      id: String(i),
+      label: String(i),
+      x: (i % 7) * 30,
+      y: Math.floor(i / 7) * 30,
+      w: 20,
+      h: 20,
+    }));
+    const edges: Graph['edges'] = [];
+    for (let r = 0; r < 7; r++)
+      for (let c = 0; c < 7; c++) {
+        const i = r * 7 + c;
+        if (c < 6)
+          edges.push({
+            id: `h${i}`,
+            source: String(i),
+            target: String(i + 1),
+            weight: 1,
+            shape: 'straight',
+            shapeAuto: true,
+          });
+        if (r < 6)
+          edges.push({
+            id: `v${i}`,
+            source: String(i),
+            target: String(i + 7),
+            weight: 1,
+            shape: 'straight',
+            shapeAuto: true,
+          });
+      }
+    const grid: Graph = { directed: false, unit: 'km', nodes, edges };
+    const start = performance.now();
+    const paths = yenKShortest(grid, '0', '48', 5000);
+    expect(paths).toHaveLength(5000);
+    expect(performance.now() - start).toBeLessThan(5000);
+    expect(paths.every((p, i) => i === 0 || paths[i - 1]!.distance <= p.distance)).toBe(true);
+    const fallbackStart = performance.now();
+    expect(allSimplePaths(grid, '0', '48', { limit: 5000, timeoutMs: 1 }).method).toBe('yen');
+    expect(performance.now() - fallbackStart).toBeLessThan(5000);
+  });
+  it('optimiza posiciones con SMACOF y devuelve centros de nodo', () => {
+    const euclidean = graph(3, [
+      [0, 1, 3],
+      [0, 2, 4],
+      [1, 2, 5],
+    ]);
+    const coords = [
+      [0, 0],
+      [120, 0],
+      [0, 160],
+    ];
+    euclidean.nodes.forEach((n, i) => {
+      n.x = coords[i]![0]! - n.w / 2;
+      n.y = coords[i]![1]! - n.h / 2;
+    });
+    const first = suggestLayout(euclidean),
+      second = suggestLayout(euclidean);
+    expect(first.stressError).toBeLessThan(1);
+    expect(first.positions).toEqual(second.positions);
+    const nonEuclidean = graph(4, [
+      [0, 1, 2],
+      [2, 3, 2],
+      [0, 2, 1],
+      [0, 3, 1],
+      [1, 2, 1],
+      [1, 3, 1],
+    ]);
+    expect(suggestLayout(nonEuclidean).stressError).toBeGreaterThan(0);
   });
 });

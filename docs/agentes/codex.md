@@ -39,21 +39,22 @@ Reemplaza los stubs de `src/core/*.ts` manteniendo el patrón `export const f: C
 - Implementados lista de adyacencia, validación, Dijkstra con pasos y heap, rutas mínimas empatadas, modelo tabular, Floyd-Warshall y reconstrucción de rutas, enumeración DFS con progreso y fallback, escala, sugerencia de posiciones y formas automáticas.
 - Añadidas pruebas unitarias y de propiedades con 500 grafos aleatorios; se comparan Dijkstra, Floyd, enumeración y rutas limitadas.
 - Añadida verificación networkx que genera CSV y reporte; cotejó 36/36 pares del grafo de prueba. Se creó `.venv` con las dependencias de `verification/requirements.txt`.
-- `npm run lint`, `npm run typecheck`, `npm run test`, `npm run test:coverage` (97.41 % statements, 90.19 % branches, 99.26 % lines), y `npm run build` pasan.
+- En Ronda 2 pasaron lint, typecheck, test, cobertura (96.8 % statements, 90.34 % branches, 96.9 % funciones, 98.22 % líneas), format:check y build.
+- Ronda 2: Yen clásico con heap, candidatos deduplicados y desempate lexicográfico; rejilla 7×7 devuelve 5 000 rutas y el fallback de DFS a Yen en menos de 5 s.
+- Ronda 2: SMACOF determinista con pesos `d⁻²`, iteraciones hasta convergencia o 300 ciclos, centros como salida y componentes separados en horizontal.
+- Ronda 2: aristas automáticas usan rectángulos centrados, ignoran cruces simples, detectan tramos colineales encimados y seleccionan `arc`; rutas mínimas usan tolerancia 1e-9 y poda al destino.
+- Ronda 2: DFS usa pila mutable y `Set`, revisa el tiempo cada 1 000 expansiones; matriz tabular usa mapa de aristas; rangos de escala usan espacios independientes del locale.
 
 ### Pendiente
 
-- `npm run format:check` marca únicamente `.agent-prompt.md`, archivo de instrucciones fuera de las carpetas autorizadas; todos los archivos propios pasan Prettier.
 - Los datasets `src/data/ejemplo6.json` y `src/data/quetzaltenango.json` todavía no existen, por lo que la verificación de esos archivos queda pendiente hasta que los publique Gemini.
-- La prueba de red propia compara todos los pares, y el ejemplo de 6 nodos de verificación está codificado en `verification/export.ts` mientras se espera el JSON del otro agente.
+- La salida de verificación al momento de la corrida compara 36/36 pares del grafo interno; los dos datasets opcionales se procesarán automáticamente cuando aparezcan.
 
 ### Decisiones
 
 - Desempate de nodos y rutas por comparación lexicográfica de ids; pesos iguales no reemplazan predecesores en Dijkstra.
-- El layout separa componentes y distribuye nodos en círculos usando distancias de camino para estimar el radio; no aplica el algoritmo iterativo de stress majorization.
-- El módulo `yen.ts` conserva orden exacto mediante enumeración exhaustiva ordenada; para redes grandes su costo puede ser alto y requiere reemplazarse por Yen clásico antes de usar con grafos densos.
-- El ajuste de formas automáticas elige `bezier` para cruces o nodos atravesados; `arc` no se selecciona automáticamente.
+- SMACOF optimiza el cierre de distancias de caminos más cortos tal como define el contrato; se valida con una métrica euclidiana exacta y otra métrica de cuatro nodos que no se representa exactamente en 2D.
 
 ### Dudas
 
-- No hay dudas sobre contratos. Se recomienda que el orquestador programe la sustitución de la enumeración exhaustiva por Yen clásico y stress majorization iterativo si los grafos reales o de diseño crecen.
+- Hay una contradicción matemática en la prueba solicitada de “triángulo que viola la desigualdad triangular con stressError > 0”: las distancias de caminos más cortos siempre cumplen esa desigualdad, porque el camino directo mínimo no supera el recorrido por el tercer nodo. Para mantener el objetivo contractual, la implementación optimiza esas distancias; cambiar a pesos directos para forzar el caso alteraría el objetivo especificado.

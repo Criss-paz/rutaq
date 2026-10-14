@@ -1,14 +1,12 @@
 import type { CoreApi, Label, TabularModel } from './types';
 export const buildTabular: CoreApi['buildTabular'] = (g, result) => {
   const order = g.nodes.map((n) => n.id),
-    adjacency = g.nodes.map((a) =>
-      g.nodes.map((b) => {
-        const e = g.edges.find(
-          (x) => (x.source === a.id && x.target === b.id) || (x.target === a.id && x.source === b.id),
-        );
-        return e?.weight ?? null;
-      }),
-    );
+    weights = new Map<string, number>();
+  for (const e of g.edges) {
+    weights.set(`${e.source}\0${e.target}`, e.weight);
+    weights.set(`${e.target}\0${e.source}`, e.weight);
+  }
+  const adjacency = order.map((a) => order.map((b) => weights.get(`${a}\0${b}`) ?? null));
   return {
     source: result.source,
     order,

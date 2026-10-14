@@ -107,20 +107,40 @@ export const shortestPaths: CoreApi['shortestPaths'] = (g, s, t, maxTies = 10) =
   assert(g, t);
   if (s === t) return [{ nodes: [s], edges: [], distance: 0 }];
   const adj = adjacencyList(g),
-    dist = dijkstra(g, s).labels[t]!.dist;
+    dist = dijkstra(g, s).labels[t]!.dist,
+    toTarget = dijkstra(g, t).labels;
   if (!Number.isFinite(dist)) return [];
-  const out: PathResult[] = [];
-  const walk = (u: string, nodes: string[], edges: string[], d: number) => {
+  const out: PathResult[] = [],
+    nodes = [s],
+    edges: string[] = [],
+    seen = new Set([s]),
+    limit = Math.max(1, maxTies);
+  const equal = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+  const walk = (u: string, d: number) => {
     if (out.length >= Math.max(1, maxTies)) return;
     if (u === t) {
-      if (d === dist) out.push({ nodes: [...nodes], edges: [...edges], distance: d });
+      if (equal(d, dist)) out.push({ nodes: [...nodes], edges: [...edges], distance: d });
       return;
     }
-    for (const v of adj.get(u) ?? [])
-      if (!nodes.includes(v.node) && d + v.weight <= dist) {
-        walk(v.node, [...nodes, v.node], [...edges, v.edgeId], d + v.weight);
+    for (const v of adj.get(u) ?? []) {
+      if (seen.has(v.node)) continue;
+      const remaining = toTarget[v.node]!.dist,
+        nextDistance = d + v.weight;
+      if (Number.isFinite(remaining) && nextDistance + remaining <= dist * (1 + 1e-9)) {
+        seen.add(v.node);
+        nodes.push(v.node);
+        edges.push(v.edgeId);
+        walk(v.node, nextDistance);
+        edges.pop();
+        nodes.pop();
+        seen.delete(v.node);
       }
+    }
   };
-  walk(s, [s], [], 0);
-  return out.sort((a, b) => a.nodes.join('\0').localeCompare(b.nodes.join('\0'))).slice(0, Math.max(1, maxTies));
+  walk(s, 0);
+  const compare = (a: string[], b: string[]) => {
+    for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) return a[i]! < b[i]! ? -1 : 1;
+    return a.length - b.length;
+  };
+  return out.sort((a, b) => compare(a.nodes, b.nodes)).slice(0, limit);
 };
