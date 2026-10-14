@@ -36,38 +36,40 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Hecho
 
+- **Ronda 3 — Ajuste menor de datos y borrador completo del informe académico:**
+  - **Tarea A — Ajuste de carretera en `scripts/build_dataset.py`:** Se refinó la función `derive_carretera_from_steps()` para descartar marcadores genéricos de OSRM (`'unknown'`, `'unnamed'`, `'sin nombre'`, `'none'`). Al regenerar el dataset desde la caché offline, la arista `CAJ-FLU` pasó de `carretera: "Unknown"` a `carretera: ""` sin afectar ninguna otra arista ni métrica topológica, confirmándose como el único cambio en `src/data/quetzaltenango.json` mediante `git diff --stat`.
+  - **Tarea B — Redacción de `docs/informe/INFORME.md`:** Redacción íntegra y exhaustiva del informe técnico-académico en español siguiendo la estructura de la sección 6 del plan (`docs/PLAN.md`):
+    - **Portada UMG:** Facultad de Ingeniería en Sistemas de Información y Ciencias de la Computación, campos en blanco para curso y catedrático, autor **Cristopher Alexis Castellanos Paz, carné 2690245972**, y fecha oficial (14 de octubre de 2026).
+    - **Resumen ejecutivo e Introducción:** Contextualización del problema de optimización vial en el altiplano occidental guatemalteco y presentación de la plataforma interactiva RutaQ.
+    - **Objetivos:** General y específicos (formulación matemática, construcción de dataset, arquitectura desacoplada y validación formal).
+    - **Marco Teórico riguroso en LaTeX:** Grafos formales y representaciones computacionales; problema SSSP y APSP; algoritmo de Dijkstra (relajación, pseudocódigo, complejidad $O((V+E)\log V)$ con min-heap y justificación formal con contraejemplo paso a paso de 3 nodos demostrando el fallo ante pesos negativos); algoritmo de Floyd-Warshall (ecuación de recurrencia en programación dinámica, pseudocódigo, complejidad $\Theta(V^3)$ y detección de ciclos negativos); algoritmo de Yen para $K$ caminos más cortos sin lazos; y formulación de Stress Majorization (SMACOF) para proyección cartográfica en 2D.
+    - **Estructuras de datos reales:** Detalle de las estructuras del código fuente (`Heap` binario indexado con desempate léxico en `dijkstra.ts`, matrices bidimensionales `d` y `next` en `floyd.ts`, cola de caminos `PathHeap` en `yen.ts`, pila DFS en `allPaths.ts`, matriz Laplaciana en `layout.ts` y almacén reactivo Zustand + Zundo en `useAppStore.ts`).
+    - **Desarrollo e implementación:** Arquitectura modular frontend (React 18 + TypeScript + Vite + Tailwind), lienzo interactivo Canvas (`CustomNode`, `CustomEdge`), cuatro modalidades de visualización (S1 tabular animada paso a paso, S2 gráfica con árbol SPT, S3 explorador de todas las rutas con Yen y Web Worker cancelable, y pestaña Floyd-Warshall) y Modo Diseño (F4).
+    - **Caso práctico de Quetzaltenango:** Justificación geográfica, catálogo oficial de los 24 municipios (INE/SEGEPLAN), metodología objetiva de filtrado punto-segmento a 1.0 km sobre los 276 pares candidatos en OSRM (55 aristas aceptadas, 221 descartadas, grado medio 4.58, 100 % conexo) y detección geométrica por punto-en-polígono de rutas interdepartamentales.
+    - **Comparación teórico vs. programa:** Validación analítica iteración por iteración del grafo de control de 6 nodos cotejado con `solucion_teorica.md` y verificado al 100 % por la prueba unitaria `tests/unit/store/teoria-ejemplo6.test.ts`. Verificación cruzada al 100.0 % contra NetworkX en los 576 pares de Quetzaltenango (`verification/reporte.md` y `verification/resultados.csv`) y desglose detallado de 3 casos reales (`QTZ-COA` 59.9 km, `QTZ-ALM` 7.0 km, `QTZ-CAB` 41.7 km).
+    - **Análisis, limitaciones y conclusiones:** Comparativa asintótica y operativa Dijkstra vs. Floyd-Warshall, impacto de la orografía en distancias reales vs. euclidianas (subestimación del 47.9 % en línea recta hacia Coatepeque), escalabilidad mediante Web Workers, limitaciones del modelo estático y conclusiones técnicas.
+    - **Manual de usuario y referencias APA 7:** Guía paso a paso de instalación y ejecución local (`npm install`, `npm run dev`), instrucciones de interacción y bibliografía científica verificable (Dijkstra 1959, Floyd 1962, Warshall 1962, Yen 1971, Cormen et al. 2022, Gansner et al. 2004, OSRM, OpenStreetMap, INE Guatemala).
+    - **Marcadores de pendientes:** Inclusión explícita de `[PENDIENTE: tabla de validación Google Maps]` y 5 marcadores `[PENDIENTE: captura ...]` sin inventar pantallas ni mediciones en curso.
 - **Ronda 2 — Reescritura 100 % guiada por datos de `scripts/build_dataset.py` y `quetzaltenango.json`:**
-  - **Eliminación de datos manuales:** Se eliminó por completo la lista estática `EDGES_DEF` y cualquier nombre de carretera o nota narrativa escrita a mano.
-  - **Consulta exhaustiva de candidatas:** Se consultaron los 276 pares de municipios ($\binom{24}{2}$) a OSRM con `?overview=full&geometries=polyline&steps=true`, respetando el límite $\le 1\text{ req/s}$ con User-Agent `RutaQ-proyecto-academico` y caché persistente en `scripts/cache/osrm/`.
-  - **Criterio de arista directa (calculado):** Se implementó la verificación punto-segmento Haversine de cada ruta contra las 24 cabeceras municipales. Un par $A-B$ es arista directa si no pasa a menos de $1.0\text{ km}$ de ningún otro municipio intermedio.
-  - **Generación de `docs/datos/aristas_descartadas.csv`:** Registro estructurado de los 221 pares descartados, documentando origen, destino, municipio intermedio interceptor y distancia mínima observada.
-  - **Grafo conexo de 55 aristas:** 55 aristas directas aceptadas, 24 nodos, pesos $km > 0$, grafo 100 % conexo verificado mediante recorrido BFS y `networkx`.
-  - **`carretera` derivada de datos:** Obtenida exclusivamente sumando distancias de los códigos `ref` de los `steps` de OSRM (p. ej. `RN-1 / RN-1B`, `CITO 180`, `CA-2 OCC`), o `name` si no hay `ref`, o `""` si OSRM no provee información. Cero códigos inventados.
-  - **`nota` calculada por punto-en-polígono:** Se descargó y almacenó en caché el polígono departamental oficial de Quetzaltenango (`scripts/cache/nominatim/departamento_quetzaltenango.json`, 3 003 vértices). Se evalúa cada vértice de la ruta; si sale del polígono, se asigna `"La ruta sale del departamento de Quetzaltenango"`, caso contrario `""`.
-  - **Reproducibilidad y determinismo offline:** `python scripts/build_dataset.py` se ejecuta sin conexión utilizando únicamente la caché y produce de forma idéntica byte a byte (`sha256`) el dataset `src/data/quetzaltenango.json`.
-  - **Actualización documental:** `docs/datos/METODOLOGIA.md` actualizada con métricas y fórmulas exactas; `docs/datos/VALIDACION.md` actualizada con el top 5 de aristas más largas (`FCC-ZUN` 70.9 km, `PAL-SMA` 70.0 km, `COL-PAL` 60.5 km, `COA-PAL` 58.4 km, `PAL-ZUN` 57.2 km) y 15 adicionales (total 20 aristas prioritarias) para la medición en Google Maps por Antigravity.
+  - Consulta de los 276 pares a OSRM con caché local, filtrado geométrico de aristas directas, generación de `docs/datos/aristas_descartadas.csv`, derivación de carreteras y detección punto-en-polígono de rutas interdepartamentales.
 - **Ronda 1 (Aprobado):**
   - `src/data/ejemplo6.json` (tipo `GraphFile`) y `docs/informe/solucion_teorica.md` (resolución manual tabular paso a paso iteración por iteración).
-- **Verificaciones técnicas superadas:**
-  - `python scripts/build_dataset.py` (ejecutado dos veces con hash idéntico).
-  - `python scripts/verify_dataset.py` (integridad topológica y de contratos superada al 100 %).
-  - `npm run lint` (0 advertencias, 0 errores).
-  - `npm run typecheck` (tsc limpio contra `CoreApi` y `Dataset`).
-  - `npm run test` (pruebas unitarias en verde).
-  - `npm run build` (build de Vite exitoso sin errores de empaquetado).
-  - `npx prettier --check docs/datos docs/informe src/data scripts` en verde.
+- **Verificaciones técnicas superadas (Ronda 3):**
+  - `npx prettier --check docs/informe docs/datos` (100 % limpio en verde).
+  - `npm run typecheck` (tsc limpio con 0 errores).
+  - `npm test` (4 suites de pruebas, 31 tests unitarios superados al 100 %).
+  - `npm run build` (build de producción de Vite exitoso sin errores).
 
 ### Pendiente
 
-- **Encargo 3 — Informe académico:** Redacción del informe final en `docs/informe/` y exportación a .docx y PDF tras la integración (F2) y con capturas de pantalla reales de la aplicación (F5), conforme a la planificación.
-- **Validación con Google Maps:** Toma de medidas en Google Maps por parte del agente Antigravity (mediante navegador automatizado) para completar `km_google` en las aristas prioritarias de `docs/datos/VALIDACION.md`.
+- **Validación con Google Maps y Capturas de Pantalla:** En proceso por parte del agente Antigravity (mediciones en navegador y capturas reales de la aplicación web).
+- **Exportación documental:** Conversión de `docs/informe/INFORME.md` a formatos .docx y PDF en la Fase 5 una vez incorporadas las capturas definitivas.
 
 ### Decisiones
 
-1. **Umbral de intermediación de 1.0 km:** Implementado con proyección local cartográfica y distancia Haversine punto-segmento. Filtró con alta fidelidad las vías que cruzan centros urbanos intermedios (descartando 221 rutas indirectas) preservando la conexidad de los 24 municipios con 55 aristas directas.
-2. **Punto-en-polígono para notas:** Basado en el polígono oficial del departamento extraído de Nominatim (OSM 214710). Elimina cualquier nota subjetiva o narrativa: solo hechos geométricamente comprobados.
-3. **Nomenclatura vial de OSM:** Se descartaron todas las etiquetas sintéticas `RD-QUE-xx` que no figuraban en los datos oficiales de OSM/MICIVI, reemplazándolas por los atributos `ref` y `name` reales de OSRM.
+1. **Filtrado de marcadores de vía en OSRM:** Se incorporó un conjunto de cadenas ignoradas (`'unknown'`, `'unnamed'`, etc.) en `derive_carretera_from_steps()` para asegurar que cuando OSRM no provea un nombre o código real, el valor resultante sea siempre la cadena vacía `""`, evitando nomenclaturas espurias en el dataset.
+2. **Estructura académica de INFORME.md:** Se redactó siguiendo fielmente los lineamientos de la Facultad de Ingeniería de la UMG y el estándar APA 7, manteniendo un lenguaje formal riguroso y fundamentando cada cifra en los artefactos verificables del repositorio.
 
 ### Dudas
 
-- Ninguna duda contractual. Los archivos generados se acoplan con total fidelidad a `src/core/types.ts` y `src/store/dataset.ts`.
+- Ninguna duda técnica ni contractual. Todas las pruebas y compilaciones se encuentran en verde.
