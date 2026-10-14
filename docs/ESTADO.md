@@ -2,16 +2,16 @@
 
 _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
-## Fase actual: **F0 Base → terminada.** Siguiente: **F1 Paralelo** (Codex + Gemini + Antigravity)
+## Fase actual: **F1 Paralelo — en curso** (los tres agentes trabajando desde 2026-10-14 00:25)
 
-| Fase           | Estado         | Responsable                              | Puerta de salida                                                    |
-| -------------- | -------------- | ---------------------------------------- | ------------------------------------------------------------------- |
-| F0 Base        | ✅ Hecha       | Claude Code                              | Repo, contrato, CI y estructura en la rama base                     |
-| F1 Paralelo    | ⏳ Por iniciar | Codex · Gemini · Antigravity             | Core con pruebas en verde · dataset validado y conexo · UI con mock |
-| F2 Integración | ⬜             | Claude Code                              | App con core y dataset reales; build sin errores                    |
-| F3 QA          | ⬜             | Claude Code + Antigravity                | Sección 8 del plan completa                                         |
-| F4 Despliegue  | ⬜             | Claude Code (+ Cris para iniciar sesión) | URL pública; E2E contra producción                                  |
-| F5 Informe     | ⬜             | Gemini (revisa Claude Code)              | Informe .docx + PDF con capturas reales                             |
+| Fase           | Estado      | Responsable                              | Puerta de salida                                                    |
+| -------------- | ----------- | ---------------------------------------- | ------------------------------------------------------------------- |
+| F0 Base        | ✅ Hecha    | Claude Code                              | Repo, contrato, CI y estructura en la rama base                     |
+| F1 Paralelo    | 🔄 En curso | Codex · Gemini · Antigravity             | Core con pruebas en verde · dataset validado y conexo · UI con mock |
+| F2 Integración | ⬜          | Claude Code                              | App con core y dataset reales; build sin errores                    |
+| F3 QA          | ⬜          | Claude Code + Antigravity                | Sección 8 del plan completa                                         |
+| F4 Despliegue  | ⬜          | Claude Code (+ Cris para iniciar sesión) | URL pública; E2E contra producción                                  |
+| F5 Informe     | ⬜          | Gemini (revisa Claude Code)              | Informe .docx + PDF con capturas reales                             |
 
 ## Hecho en F0
 
@@ -29,12 +29,12 @@ _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
 | Tarea                                                                              | Dueño                | Estado                   |
 | ---------------------------------------------------------------------------------- | -------------------- | ------------------------ |
-| Algoritmos `src/core/*` + `tests/unit/` + `verification/`                          | Codex                | ⏳                       |
-| Dataset `src/data/quetzaltenango.json`, `ejemplo6.json`, `scripts/`, `docs/datos/` | Gemini               | ⏳                       |
-| Solución a mano del ejemplo 6 nodos (`docs/informe/solucion_teorica.md`)           | Gemini               | ⏳                       |
-| UI `src/ui/*` con mock de `AppState` + `tests/e2e/`                                | Antigravity          | ⏳                       |
+| Algoritmos `src/core/*` + `tests/unit/` + `verification/`                          | Codex                | 🔄                       |
+| Dataset `src/data/quetzaltenango.json`, `ejemplo6.json`, `scripts/`, `docs/datos/` | Gemini               | 🔄                       |
+| Solución a mano del ejemplo 6 nodos (`docs/informe/solucion_teorica.md`)           | Gemini               | 🔄                       |
+| UI `src/ui/*` con mock de `AppState` + `tests/e2e/`                                | Antigravity          | 🔄                       |
 | Validación Google Maps (≥ 15 aristas) → `docs/datos/VALIDACION.md`                 | Antigravity + Gemini | ⏳ (después del dataset) |
-| Implementación del store (`src/store/`) con Zustand + zundo + Worker               | Claude Code          | ⏳                       |
+| Implementación del store (`src/store/`) con Zustand + zundo + Worker               | Claude Code          | ✅ (16 pruebas)          |
 | Workflow de despliegue (GitHub Pages)                                              | Claude Code          | ⏳ F4                    |
 
 ## Cómo corren los agentes
@@ -49,6 +49,7 @@ Plan completo para los agentes: `docs/PLAN.md`. Rama de integración: `main`.
 
 ## Bloqueos
 
+- **Store (Claude Code):** `src/store/useAppStore.ts` implementa `AppState`. Para mover nodos, la UI debe llamar `moveNodes` al soltar (no en cada píxel) para no llenar el historial.
 - **Remoto de GitHub:** el repo no tiene `origin`. Para CI y despliegue, Cris debe crear el repositorio en GitHub (o autorizar `gh repo create` iniciando sesión con `gh auth login`). Nadie más crea cuentas ni escribe credenciales.
 - **Formato exacto del método tabular del catedrático:** pendiente de confirmar con los apuntes de Cris; S1 es configurable (`TabularConfig`).
 
