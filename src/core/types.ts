@@ -8,7 +8,10 @@
  * - Distancia inalcanzable = `Infinity` (nunca `null` ni -1). Se transfiere bien a Workers
  *   (structured clone); al serializar a JSON se debe convertir explícitamente.
  * - Desempate determinista: ante distancias iguales gana el `NodeId` menor por comparación
- *   de cadenas (`a < b`, sin locale). Aplica a Dijkstra, a la elección de predecesor y al orden de rutas.
+ *   de cadenas (`a < b`, sin locale). Aplica al nodo que se vuelve permanente y al orden de rutas.
+ * - Predecesor: una etiqueta solo cambia ante una mejora ESTRICTA (como en el método tabular a mano);
+ *   ante un empate se conserva el predecesor que ya tenía.
+ * - Comparaciones de distancias acumuladas con tolerancia relativa 1e-9 (sumas de decimales).
  * - Todas las funciones del núcleo son puras: no mutan el `Graph` recibido.
  * - Los grafos son no dirigidos: una arista {source, target} se recorre en ambos sentidos.
  */
