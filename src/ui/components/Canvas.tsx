@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  applyNodeChanges,
   Background,
   BackgroundVariant,
   type Connection,
@@ -25,46 +24,29 @@ const edgeTypes = {
   customEdge: CustomEdge,
 };
 
-export default function Canvas() {
-  const graph = useApp((s) => s.graph);
+interface CanvasFlowProps {
+  rfNodes: Node[];
+  rfEdges: Edge[];
+  onConnect: (params: Connection) => void;
+  canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef }: CanvasFlowProps) {
   const mode = useApp((s) => s.mode);
-  const query = useApp((s) => s.query);
-  const setTreeQuery = useApp((s) => s.setTreeQuery);
-  const setPathQuery = useApp((s) => s.setPathQuery);
-  const clearQuery = useApp((s) => s.clearQuery);
-  const dijkstra = useApp((s) => s.dijkstra);
-  const shortest = useApp((s) => s.shortest);
-  const highlightedPath = useApp((s) => s.highlightedPath);
-  const allPaths = useApp((s) => s.allPaths);
-  const playback = useApp((s) => s.playback);
-  const scale = useApp((s) => s.scale);
-  const layoutSuggestion = useApp((s) => s.layoutSuggestion);
-  const applySuggestedLayout = useApp((s) => s.applySuggestedLayout);
+  const graph = useApp((s) => s.graph);
+  const theme = useApp((s) => s.theme);
   const keepProportion = useApp((s) => s.keepProportion);
-  const setKeepProportion = useApp((s) => s.setKeepProportion);
-  const addNode = useApp((s) => s.addNode);
+  const scale = useApp((s) => s.scale);
   const moveNodes = useApp((s) => s.moveNodes);
   const selectedNodeIds = useApp((s) => s.selectedNodeIds);
   const selectedEdgeIds = useApp((s) => s.selectedEdgeIds);
-  const theme = useApp((s) => s.theme);
-
-  const [edgeDialogState, setEdgeDialogState] = useState<{
-    isOpen: boolean;
-    sourceId: string;
-    targetId: string;
-    isSelfLoop?: boolean;
-    canSelectEndpoints?: boolean;
-  }>({
-    isOpen: false,
-    sourceId: '',
-    targetId: '',
-    isSelfLoop: false,
-    canSelectEndpoints: false,
-  });
-
+  const select = useApp((s) => s.select);
   const mobileSheetPos = useUiStore((s) => s.mobileSheetPos);
   const isDesktopCollapsed = useUiStore((s) => s.isDesktopCollapsed);
-  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Estados locales independientes para cada instancia del grafo
+  const [dragOverrides, setDragOverrides] = useState<Record<string, { x: number; y: number }>>({});
+  const [nodeDimensions, setNodeDimensions] = useState<Record<string, { width: number; height: number }>>({});
 
   const { fitView } = useReactFlow();
 
@@ -75,132 +57,6 @@ export default function Canvas() {
     [fitView],
   );
 
-  // Determinar aristas y nodos en la ruta activa resaltada
-  // Si no hay selección explícita y hay empates en shortest (shortest.length > 1),
-  // se resaltan todas las rutas empatadas: la primera sólida y las demás discontinuas.
-  const { activePathEdges, dashedPathEdges, activePathNodes } = useMemo(() => {
-    const activeEdges = new Set<string>();
-    const dashedEdges = new Set<string>();
-    const activeNodes = new Set<string>();
-
-    if (highlightedPath) {
-      if (highlightedPath.from === 'all' && allPaths.result?.paths[highlightedPath.index]) {
-        const p = allPaths.result.paths[highlightedPath.index]!;
-        for (const e of p.edges) activeEdges.add(e);
-        for (const n of p.nodes) activeNodes.add(n);
-      } else if (highlightedPath.from === 'shortest' && shortest?.[highlightedPath.index]) {
-        const p = shortest[highlightedPath.index]!;
-        for (const e of p.edges) activeEdges.add(e);
-        for (const n of p.nodes) activeNodes.add(n);
-      }
-    } else if (shortest && shortest.length > 0) {
-      // Sin selección explícita: primera ruta con trazo sólido
-      const first = shortest[0];
-      if (first) {
-        for (const e of first.edges) activeEdges.add(e);
-        for (const n of first.nodes) activeNodes.add(n);
-      }
-      // Rutas empatadas adicionales con trazo discontinuo
-      if (shortest.length > 1) {
-        for (let i = 1; i < shortest.length; i++) {
-          const other = shortest[i];
-          if (!other) continue;
-          for (const n of other.nodes) activeNodes.add(n);
-          for (const e of other.edges) {
-            if (!activeEdges.has(e)) {
-              dashedEdges.add(e);
-            }
-          }
-        }
-      }
-    }
-
-    return {
-      activePathEdges: activeEdges,
-      dashedPathEdges: dashedEdges,
-      activePathNodes: activeNodes,
-    };
-  }, [highlightedPath, allPaths.result, shortest]);
-
-  // Paso actual en reproducción
-  const currentStep = dijkstra?.steps[playback.stepIndex];
-  const currentStepCurrent = currentStep?.current;
-  const currentStepEvaluated = currentStep?.evaluatedEdges;
-  const currentStepPermanent = currentStep?.permanent;
-  const treeEdgesSet = useMemo(() => new Set(dijkstra?.treeEdges ?? []), [dijkstra?.treeEdges]);
-  const evaluatedEdgesSet = useMemo(() => new Set(currentStepEvaluated ?? []), [currentStepEvaluated]);
-  const permanentNodesSet = useMemo(() => new Set(currentStepPermanent ?? []), [currentStepPermanent]);
-
-  // Mapear nodos de Graph a ReactFlow Nodes
-  const rfNodes: Node[] = useMemo(() => {
-    return graph.nodes.map((n) => {
-      const isOrigin = query?.source === n.id;
-      const isTarget = query?.kind === 'path' && query?.target === n.id;
-      const isCurrent = currentStepCurrent === n.id;
-      const isPermanent = permanentNodesSet.has(n.id);
-      const isOnPath = activePathNodes.has(n.id);
-      const dist = dijkstra?.labels[n.id]?.dist;
-
-      return {
-        id: n.id,
-        type: 'customNode',
-        position: { x: n.x, y: n.y },
-        style: { width: n.w, height: n.h },
-        selected: selectedNodeIds.includes(n.id),
-        data: {
-          label: n.label,
-          isOrigin,
-          isTarget,
-          isCurrent,
-          isPermanent,
-          isOnPath,
-          dist,
-        },
-      };
-    });
-  }, [graph.nodes, query, currentStepCurrent, permanentNodesSet, activePathNodes, dijkstra?.labels, selectedNodeIds]);
-
-  // Mapear aristas de Graph a ReactFlow Edges
-  const rfEdges: Edge[] = useMemo(() => {
-    return graph.edges.map((e) => {
-      const isSolidPath = activePathEdges.has(e.id);
-      const isDashedPath = dashedPathEdges.has(e.id);
-      const isOnPath = isSolidPath || isDashedPath;
-      const isTiedDashed = isDashedPath;
-      const isTreeEdge = treeEdgesSet.has(e.id);
-      const isEvaluated = evaluatedEdgesSet.has(e.id);
-
-      return {
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        type: 'customEdge',
-        selected: selectedEdgeIds.includes(e.id),
-        data: {
-          weight: e.weight,
-          shape: e.shape,
-          shapeAuto: e.shapeAuto,
-          isOnPath,
-          isTiedDashed,
-          isTreeEdge,
-          isEvaluated,
-          unit: graph.unit || 'km',
-        },
-      };
-    });
-  }, [graph.edges, graph.unit, activePathEdges, dashedPathEdges, treeEdgesSet, evaluatedEdgesSet, selectedEdgeIds]);
-
-  const [prevRfNodes, setPrevRfNodes] = useState<Node[]>(rfNodes);
-  const [localNodes, setLocalNodes] = useState<Node[]>(rfNodes);
-  const graphName = useApp((s) => s.graphName);
-  const prevGraphNameRef = useRef(graphName);
-
-  // Sincronizar nodos locales durante el render cuando cambia el grafo o las consultas del store
-  if (prevRfNodes !== rfNodes) {
-    setPrevRfNodes(rfNodes);
-    setLocalNodes(rfNodes);
-  }
-
   // 1. Al montar el lienzo
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -209,24 +65,7 @@ export default function Canvas() {
     return () => clearTimeout(timer);
   }, [handleFitView]);
 
-  // 2. Al cambiar de plantilla
-  useEffect(() => {
-    if (prevGraphNameRef.current !== graphName) {
-      prevGraphNameRef.current = graphName;
-      handleFitView(0);
-    }
-  }, [graphName, handleFitView]);
-
-  // 3. Al cambiar de modo (Quetzaltenango / Diseño)
-  const prevModeRef = useRef(mode);
-  useEffect(() => {
-    if (prevModeRef.current !== mode) {
-      prevModeRef.current = mode;
-      handleFitView(0);
-    }
-  }, [mode, handleFitView]);
-
-  // 4. Al importar un archivo o cambiar el número de nodos/aristas
+  // 2. Al cambiar número de nodos/aristas en edición
   const prevNodesCountRef = useRef(graph.nodes.length);
   const prevEdgesCountRef = useRef(graph.edges.length);
   useEffect(() => {
@@ -237,7 +76,7 @@ export default function Canvas() {
     }
   }, [graph.nodes.length, graph.edges.length, handleFitView]);
 
-  // 5. Al cambiar posición de la hoja inferior / colapsar el panel lateral
+  // 3. Al cambiar posición de la hoja inferior / colapsar el panel lateral
   const prevSheetPosRef = useRef(mobileSheetPos);
   const prevCollapsedRef = useRef(isDesktopCollapsed);
   useEffect(() => {
@@ -248,7 +87,7 @@ export default function Canvas() {
     }
   }, [mobileSheetPos, isDesktopCollapsed, handleFitView]);
 
-  // 6. Al cambiar el tamaño del lienzo (ResizeObserver)
+  // 4. Al cambiar el tamaño del lienzo (ResizeObserver)
   useEffect(() => {
     if (!canvasWrapperRef.current) return;
     const ro = new ResizeObserver(() => {
@@ -256,13 +95,71 @@ export default function Canvas() {
     });
     ro.observe(canvasWrapperRef.current);
     return () => ro.disconnect();
-  }, [handleFitView]);
+  }, [canvasWrapperRef, handleFitView]);
+
+  const validNodeIds = useMemo(() => new Set(graph.nodes.map((n) => n.id)), [graph.nodes]);
 
   // Manejador durante el arrastre: actualiza ÚNICAMENTE el estado local de React Flow
   // para evitar saturar el historial de deshacer/rehacer y no recalcular el store en cada píxel.
-  const onNodesChange = useCallback((changes: NodeChange[]) => {
-    setLocalNodes((prev) => applyNodeChanges(changes, prev));
-  }, []);
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      let hasPosChanges = false;
+      let hasDimChanges = false;
+      const newPositions: Record<string, { x: number; y: number }> = {};
+      const newDimensions: Record<string, { width: number; height: number }> = {};
+      const selectChanges: { id: string; selected: boolean }[] = [];
+
+      for (const change of changes) {
+        const changeId = 'id' in change ? change.id : change.type === 'add' ? change.item.id : undefined;
+        if (!changeId || !validNodeIds.has(changeId)) continue;
+
+        if (change.type === 'position') {
+          if (change.dragging && change.position) {
+            newPositions[change.id] = change.position;
+            hasPosChanges = true;
+          } else if (change.dragging === false) {
+            setDragOverrides((prev) => {
+              if (!prev[change.id]) return prev;
+              const next = { ...prev };
+              delete next[change.id];
+              return next;
+            });
+          }
+        } else if (change.type === 'dimensions' && change.dimensions) {
+          newDimensions[change.id] = change.dimensions;
+          hasDimChanges = true;
+        } else if (change.type === 'select') {
+          selectChanges.push({ id: change.id, selected: change.selected });
+        }
+      }
+
+      if (hasPosChanges) {
+        setDragOverrides((prev) => ({ ...prev, ...newPositions }));
+      }
+      if (hasDimChanges) {
+        setNodeDimensions((prev) => {
+          let changed = false;
+          for (const [id, dims] of Object.entries(newDimensions)) {
+            const cur = prev[id];
+            if (!cur || cur.width !== dims.width || cur.height !== dims.height) {
+              changed = true;
+              break;
+            }
+          }
+          return changed ? { ...prev, ...newDimensions } : prev;
+        });
+      }
+      if (selectChanges.length > 0) {
+        const nextSelected = new Set(selectedNodeIds);
+        for (const sc of selectChanges) {
+          if (sc.selected) nextSelected.add(sc.id);
+          else nextSelected.delete(sc.id);
+        }
+        select(Array.from(nextSelected), selectedEdgeIds);
+      }
+    },
+    [validNodeIds, selectedNodeIds, selectedEdgeIds, select],
+  );
 
   // Al soltar el nodo (onNodeDragStop): se registra una única entrada en el historial de deshacer.
   // Regla de Mantener Proporción (keepProportion):
@@ -320,9 +217,220 @@ export default function Canvas() {
           y: Math.round(finalY),
         },
       });
+
+      setDragOverrides((prev) => {
+        if (!prev[node.id]) return prev;
+        const next = { ...prev };
+        delete next[node.id];
+        return next;
+      });
     },
     [keepProportion, scale.pxPerUnit, graph.edges, graph.nodes, moveNodes],
   );
+
+  // Derivar los nodos que recibe React Flow: store (rfNodes) + overrides de arrastre + medidas
+  const nodes: Node[] = useMemo(() => {
+    return rfNodes.map((n) => {
+      const overridePos = dragOverrides[n.id];
+      const measured = nodeDimensions[n.id];
+
+      if (!overridePos && !measured) {
+        return n;
+      }
+
+      return {
+        ...n,
+        position: overridePos ? { ...overridePos } : n.position,
+        measured: measured ? { ...measured } : n.measured,
+      };
+    });
+  }, [rfNodes, dragOverrides, nodeDimensions]);
+
+  return (
+    <div className="relative flex-1 w-full overflow-hidden">
+      <ReactFlow
+        nodes={nodes}
+        edges={rfEdges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
+        onNodeDragStop={onNodeDragStop}
+        onConnect={onConnect}
+        fitView
+        fitViewOptions={{ padding: 0.15 }}
+        minZoom={0.15}
+        maxZoom={2.5}
+        deleteKeyCode={mode === 'design' ? 'Delete' : null}
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={18}
+          size={1.5}
+          color={theme === 'dark' ? '#334155' : '#cbd5e1'}
+        />
+        <Controls
+          showInteractive={false}
+          position="bottom-left"
+          className="!m-3 !overflow-hidden !rounded-lg !border !border-slate-200 !bg-white/95 !shadow-md dark:!border-slate-700 dark:!bg-slate-800/95 [&>button]:!border-b [&>button]:!border-slate-200 dark:[&>button]:!border-slate-700 [&>button]:!bg-white dark:[&>button]:!bg-slate-800 [&>button]:!text-slate-700 dark:[&>button]:!text-slate-200 [&>button:hover]:!bg-slate-100 dark:[&>button:hover]:!bg-slate-700 [&>button>svg]:!fill-current"
+        />
+      </ReactFlow>
+    </div>
+  );
+}
+
+export default function Canvas() {
+  const graph = useApp((s) => s.graph);
+  const mode = useApp((s) => s.mode);
+  const graphName = useApp((s) => s.graphName);
+  const query = useApp((s) => s.query);
+  const setTreeQuery = useApp((s) => s.setTreeQuery);
+  const setPathQuery = useApp((s) => s.setPathQuery);
+  const clearQuery = useApp((s) => s.clearQuery);
+  const dijkstra = useApp((s) => s.dijkstra);
+  const shortest = useApp((s) => s.shortest);
+  const highlightedPath = useApp((s) => s.highlightedPath);
+  const allPaths = useApp((s) => s.allPaths);
+  const playback = useApp((s) => s.playback);
+  const scale = useApp((s) => s.scale);
+  const layoutSuggestion = useApp((s) => s.layoutSuggestion);
+  const applySuggestedLayout = useApp((s) => s.applySuggestedLayout);
+  const keepProportion = useApp((s) => s.keepProportion);
+  const setKeepProportion = useApp((s) => s.setKeepProportion);
+  const addNode = useApp((s) => s.addNode);
+  const selectedNodeIds = useApp((s) => s.selectedNodeIds);
+  const selectedEdgeIds = useApp((s) => s.selectedEdgeIds);
+
+  const [edgeDialogState, setEdgeDialogState] = useState<{
+    isOpen: boolean;
+    sourceId: string;
+    targetId: string;
+    isSelfLoop?: boolean;
+    canSelectEndpoints?: boolean;
+  }>({
+    isOpen: false,
+    sourceId: '',
+    targetId: '',
+    isSelfLoop: false,
+    canSelectEndpoints: false,
+  });
+
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const { fitView } = useReactFlow();
+
+  // Determinar aristas y nodos en la ruta activa resaltada
+  // Si no hay selección explícita y hay empates en shortest (shortest.length > 1),
+  // se resaltan todas las rutas empatadas: la primera sólida y las demás discontinuas.
+  const { activePathEdges, dashedPathEdges, activePathNodes } = useMemo(() => {
+    const activeEdges = new Set<string>();
+    const dashedEdges = new Set<string>();
+    const activeNodes = new Set<string>();
+
+    if (highlightedPath) {
+      if (highlightedPath.from === 'all' && allPaths.result?.paths[highlightedPath.index]) {
+        const p = allPaths.result.paths[highlightedPath.index]!;
+        for (const e of p.edges) activeEdges.add(e);
+        for (const n of p.nodes) activeNodes.add(n);
+      } else if (highlightedPath.from === 'shortest' && shortest?.[highlightedPath.index]) {
+        const p = shortest[highlightedPath.index]!;
+        for (const e of p.edges) activeEdges.add(e);
+        for (const n of p.nodes) activeNodes.add(n);
+      }
+    } else if (shortest && shortest.length > 0) {
+      // Sin selección explícita: primera ruta con trazo sólido
+      const first = shortest[0];
+      if (first) {
+        for (const e of first.edges) activeEdges.add(e);
+        for (const n of first.nodes) activeNodes.add(n);
+      }
+      // Rutas empatadas adicionales con trazo discontinuo
+      if (shortest.length > 1) {
+        for (let i = 1; i < shortest.length; i++) {
+          const other = shortest[i];
+          if (!other) continue;
+          for (const n of other.nodes) activeNodes.add(n);
+          for (const e of other.edges) {
+            if (!activeEdges.has(e)) {
+              dashedEdges.add(e);
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      activePathEdges: activeEdges,
+      dashedPathEdges: dashedEdges,
+      activePathNodes: activeNodes,
+    };
+  }, [highlightedPath, allPaths.result, shortest]);
+
+  // Paso actual en reproducción
+  const currentStep = dijkstra?.steps[playback.stepIndex];
+  const currentStepCurrent = currentStep?.current;
+  const currentStepEvaluated = currentStep?.evaluatedEdges;
+  const currentStepPermanent = currentStep?.permanent;
+  const treeEdgesSet = useMemo(() => new Set(dijkstra?.treeEdges ?? []), [dijkstra?.treeEdges]);
+  const evaluatedEdgesSet = useMemo(() => new Set(currentStepEvaluated ?? []), [currentStepEvaluated]);
+  const permanentNodesSet = useMemo(() => new Set(currentStepPermanent ?? []), [currentStepPermanent]);
+
+  // Mapear nodos de Graph a ReactFlow Nodes (base del store)
+  const rfNodes: Node[] = useMemo(() => {
+    return graph.nodes.map((n) => {
+      const isOrigin = query?.source === n.id;
+      const isTarget = query?.kind === 'path' && query?.target === n.id;
+      const isCurrent = currentStepCurrent === n.id;
+      const isPermanent = permanentNodesSet.has(n.id);
+      const isOnPath = activePathNodes.has(n.id);
+      const dist = dijkstra?.labels[n.id]?.dist;
+
+      return {
+        id: n.id,
+        type: 'customNode',
+        position: { x: n.x, y: n.y },
+        style: { width: n.w, height: n.h },
+        selected: selectedNodeIds.includes(n.id),
+        data: {
+          label: n.label,
+          isOrigin,
+          isTarget,
+          isCurrent,
+          isPermanent,
+          isOnPath,
+          dist,
+        },
+      };
+    });
+  }, [graph.nodes, query, currentStepCurrent, permanentNodesSet, activePathNodes, dijkstra?.labels, selectedNodeIds]);
+
+  // Mapear aristas de Graph a ReactFlow Edges
+  const rfEdges: Edge[] = useMemo(() => {
+    return graph.edges.map((e) => {
+      const isSolidPath = activePathEdges.has(e.id);
+      const isDashedPath = dashedPathEdges.has(e.id);
+      const isOnPath = isSolidPath || isDashedPath;
+      const isTiedDashed = isDashedPath;
+      const isTreeEdge = treeEdgesSet.has(e.id);
+      const isEvaluated = evaluatedEdgesSet.has(e.id);
+
+      return {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        type: 'customEdge',
+        selected: selectedEdgeIds.includes(e.id),
+        data: {
+          weight: e.weight,
+          shape: e.shape,
+          shapeAuto: e.shapeAuto,
+          isOnPath,
+          isTiedDashed,
+          isTreeEdge,
+          isEvaluated,
+          unit: graph.unit || 'km',
+        },
+      };
+    });
+  }, [graph.edges, graph.unit, activePathEdges, dashedPathEdges, treeEdgesSet, evaluatedEdgesSet, selectedEdgeIds]);
 
   // Manejador de conexión de nuevas aristas al arrastrar
   const onConnect = useCallback(
@@ -554,35 +662,14 @@ export default function Canvas() {
         </div>
       </div>
 
-      {/* Contenedor del Lienzo ReactFlow */}
-      <div className="relative flex-1 w-full overflow-hidden">
-        <ReactFlow
-          nodes={localNodes}
-          edges={rfEdges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          onNodesChange={onNodesChange}
-          onNodeDragStop={onNodeDragStop}
-          onConnect={onConnect}
-          fitView
-          fitViewOptions={{ padding: 0.15 }}
-          minZoom={0.15}
-          maxZoom={2.5}
-          deleteKeyCode={mode === 'design' ? 'Delete' : null}
-        >
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={18}
-            size={1.5}
-            color={theme === 'dark' ? '#334155' : '#cbd5e1'}
-          />
-          <Controls
-            showInteractive={false}
-            position="bottom-left"
-            className="!m-3 !overflow-hidden !rounded-lg !border !border-slate-200 !bg-white/95 !shadow-md dark:!border-slate-700 dark:!bg-slate-800/95 [&>button]:!border-b [&>button]:!border-slate-200 dark:[&>button]:!border-slate-700 [&>button]:!bg-white dark:[&>button]:!bg-slate-800 [&>button]:!text-slate-700 dark:[&>button]:!text-slate-200 [&>button:hover]:!bg-slate-100 dark:[&>button:hover]:!bg-slate-700 [&>button>svg]:!fill-current"
-          />
-        </ReactFlow>
-      </div>
+      {/* Contenedor del Lienzo ReactFlow - remontado por identidad de grafo (mode + graphName) */}
+      <CanvasFlow
+        key={`${mode}-${graphName}`}
+        rfNodes={rfNodes}
+        rfEdges={rfEdges}
+        onConnect={onConnect}
+        canvasWrapperRef={canvasWrapperRef}
+      />
 
       <EdgeDialog
         isOpen={edgeDialogState.isOpen}
