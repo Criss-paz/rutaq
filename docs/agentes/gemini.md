@@ -36,24 +36,26 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Hecho
 
-- **Encargo 1 — Dataset de Quetzaltenango (`src/data/quetzaltenango.json`, tipo `Dataset`):**
-  - Verificación oficial de los 24 municipios contra catálogos del INE y SEGEPLAN. Asignación de 24 identificadores únicos, estables y de 3 letras mayúsculas (`QTZ`, `SAL`, `OLI`, `SIJ`, `SIB`, `CAB`, `CAJ`, `SIG`, `OST`, `MAT`, `CCH`, `SMA`, `ALM`, `CAN`, `HUI`, `ZUN`, `COL`, `FLU`, `PAL`, `COA`, `GEN`, `FCC`, `ESP`, `PLA`).
-  - Extracción y caché local de coordenadas geográficas de las 24 cabeceras municipales desde OpenStreetMap / Nominatim (`scripts/cache/nominatim/`) respetando el límite $\le 1$ req/s y cabecera descriptiva `RutaQ-proyecto-academico`.
-  - Construcción de `scripts/build_dataset.py` y `scripts/verify_dataset.py` en entorno `.venv` con dependencias en `scripts/requirements.txt` (`requests`, `networkx`, `polyline`).
-  - Cálculo de distancias reales de conducción mediante OSRM (`scripts/cache/osrm/`) y simplificación de geometrías con Ramer-Douglas-Peucker (precisión 5).
-  - Generación de `src/data/quetzaltenango.json`: 24 nodos, 36 aristas directas (criterio $< 1\text{ km}$ de cabeceras intermedias), pesos positivos $km > 0$, grafo 100 % conexo verificado con `networkx`, carreteras identificadas (CA-01, CA-02, RN-01, RN-10, Cito-180, RD-QUE-...), `verificado_google: false` y `km_google: null`.
-  - Documentación completa en `docs/datos/METODOLOGIA.md` (fuentes, fecha de consulta 2026-10-14, criterio de arista, tratamiento de vías interdepartamentales).
-  - Documentación en `docs/datos/VALIDACION.md` con tabla comparativa de las 36 aristas y lista de 18 aristas prioritarias (incluyendo las 5 más largas de la red) listas para la validación con Google Maps por Antigravity.
-- **Encargo 2 — Ejemplo didáctico de 6 nodos:**
-  - Generación de `src/data/ejemplo6.json` (tipo `GraphFile`): 6 nodos A–F con dimensiones estándar $132 \times 44\text{ px}$, pesos enteros, camino indirecto ventajoso ($A \to B \to D$ de peso 7 vs arista directa $A-D$ de peso 10), empate didáctico en iteración 2 ($B$ y $C$ con distancia 4, desempate $B < C$) y rutas empatadas hacia $F$.
-  - Elaboración exhaustiva de `docs/informe/solucion_teorica.md`: resolución manual analítica aplicando el método tabular tradicional desde A, con matriz de adyacencia, tabla de iteraciones detallada (etiqueta mínima, columna tachada, casillas actualizadas), justificación paso a paso y tabla resumen final de distancias y rutas.
+- **Ronda 2 — Reescritura 100 % guiada por datos de `scripts/build_dataset.py` y `quetzaltenango.json`:**
+  - **Eliminación de datos manuales:** Se eliminó por completo la lista estática `EDGES_DEF` y cualquier nombre de carretera o nota narrativa escrita a mano.
+  - **Consulta exhaustiva de candidatas:** Se consultaron los 276 pares de municipios ($\binom{24}{2}$) a OSRM con `?overview=full&geometries=polyline&steps=true`, respetando el límite $\le 1\text{ req/s}$ con User-Agent `RutaQ-proyecto-academico` y caché persistente en `scripts/cache/osrm/`.
+  - **Criterio de arista directa (calculado):** Se implementó la verificación punto-segmento Haversine de cada ruta contra las 24 cabeceras municipales. Un par $A-B$ es arista directa si no pasa a menos de $1.0\text{ km}$ de ningún otro municipio intermedio.
+  - **Generación de `docs/datos/aristas_descartadas.csv`:** Registro estructurado de los 221 pares descartados, documentando origen, destino, municipio intermedio interceptor y distancia mínima observada.
+  - **Grafo conexo de 55 aristas:** 55 aristas directas aceptadas, 24 nodos, pesos $km > 0$, grafo 100 % conexo verificado mediante recorrido BFS y `networkx`.
+  - **`carretera` derivada de datos:** Obtenida exclusivamente sumando distancias de los códigos `ref` de los `steps` de OSRM (p. ej. `RN-1 / RN-1B`, `CITO 180`, `CA-2 OCC`), o `name` si no hay `ref`, o `""` si OSRM no provee información. Cero códigos inventados.
+  - **`nota` calculada por punto-en-polígono:** Se descargó y almacenó en caché el polígono departamental oficial de Quetzaltenango (`scripts/cache/nominatim/departamento_quetzaltenango.json`, 3 003 vértices). Se evalúa cada vértice de la ruta; si sale del polígono, se asigna `"La ruta sale del departamento de Quetzaltenango"`, caso contrario `""`.
+  - **Reproducibilidad y determinismo offline:** `python scripts/build_dataset.py` se ejecuta sin conexión utilizando únicamente la caché y produce de forma idéntica byte a byte (`sha256`) el dataset `src/data/quetzaltenango.json`.
+  - **Actualización documental:** `docs/datos/METODOLOGIA.md` actualizada con métricas y fórmulas exactas; `docs/datos/VALIDACION.md` actualizada con el top 5 de aristas más largas (`FCC-ZUN` 70.9 km, `PAL-SMA` 70.0 km, `COL-PAL` 60.5 km, `COA-PAL` 58.4 km, `PAL-ZUN` 57.2 km) y 15 adicionales (total 20 aristas prioritarias) para la medición en Google Maps por Antigravity.
+- **Ronda 1 (Aprobado):**
+  - `src/data/ejemplo6.json` (tipo `GraphFile`) y `docs/informe/solucion_teorica.md` (resolución manual tabular paso a paso iteración por iteración).
 - **Verificaciones técnicas superadas:**
+  - `python scripts/build_dataset.py` (ejecutado dos veces con hash idéntico).
+  - `python scripts/verify_dataset.py` (integridad topológica y de contratos superada al 100 %).
   - `npm run lint` (0 advertencias, 0 errores).
   - `npm run typecheck` (tsc limpio contra `CoreApi` y `Dataset`).
   - `npm run test` (pruebas unitarias en verde).
   - `npm run build` (build de Vite exitoso sin errores de empaquetado).
-  - `verify_dataset.py` (integridad topológica y de contratos superada al 100 %).
-  - Formateo con `npx prettier --write docs/datos docs/informe src/data scripts`.
+  - `npx prettier --check docs/datos docs/informe src/data scripts` en verde.
 
 ### Pendiente
 
@@ -62,10 +64,9 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Decisiones
 
-1. **Corrección de la cabecera de Almolonga:** La consulta automática inicial devolvía la cima del Volcán Almolonga (`type=volcano`) en la zona rural 12 de Quetzaltenango. Se corrigió explícitamente para apuntar a la cabecera municipal en el valle agrícola (`14.81498, -91.49475`), resolviendo la conectividad real sobre la RN-10 hacia Xela y Zunil.
-2. **Conexiones interdepartamentales:** Las carreteras `PAL-ZUN` (Cito-180), `COL-PAL` (Cito-180/CA-02) y `SAL-SIJ` (CA-01) transitan brevemente por Retalhuleu o Totonicapán debido al relieve de la Sierra Madre. Se mantuvieron como aristas directas registrando la aclaración en el atributo `nota`, cumpliendo la sección 3.2 del plan maestro.
-3. **Nomenclatura uniforme:** Los identificadores de arista se ordenan lexicográficamente `min(u, v) - max(u, v)` (p. ej. `ALM-QTZ`), eliminando aristas duplicadas y garantizando unicidad en grafos no dirigidos.
-4. **Simplificación RDP:** Se aplicó tolerancia $\epsilon = 0.0001^\circ$ (~10 m), optimizando el tamaño del archivo JSON sin comprometer la precisión cartográfica.
+1. **Umbral de intermediación de 1.0 km:** Implementado con proyección local cartográfica y distancia Haversine punto-segmento. Filtró con alta fidelidad las vías que cruzan centros urbanos intermedios (descartando 221 rutas indirectas) preservando la conexidad de los 24 municipios con 55 aristas directas.
+2. **Punto-en-polígono para notas:** Basado en el polígono oficial del departamento extraído de Nominatim (OSM 214710). Elimina cualquier nota subjetiva o narrativa: solo hechos geométricamente comprobados.
+3. **Nomenclatura vial de OSM:** Se descartaron todas las etiquetas sintéticas `RD-QUE-xx` que no figuraban en los datos oficiales de OSM/MICIVI, reemplazándolas por los atributos `ref` y `name` reales de OSRM.
 
 ### Dudas
 
