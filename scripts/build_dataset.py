@@ -365,11 +365,12 @@ def derive_carretera_from_steps(route):
     """
     Deriva el nombre o código de carretera desde los steps de OSRM:
     Suma distancias por cada ref (o por name si no hay ref).
-    Si no hay ref ni name, retorna "". Nunca inventa códigos.
+    Si no hay ref ni name (o si el marcador es vacío/"Unknown"), retorna "". Nunca inventa códigos.
     """
     steps = route.get('legs', [{}])[0].get('steps', [])
     ref_dist = {}
     name_dist = {}
+    ignored_markers = {'unknown', 'unnamed', 'sin nombre', 'none'}
 
     for s in steps:
         dist = s.get('distance', 0)
@@ -379,11 +380,12 @@ def derive_carretera_from_steps(route):
             # Limpiar y separar refs múltiples si están separadas por ';'
             for r in ref.replace(';', '/').split('/'):
                 clean_r = r.strip()
-                if clean_r:
+                if clean_r and clean_r.lower() not in ignored_markers:
                     ref_dist[clean_r] = ref_dist.get(clean_r, 0) + dist
         if name and name.strip():
             clean_name = name.strip()
-            name_dist[clean_name] = name_dist.get(clean_name, 0) + dist
+            if clean_name and clean_name.lower() not in ignored_markers:
+                name_dist[clean_name] = name_dist.get(clean_name, 0) + dist
 
     if ref_dist:
         sorted_refs = sorted(ref_dist.items(), key=lambda x: -x[1])
