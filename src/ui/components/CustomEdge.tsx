@@ -1,4 +1,5 @@
-import { memo, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   BaseEdge,
   type EdgeProps,
@@ -53,6 +54,61 @@ function CustomEdgeComponent({
   const [isEditingWeight, setIsEditingWeight] = useState(false);
   const [weightInput, setWeightInput] = useState(String(weight));
   const [showShapeMenu, setShowShapeMenu] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number }>({ top: 100, left: 100 });
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const toggleShapeMenu = useCallback(() => {
+    if (!showShapeMenu) {
+      const rect = menuButtonRef.current?.getBoundingClientRect();
+      const menuWidth = 208;
+      const menuHeight = 320;
+      const padding = 8;
+
+      let left = rect ? rect.left : 100;
+      let top = rect ? rect.bottom + 4 : 100;
+
+      if (left + menuWidth > window.innerWidth - padding) {
+        left = Math.max(padding, window.innerWidth - menuWidth - padding);
+      }
+      if (left < padding) left = padding;
+
+      if (top + menuHeight > window.innerHeight - padding) {
+        top = Math.max(padding, (rect?.top ?? 300) - menuHeight - 4);
+      }
+      if (top < padding) top = padding;
+
+      setMenuPos({ top, left });
+      setShowShapeMenu(true);
+    } else {
+      setShowShapeMenu(false);
+    }
+  }, [showShapeMenu]);
+
+  // Cerrar al hacer clic fuera o presionar Escape
+  useEffect(() => {
+    if (!showShapeMenu) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(e.target as Node)
+      ) {
+        setShowShapeMenu(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowShapeMenu(false);
+    };
+
+    window.addEventListener('pointerdown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('pointerdown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showShapeMenu]);
 
   // Calcular trazado según la forma
   let edgePath = '';
@@ -221,92 +277,107 @@ function CustomEdgeComponent({
             </span>
           )}
 
-          {/* Botón de menú de forma de arista */}
+          {/* Botón de menú de forma de arista táctil (>=44px) */}
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
+              ref={menuButtonRef}
               data-testid={`edge-menu-${id}`}
               onClick={(e) => {
                 e.stopPropagation();
-                setShowShapeMenu((prev) => !prev);
+                toggleShapeMenu();
               }}
               aria-label={`Cambiar forma de la arista ${id}`}
-              className="flex h-4 w-4 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+              className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
               title="Forma de arista"
             >
-              ⚙
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs font-bold dark:bg-slate-700">
+                ⚙
+              </span>
             </button>
 
-            {/* Menú desplegable */}
-            {showShapeMenu && (
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className="absolute top-6 left-0 z-50 w-44 rounded-lg border border-slate-200 bg-white p-1 text-xs shadow-lg dark:border-slate-700 dark:bg-slate-800"
-                role="menu"
-              >
-                <div className="px-2 py-1 font-semibold text-slate-500 dark:text-slate-400">Forma ({shape})</div>
-                {shapesList.map((s) => (
-                  <button
-                    key={s.key}
-                    type="button"
-                    data-testid={`edge-shape-${s.key}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEdgeShape([id], s.key);
-                      setShowShapeMenu(false);
-                    }}
-                    className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-300 ${
-                      shape === s.key ? 'font-bold text-blue-600 dark:text-blue-400' : ''
-                    }`}
-                  >
-                    <span>{s.label}</span>
-                    {shape === s.key && <span>✓</span>}
-                  </button>
-                ))}
-
-                <hr className="my-1 border-slate-200 dark:border-slate-700" />
-
-                <button
-                  type="button"
-                  data-testid="edge-shape-apply-all"
-                  onClick={() => {
-                    setEdgeShape('all', shape);
-                    setShowShapeMenu(false);
+            {/* Menú desplegable en portal document.body para evitar distorsión de coordenadas por transform de React Flow */}
+            {showShapeMenu &&
+              typeof document !== 'undefined' &&
+              createPortal(
+                <div
+                  ref={menuRef}
+                  style={{
+                    position: 'fixed',
+                    top: `${menuPos.top}px`,
+                    left: `${menuPos.left}px`,
+                    zIndex: 9999,
                   }}
-                  className="block w-full rounded px-2 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 text-xs shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
+                  role="menu"
                 >
-                  Aplicar {shape} a todas
-                </button>
-
-                <button
-                  type="button"
-                  data-testid="edge-shape-reset-auto"
-                  onClick={() => {
-                    resetEdgeShapeAuto([id]);
-                    setShowShapeMenu(false);
-                  }}
-                  className="block w-full rounded px-2 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
-                >
-                  Volver a automático
-                </button>
-
-                {mode === 'design' && (
-                  <>
-                    <hr className="my-1 border-slate-200 dark:border-slate-700" />
+                  <div className="px-3 py-1 font-semibold text-slate-500 dark:text-slate-400">Forma ({shape})</div>
+                  {shapesList.map((s) => (
                     <button
+                      key={s.key}
                       type="button"
-                      onClick={() => {
-                        removeEdges([id]);
+                      data-testid={`edge-shape-${s.key}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEdgeShape([id], s.key);
                         setShowShapeMenu(false);
                       }}
-                      className="block w-full rounded px-2 py-1.5 text-left text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+                      className={`flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-300 ${
+                        shape === s.key
+                          ? 'font-bold text-blue-600 dark:text-blue-400'
+                          : 'text-slate-700 dark:text-slate-200'
+                      }`}
                     >
-                      Eliminar arista
+                      <span>{s.label}</span>
+                      {shape === s.key && <span className="font-bold">✓</span>}
                     </button>
-                  </>
-                )}
-              </div>
-            )}
+                  ))}
+
+                  <hr className="my-1 border-slate-200 dark:border-slate-700" />
+
+                  <button
+                    type="button"
+                    data-testid="edge-shape-apply-all"
+                    onClick={() => {
+                      setEdgeShape('all', shape);
+                      setShowShapeMenu(false);
+                    }}
+                    className="flex min-h-[44px] w-full items-center rounded-lg px-3 py-2 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+                  >
+                    Aplicar {shape} a todas
+                  </button>
+
+                  <button
+                    type="button"
+                    data-testid="edge-shape-reset-auto"
+                    onClick={() => {
+                      resetEdgeShapeAuto([id]);
+                      setShowShapeMenu(false);
+                    }}
+                    className="flex min-h-[44px] w-full items-center rounded-lg px-3 py-2 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+                  >
+                    Volver a automático
+                  </button>
+
+                  {mode === 'design' && (
+                    <>
+                      <hr className="my-1 border-slate-200 dark:border-slate-700" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeEdges([id]);
+                          setShowShapeMenu(false);
+                        }}
+                        className="flex min-h-[44px] w-full items-center rounded-lg px-3 py-2 text-left text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+                      >
+                        Eliminar arista
+                      </button>
+                    </>
+                  )}
+                </div>,
+                document.body,
+              )}
           </div>
         </div>
       </EdgeLabelRenderer>

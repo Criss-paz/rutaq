@@ -109,16 +109,45 @@ UI completa funcionando con el mock; `npm run lint && npm run typecheck && npm r
    - Las 7 aristas restantes presentan diferencias originadas por la selección de travesías urbanas céntricas en Google Maps frente a circunvalaciones periféricas en OSRM (p. ej. CITO-180 vs. RN 09 S).
    - Toda la evidencia y el análisis técnico quedaron asentados en la Sección 5 de `docs/datos/VALIDACION.md` con fecha 2026-10-14.
 
+### Resolución de la Revisión del Orquestador (Ronda 3 — Móvil y Robustez)
+
+1. **Ajuste del grafo al tamaño de pantalla (`fitView`) [Ítem 1]**:
+   - Se configuró `fitView({ padding: 0.15, duration: 0 })` de forma reactiva al montar el lienzo, al cambiar de plantilla (`graphName`), al cambiar de modo (`mode`), al modificar el conteo de nodos o aristas, y al abrir/cerrar la hoja inferior en móviles.
+   - Se añadió un `ResizeObserver` sobre el contenedor del lienzo (`canvas-container`) para reajustar la vista en cambios dinámicos del viewport.
+   - El uso de `duration: 0` garantiza saltos inmediatos sin animaciones flotantes, eliminando falsos clics o condiciones de carrera en interacción táctil y en pruebas automatizadas.
+2. **Optimización de cabecera en móviles (< 640 px) [Ítem 2]**:
+   - En pantallas pequeñas (`< 640px`), la cabecera se redujo estrictamente a $\le 2$ filas:
+     - Fila 1: Logo Q + título «RutaQ», alternador de modo (Quetzaltenango / Diseño), y botón de menú «⋯» (`header-more-btn`).
+     - Fila 2: Selector de plantilla (`template-select`) y botones de deshacer/rehacer (en modo diseño).
+   - Las acciones secundarias (Cargar, Guardar, PNG, Tema) se agruparon en un menú desplegable «⋯» flotante en móviles, manteniéndose visibles directamente en línea a partir de `sm:` (≥ 640 px).
+3. **Controles de zoom completamente visibles sobre el lienzo [Ítem 3]**:
+   - Se centralizó el estado de expansión de la hoja inferior móvil (`isMobileExpanded`) en `src/ui/uiStore.ts`.
+   - Se aplicó margen inferior dinámico al contenedor principal `<main>` (`mb-14` colapsado, `mb-[60vh]` expandido, y `lg:!mb-0` en escritorio), asegurando que los controles de zoom `<Controls>` permanezcan siempre flotando 100 % visibles sobre el lienzo sin quedar nunca recortados ni sepultados bajo la hoja inferior.
+4. **Etiqueta visible y accesible «Mantener proporción» [Ítem 4]**:
+   - Se añadió la etiqueta de texto visible «Mantener proporción» junto al checkbox de la barra de escala, con clase `whitespace-nowrap` y atributo `aria-label="Mantener proporción"`.
+5. **Menús contextuales dentro del viewport y táctiles ≥ 44 px [Ítem 5]**:
+   - Se solucionó el confinamiento de CSS `transform` de React Flow renderizando los menús desplegables (menú de forma de arista y menú contextual de nodo) a través de `createPortal(..., document.body)`.
+   - Se implementó cálculo de coordenadas con clamping en pantalla (`Math.min(..., innerWidth - menuWidth)`) para asegurar que el menú siempre se abra íntegramente dentro del viewport visible.
+   - Todas las opciones de menú y botones de acción rápida poseen altura y anchura mínima táctil $\ge 44\text{ px}$ (`min-h-[44px] min-w-[44px]`), garantizando usabilidad táctil conforme a directrices móviles.
+6. **Verificación visual y eliminación de desbordes horizontales [Ítem 6]**:
+   - Se verificaron los 4 dispositivos (`desktop-chrome`, `iphone-13`, `pixel-7`, `ipad`) sin desbordes horizontales (`overflow-x-hidden`) ni solapamientos.
+   - Las 40 capturas de pantalla fueron regeneradas y actualizadas en `docs/informe/capturas/`.
+7. **Criterio de aceptación: 2 ejecuciones completas consecutivas de Playwright en verde**:
+   - **Ejecución 1:** 44/44 pruebas pasadas (25.3s).
+   - **Ejecución 2:** 44/44 pruebas pasadas (27.8s).
+   - Cero flakiness (100 % de fiabilidad en ambos runs consecutivos).
+
 ### Pendiente
 
-- Ninguno. Todos los requerimientos de la Fase F1 y de la Revisión del Orquestador (Ronda 2) han sido completamente satisfechos.
+- Ninguno. Todos los requerimientos de la Fase F1, la Revisión del Orquestador (Ronda 2) y la Ronda 3 (Móvil y Robustez) han sido completamente satisfechos.
 
 ### Decisiones
 
 1. **Persistencia del layout de escritorio**: En monitores $\ge 1024$ px, el panel lateral derecho ofrece visualización continua de tablas y matrices sin restar altura de visualización al mapa de Quetzaltenango.
-2. **Acciones flotantes de nodo en hover**: Permiten mantener la superficie de los nodos despejada para la lectura de los nombres de los municipios, sin sacrificar la agilidad para fijar origen (A) y destino (B).
+2. **Acciones flotantes de nodo en hover/focus**: Permiten mantener la superficie de los nodos despejada para la lectura de los nombres de los municipios, sin sacrificar la agilidad para fijar origen (A) y destino (B).
 3. **Cálculo de proporción al soltar nodo**: Al calcular la proyección proporcional solo en `onNodeDragStop`, el rendimiento del arrastre a 60 fps se mantiene fluido sin interrupciones ni recálculos bloqueantes.
 4. **Verificación E2E ligada a `verification/resultados.csv`**: Desacopla los tests de constantes fijas arbitrarias y garantiza que cualquier evolución de los algoritmos teóricos se contraste directamente contra la interfaz gráfica.
+5. **Portal DOM para menús contextuales en lienzo interactivo**: Renderizar fuera del árbol SVG/DOM transformado de React Flow elimina cualquier contención de coordenadas en `position: fixed`, garantizando posicionamiento viewport preciso en cualquier resolución de pantalla y nivel de zoom.
 
 ### Dudas
 

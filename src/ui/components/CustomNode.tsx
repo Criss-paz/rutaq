@@ -1,4 +1,5 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Handle, type NodeProps, NodeResizer, Position } from '@xyflow/react';
 import { useApp } from '../useApp';
 
@@ -34,6 +35,54 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(label);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState<{ top: number; left: number } | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  const openNodeMenu = useCallback(
+    (clientX: number, clientY: number) => {
+      const menuWidth = 200;
+      const menuHeight = mode === 'design' ? 220 : 180;
+      const padding = 12;
+
+      let left = clientX;
+      let top = clientY;
+
+      if (left + menuWidth > window.innerWidth - padding) {
+        left = Math.max(padding, window.innerWidth - menuWidth - padding);
+      }
+      if (left < padding) left = padding;
+
+      if (top + menuHeight > window.innerHeight - padding) {
+        top = Math.max(padding, clientY - menuHeight);
+      }
+      if (top < padding) top = padding;
+
+      setContextMenuPos({ top, left });
+      setShowContextMenu(true);
+    },
+    [mode],
+  );
+
+  useEffect(() => {
+    if (!showContextMenu) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setShowContextMenu(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowContextMenu(false);
+    };
+
+    window.addEventListener('pointerdown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('pointerdown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showContextMenu]);
 
   useEffect(() => {
     if (isEditing) {
@@ -96,6 +145,11 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   return (
     <div
       data-testid={`node-${id}`}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openNodeMenu(e.clientX, e.clientY);
+      }}
       className={`group relative flex h-full w-full min-h-[44px] min-w-[80px] items-center justify-between rounded-xl border-2 px-3 py-2 text-xs font-semibold shadow-xs transition-all ${borderClasses} ${
         selected ? 'ring-2 ring-blue-600' : ''
       }`}
@@ -168,15 +222,19 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           <span
             data-testid={`node-label-${label}`}
             className="block w-full cursor-pointer truncate text-xs font-bold leading-tight text-slate-900 dark:text-slate-100"
-            title={`${label} (Doble clic para renombrar)`}
+            title={`${label} (Doble clic para renombrar o clic derecho para menú)`}
           >
             {label}
           </span>
         )}
       </div>
 
-      {/* Botones de acción rápida flotantes en hover/focus (no reducen el ancho del texto del nodo) */}
-      <div className="absolute -top-3.5 right-1 z-10 hidden items-center gap-0.5 rounded-full border border-slate-200 bg-white/95 px-1 py-0.5 shadow-xs group-hover:flex group-focus-within:flex dark:border-slate-700 dark:bg-slate-800/95">
+      {/* Botones de acción rápida flotantes en hover/focus o selección */}
+      <div
+        className={`absolute -top-4 right-0 z-10 items-center gap-0.5 rounded-full border border-slate-200 bg-white/95 p-0.5 shadow-md backdrop-blur-xs dark:border-slate-700 dark:bg-slate-800/95 ${
+          selected ? 'flex' : 'hidden group-hover:flex group-focus-within:flex'
+        }`}
+      >
         {/* Fijar como origen en F2/F3 */}
         <button
           type="button"
@@ -190,9 +248,11 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Fijar ${label} como origen`}
           title="Fijar como origen (A)"
-          className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700 hover:bg-emerald-200 focus-visible:ring-1 focus-visible:ring-emerald-500 dark:bg-emerald-950 dark:text-emerald-300"
+          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300 dark:hover:bg-emerald-950"
         >
-          A
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950">
+            A
+          </span>
         </button>
 
         {/* Fijar como destino en F3 */}
@@ -205,9 +265,26 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Fijar ${label} como destino`}
           title="Fijar como destino (B)"
-          className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-[10px] font-bold text-rose-700 hover:bg-rose-200 focus-visible:ring-1 focus-visible:ring-rose-500 dark:bg-rose-950 dark:text-rose-300"
+          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-rose-700 hover:bg-rose-100 focus-visible:ring-2 focus-visible:ring-rose-500 dark:text-rose-300 dark:hover:bg-rose-950"
         >
-          B
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950">B</span>
+        </button>
+
+        {/* Menú de opciones del nodo */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const rect = e.currentTarget.getBoundingClientRect();
+            openNodeMenu(rect.left, rect.bottom + 4);
+          }}
+          aria-label={`Más opciones del nodo ${label}`}
+          title="Menú contextual del nodo"
+          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-slate-600 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs dark:bg-slate-700">
+            ⋯
+          </span>
         </button>
 
         {/* Eliminar nodo en modo diseño */}
@@ -220,12 +297,93 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
             }}
             aria-label={`Eliminar nodo ${label}`}
             title="Eliminar nodo"
-            className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-1 focus-visible:ring-red-500 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-red-950"
+            className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-slate-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-2 focus-visible:ring-red-500 dark:text-slate-300 dark:hover:bg-red-950"
           >
-            ×
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 hover:bg-red-200 dark:bg-slate-700">
+              ×
+            </span>
           </button>
         )}
       </div>
+
+      {/* Menú contextual flotante del nodo reposicionado en viewport con items >= 44px */}
+      {showContextMenu &&
+        contextMenuPos &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={contextMenuRef}
+            style={{
+              position: 'fixed',
+              top: `${contextMenuPos.top}px`,
+              left: `${contextMenuPos.left}px`,
+              zIndex: 9999,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 text-xs shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
+            role="menu"
+          >
+            <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase truncate">
+              Nodo: {label}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowContextMenu(false);
+                if (query?.kind === 'path') {
+                  setPathQuery(id, query.target);
+                } else {
+                  setTreeQuery(id);
+                }
+              }}
+              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/50"
+            >
+              <span className="text-sm">🌳</span>
+              <span>Fijar como origen (A)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowContextMenu(false);
+                const source = query ? query.source : id;
+                setPathQuery(source, id);
+              }}
+              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-700 dark:text-slate-200 dark:hover:bg-rose-950/50"
+            >
+              <span className="text-sm">📍</span>
+              <span>Fijar como destino (B)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowContextMenu(false);
+                setEditText(label);
+                setIsEditing(true);
+              }}
+              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <span className="text-sm">✏️</span>
+              <span>Renombrar nodo</span>
+            </button>
+            {mode === 'design' && (
+              <>
+                <hr className="my-1 border-slate-200 dark:border-slate-700" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowContextMenu(false);
+                    removeNodes([id]);
+                  }}
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+                >
+                  <span className="text-sm">🗑️</span>
+                  <span>Eliminar nodo</span>
+                </button>
+              </>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

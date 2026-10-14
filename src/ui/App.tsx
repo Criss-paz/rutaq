@@ -4,6 +4,7 @@ import Canvas from './components/Canvas';
 import Header from './components/Header';
 import ResultsPanel from './components/ResultsPanel';
 import { useApp } from './useApp';
+import { useUiStore } from './uiStore';
 
 export default function App() {
   const undo = useApp((s) => s.undo);
@@ -12,6 +13,7 @@ export default function App() {
   const canRedo = useApp((s) => s.canRedo());
   const mode = useApp((s) => s.mode);
   const validation = useApp((s) => s.validation);
+  const isMobileExpanded = useUiStore((s) => s.isMobileExpanded);
 
   // Atajos de teclado globales (Ctrl+Z para deshacer, Ctrl+Y para rehacer)
   useEffect(() => {
@@ -63,7 +65,12 @@ export default function App() {
       {/* Contenedor principal: en pantallas >= 1024px divide en lienzo a la izquierda y panel a la derecha */}
       <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Área central del lienzo con React Flow */}
-        <main className="relative h-full flex-1 overflow-hidden" role="main">
+        <main
+          className={`relative flex flex-1 flex-col overflow-hidden transition-all duration-300 lg:!mb-0 ${
+            isMobileExpanded ? 'mb-[60vh]' : 'mb-14'
+          }`}
+          role="main"
+        >
           <ReactFlowProvider>
             <Canvas />
           </ReactFlowProvider>

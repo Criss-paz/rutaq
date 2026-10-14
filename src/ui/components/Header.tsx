@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Theme } from '../../store/types';
 import { useApp } from '../useApp';
 
@@ -18,6 +18,34 @@ export default function Header() {
   const graphName = useApp((s) => s.graphName);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const moreBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Cerrar menú móvil al hacer clic fuera o presionar Escape
+  useEffect(() => {
+    if (!showMobileMenu) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(e.target as Node) &&
+        moreBtnRef.current &&
+        !moreBtnRef.current.contains(e.target as Node)
+      ) {
+        setShowMobileMenu(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowMobileMenu(false);
+    };
+
+    window.addEventListener('pointerdown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('pointerdown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showMobileMenu]);
 
   const handleExportJson = () => {
     const data = exportGraphFile();
@@ -48,7 +76,6 @@ export default function Header() {
   };
 
   const handleExportPng = () => {
-    // Renderizado nativo del grafo a un canvas HTML para descarga PNG de alta resolución
     const canvas = document.createElement('canvas');
     const width = 1400;
     const height = 900;
@@ -160,61 +187,151 @@ export default function Header() {
         : '';
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-2 text-slate-800 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
-      {/* Logotipo y título */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-xs">
-          Q
+    <header className="flex flex-col gap-1.5 border-b border-slate-200 bg-white px-3 py-1.5 text-slate-800 shadow-xs sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-4 sm:py-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+      {/* Input de archivo JSON oculto */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImportFile}
+        accept=".json,application/json"
+        className="hidden"
+        data-testid="input-file-json"
+        aria-hidden="true"
+      />
+
+      {/* Fila 1 en móvil: Logo, Modos y Menú "⋯" | Integrado en escritorio */}
+      <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
+        {/* Logotipo y título */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-xs sm:h-10 sm:w-10">
+            Q
+          </div>
+          <div>
+            <h1 className="text-base font-bold leading-tight tracking-tight sm:text-lg">RutaQ</h1>
+            <p className="hidden text-xs text-slate-500 md:block dark:text-slate-400">
+              Red vial de Quetzaltenango · Dijkstra &amp; Floyd-Warshall
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-bold leading-tight tracking-tight">RutaQ</h1>
-          <p className="hidden text-xs text-slate-500 sm:block dark:text-slate-400">
-            Red vial de Quetzaltenango · Dijkstra &amp; Floyd-Warshall
-          </p>
+
+        {/* Modos Quetzaltenango / Diseño y botón "⋯" en móvil */}
+        <div className="flex items-center gap-1.5">
+          <div
+            className="flex rounded-lg bg-slate-100 p-0.5 sm:p-1 dark:bg-slate-800"
+            role="group"
+            aria-label="Modo de la aplicación"
+          >
+            <button
+              type="button"
+              data-testid="mode-quetzaltenango"
+              onClick={() => {
+                setMode('quetzaltenango');
+                loadTemplate('quetzaltenango');
+              }}
+              className={`min-h-[44px] rounded-md px-2.5 py-1 text-xs font-medium transition-colors sm:px-3 sm:py-1.5 ${
+                mode === 'quetzaltenango'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+              }`}
+              aria-pressed={mode === 'quetzaltenango'}
+            >
+              Quetzaltenango
+            </button>
+            <button
+              type="button"
+              data-testid="mode-design"
+              onClick={() => setMode('design')}
+              className={`min-h-[44px] rounded-md px-2.5 py-1 text-xs font-medium transition-colors sm:px-3 sm:py-1.5 ${
+                mode === 'design'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+              }`}
+              aria-pressed={mode === 'design'}
+            >
+              Diseño
+            </button>
+          </div>
+
+          {/* Botón "⋯" de acciones secundarias en pantallas < 640px */}
+          <div className="relative sm:hidden">
+            <button
+              type="button"
+              ref={moreBtnRef}
+              data-testid="header-more-btn"
+              onClick={() => setShowMobileMenu((prev) => !prev)}
+              aria-label="Más acciones secundarias"
+              aria-expanded={showMobileMenu}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white text-base font-bold text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              title="Más opciones (Cargar, Guardar, PNG, tema)"
+            >
+              ⋯
+            </button>
+
+            {/* Menú desplegable móvil */}
+            {showMobileMenu && (
+              <div
+                ref={mobileMenuRef}
+                className="fixed right-3 top-14 z-50 w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
+                role="menu"
+              >
+                <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Acciones</div>
+                <button
+                  type="button"
+                  data-testid="btn-import-json-mobile"
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    fileInputRef.current?.click();
+                  }}
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <span className="text-base">📂</span>
+                  <span>Cargar JSON</span>
+                </button>
+                <button
+                  type="button"
+                  data-testid="btn-export-json"
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    handleExportJson();
+                  }}
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <span className="text-base">💾</span>
+                  <span>Guardar JSON</span>
+                </button>
+                <button
+                  type="button"
+                  data-testid="btn-export-png-mobile"
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    handleExportPng();
+                  }}
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <span className="text-base">📷</span>
+                  <span>Exportar PNG</span>
+                </button>
+                <button
+                  type="button"
+                  data-testid="theme-toggle-mobile"
+                  onClick={() => {
+                    cycleTheme();
+                  }}
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <span className="text-base">{theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}</span>
+                  <span>Tema visual ({theme})</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Selector de Modo: Quetzaltenango / Diseño */}
-      <div
-        className="flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800"
-        role="group"
-        aria-label="Modo de la aplicación"
-      >
-        <button
-          type="button"
-          data-testid="mode-quetzaltenango"
-          onClick={() => {
-            setMode('quetzaltenango');
-            loadTemplate('quetzaltenango');
-          }}
-          className={`min-h-[44px] rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden ${
-            mode === 'quetzaltenango'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-          }`}
-          aria-pressed={mode === 'quetzaltenango'}
-        >
-          Quetzaltenango
-        </button>
-        <button
-          type="button"
-          data-testid="mode-design"
-          onClick={() => setMode('design')}
-          className={`min-h-[44px] rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden ${
-            mode === 'design'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-          }`}
-          aria-pressed={mode === 'design'}
-        >
-          Diseño
-        </button>
-      </div>
-
-      {/* Plantillas y Archivos */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      {/* Fila 2 en móvil: Plantilla + Deshacer/Rehacer | Continuación en escritorio */}
+      <div className="flex w-full items-center justify-between gap-1.5 sm:w-auto">
         {/* Selector de plantilla */}
-        <div className="relative">
+        <div className="relative flex-1 sm:flex-initial">
           <select
             data-testid="template-select"
             aria-label="Cargar plantilla"
@@ -223,7 +340,7 @@ export default function Header() {
               const val = e.target.value as 'quetzaltenango' | 'ejemplo6' | 'vacio';
               if (val) loadTemplate(val);
             }}
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden sm:w-auto dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
           >
             {currentTemplate === '' && (
               <option value="" disabled>
@@ -264,59 +381,53 @@ export default function Header() {
           </div>
         )}
 
-        {/* Cargar JSON */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleImportFile}
-          accept=".json,application/json"
-          className="hidden"
-          data-testid="input-file-json"
-          aria-hidden="true"
-        />
-        <button
-          type="button"
-          data-testid="btn-import-json"
-          onClick={() => fileInputRef.current?.click()}
-          aria-label="Cargar archivo de grafo JSON"
-          className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          📂 Cargar
-        </button>
+        {/* Acciones secundarias en pantallas >= 640px */}
+        <div className="hidden items-center gap-1.5 sm:flex">
+          {/* Cargar JSON */}
+          <button
+            type="button"
+            data-testid="btn-import-json"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Cargar archivo de grafo JSON"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            📂 Cargar
+          </button>
 
-        {/* Guardar JSON */}
-        <button
-          type="button"
-          data-testid="btn-export-json"
-          onClick={handleExportJson}
-          aria-label="Guardar grafo en formato JSON"
-          className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          💾 Guardar
-        </button>
+          {/* Guardar JSON */}
+          <button
+            type="button"
+            data-testid="btn-export-json"
+            onClick={handleExportJson}
+            aria-label="Guardar grafo en formato JSON"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            💾 Guardar
+          </button>
 
-        {/* Exportar PNG */}
-        <button
-          type="button"
-          data-testid="btn-export-png"
-          onClick={handleExportPng}
-          aria-label="Exportar imagen del grafo en formato PNG"
-          className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          📷 PNG
-        </button>
+          {/* Exportar PNG */}
+          <button
+            type="button"
+            data-testid="btn-export-png"
+            onClick={handleExportPng}
+            aria-label="Exportar imagen del grafo en formato PNG"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            📷 PNG
+          </button>
 
-        {/* Alternador de Tema Claro / Oscuro / Sistema */}
-        <button
-          type="button"
-          data-testid="theme-toggle"
-          onClick={cycleTheme}
-          aria-label={`Cambiar tema visual (actual: ${theme})`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white text-sm shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
-          title={`Tema: ${theme}`}
-        >
-          {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}
-        </button>
+          {/* Alternador de Tema */}
+          <button
+            type="button"
+            data-testid="theme-toggle"
+            onClick={cycleTheme}
+            aria-label={`Cambiar tema visual (actual: ${theme})`}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white text-sm shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+            title={`Tema: ${theme}`}
+          >
+            {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}
+          </button>
+        </div>
       </div>
     </header>
   );

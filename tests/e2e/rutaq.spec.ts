@@ -313,8 +313,17 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await page.goto('./');
     await page.getByTestId('template-select').selectOption('ejemplo6');
 
+    // En móviles, abrir el menú de acciones secundarias si está presente
+    const moreMenuBtn = page.getByTestId('header-more-btn');
+    if (await moreMenuBtn.isVisible()) {
+      await moreMenuBtn.click();
+    }
+
     // Descargar archivo JSON
-    const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btn-export-json').click()]);
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('[data-testid="btn-export-json"]:visible').first().click(),
+    ]);
 
     expect(download.suggestedFilename()).toContain('.json');
     const path = await download.path();

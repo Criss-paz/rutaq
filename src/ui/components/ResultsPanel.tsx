@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { ResultTab } from '../../store/types';
+import { useUiStore } from '../uiStore';
 import { useApp } from '../useApp';
 import AllPathsTab from './tabs/AllPathsTab';
 import FloydTab from './tabs/FloydTab';
@@ -10,10 +10,10 @@ export default function ResultsPanel() {
   const activeTab = useApp((s) => s.activeTab);
   const setActiveTab = useApp((s) => s.setActiveTab);
 
-  // Estado para la hoja inferior en dispositivos móviles (<1024px): colapsada inicialmente a 56px, expandible a 60vh
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
-  // Estado para colapsar/expandir en escritorio (>=1024px): por defecto abierto a 460px
-  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
+  const isMobileExpanded = useUiStore((s) => s.isMobileExpanded);
+  const setIsMobileExpanded = useUiStore((s) => s.setIsMobileExpanded);
+  const isDesktopCollapsed = useUiStore((s) => s.isDesktopCollapsed);
+  const setIsDesktopCollapsed = useUiStore((s) => s.setIsDesktopCollapsed);
 
   const tabs: { key: ResultTab; label: string; shortLabel: string; icon: string; testId: string }[] = [
     { key: 'tabla', label: 'Tabla (S1)', shortLabel: 'Tabla', icon: '📋', testId: 'tab-tabla' },
