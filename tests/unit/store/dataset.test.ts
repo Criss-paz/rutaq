@@ -50,3 +50,20 @@ describe('datasetToGraph', () => {
     expect(datasetToGraph({ ...ds, nodes: [], edges: [] }).nodes).toEqual([]);
   });
 });
+
+describe('datasetToGraph con el dataset real', () => {
+  it('ningún par de municipios queda encimado', async () => {
+    const { default: q } = await import('../../../src/data/quetzaltenango.json');
+    const g = datasetToGraph(q as Dataset);
+    expect(g.nodes).toHaveLength(24);
+    for (const [i, a] of g.nodes.entries())
+      for (const b of g.nodes.slice(i + 1)) {
+        const libre = a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
+        expect(libre, `${a.label} / ${b.label}`).toBe(true);
+      }
+    // La geografía se conserva: Coatepeque (costa, oeste) queda al sur-oeste de Quetzaltenango.
+    const by = (id: string) => g.nodes.find((n) => n.id === id)!;
+    expect(by('COA').y).toBeGreaterThan(by('QTZ').y);
+    expect(by('COA').x).toBeLessThan(by('QTZ').x);
+  });
+});

@@ -7,7 +7,7 @@ export const DEFAULT_NODE_SIZE = { w: 132, h: 44 } as const;
  * en el centroide (suficiente para un departamento de ~2 000 km²) escalada a `widthPx` de ancho;
  * el norte queda arriba. (x, y) es la esquina superior izquierda del nodo.
  */
-export function datasetToGraph(ds: Dataset, widthPx = 1400): Graph {
+export function datasetToGraph(ds: Dataset, widthPx = 2400): Graph {
   if (ds.nodes.length === 0) return { nodes: [], edges: [], directed: false, unit: ds.meta.unidad };
 
   const lat0 = ds.nodes.reduce((a, n) => a + n.lat, 0) / ds.nodes.length;
@@ -38,5 +38,43 @@ export function datasetToGraph(ds: Dataset, widthPx = 1400): Graph {
     meta,
   }));
 
+  separateNodes(nodes);
   return { nodes, edges, directed: false, unit: ds.meta.unidad };
+}
+
+/**
+ * Las cabeceras del altiplano están a 2–3 km entre sí: proyectadas, sus cajas se enciman.
+ * Empuja cada par encimado a lo largo de la recta que une sus centros (mínimo desplazamiento,
+ * determinista), así se conserva la forma geográfica del departamento.
+ */
+export function separateNodes(nodes: GNode[], gap = 16, maxIter = 300): void {
+  for (let iter = 0; iter < maxIter; iter++) {
+    let moved = false;
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i]!;
+        const b = nodes[j]!;
+        const dx = b.x + b.w / 2 - (a.x + a.w / 2);
+        const dy = b.y + b.h / 2 - (a.y + a.h / 2);
+        const overlapX = (a.w + b.w) / 2 + gap - Math.abs(dx);
+        const overlapY = (a.h + b.h) / 2 + gap - Math.abs(dy);
+        if (overlapX <= 0 || overlapY <= 0) continue;
+        // Se separa por el eje que requiere menos movimiento.
+        if (overlapX / Math.max(1, Math.abs(dx)) < overlapY / Math.max(1, Math.abs(dy))) {
+          const s = (dx >= 0 ? 1 : -1) * (overlapX / 2);
+          a.x -= s;
+          b.x += s;
+        } else {
+          const s = (dy >= 0 ? 1 : -1) * (overlapY / 2);
+          a.y -= s;
+          b.y += s;
+        }
+        moved = true;
+      }
+    if (!moved) break;
+  }
+  for (const n of nodes) {
+    n.x = Math.round(n.x);
+    n.y = Math.round(n.y);
+  }
 }
