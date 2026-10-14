@@ -13,7 +13,7 @@ export default function App() {
   const canRedo = useApp((s) => s.canRedo());
   const mode = useApp((s) => s.mode);
   const validation = useApp((s) => s.validation);
-  const isMobileExpanded = useUiStore((s) => s.isMobileExpanded);
+  const mobileSheetPos = useUiStore((s) => s.mobileSheetPos);
 
   // Atajos de teclado globales (Ctrl+Z para deshacer, Ctrl+Y para rehacer)
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function App() {
         {/* Área central del lienzo con React Flow */}
         <main
           className={`relative flex flex-1 flex-col overflow-hidden transition-all duration-300 lg:!mb-0 ${
-            isMobileExpanded ? 'mb-[60vh]' : 'mb-14'
+            mobileSheetPos === 'expanded' ? 'mb-[85vh]' : mobileSheetPos === 'mid' ? 'mb-[45vh]' : 'mb-14'
           }`}
           role="main"
         >

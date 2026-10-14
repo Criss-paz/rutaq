@@ -31,6 +31,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   const setTreeQuery = useApp((s) => s.setTreeQuery);
   const setPathQuery = useApp((s) => s.setPathQuery);
   const query = useApp((s) => s.query);
+  const unit = useApp((s) => s.graph.unit || 'km');
 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(label);
@@ -139,7 +140,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   } else if (isPermanent) {
     borderClasses = 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-950 dark:text-blue-100';
     badgeColor = 'bg-blue-500 text-white';
-    badgeText = typeof dist === 'number' && dist < Infinity ? `${dist} km` : 'Perm.';
+    badgeText = typeof dist === 'number' && dist < Infinity ? `${dist} ${unit}` : 'Perm.';
   }
 
   return (
@@ -248,7 +249,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Fijar ${label} como origen`}
           title="Fijar como origen (A)"
-          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300 dark:hover:bg-emerald-950"
+          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-xs font-bold text-emerald-700 hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300 dark:hover:bg-emerald-950"
         >
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950">
             A
@@ -265,7 +266,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Fijar ${label} como destino`}
           title="Fijar como destino (B)"
-          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-rose-700 hover:bg-rose-100 focus-visible:ring-2 focus-visible:ring-rose-500 dark:text-rose-300 dark:hover:bg-rose-950"
+          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-xs font-bold text-rose-700 hover:bg-rose-100 focus-visible:ring-2 focus-visible:ring-rose-500 dark:text-rose-300 dark:hover:bg-rose-950"
         >
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950">B</span>
         </button>
@@ -280,7 +281,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           }}
           aria-label={`Más opciones del nodo ${label}`}
           title="Menú contextual del nodo"
-          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-slate-600 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-300 dark:hover:bg-slate-700"
+          className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-xs font-bold text-slate-600 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-300 dark:hover:bg-slate-700"
         >
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs dark:bg-slate-700">
             ⋯
@@ -297,7 +298,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
             }}
             aria-label={`Eliminar nodo ${label}`}
             title="Eliminar nodo"
-            className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[11px] font-bold text-slate-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-2 focus-visible:ring-red-500 dark:text-slate-300 dark:hover:bg-red-950"
+            className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-xs font-bold text-slate-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-2 focus-visible:ring-red-500 dark:text-slate-300 dark:hover:bg-red-950"
           >
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 hover:bg-red-200 dark:bg-slate-700">
               ×
@@ -323,7 +324,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
             className="w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 text-xs shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
             role="menu"
           >
-            <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase truncate">
+            <div className="px-3 py-1 text-xs font-bold tracking-wider text-slate-400 uppercase truncate">
               Nodo: {label}
             </div>
             <button

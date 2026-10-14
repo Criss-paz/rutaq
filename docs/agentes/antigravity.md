@@ -137,9 +137,38 @@ UI completa funcionando con el mock; `npm run lint && npm run typecheck && npm r
    - **Ejecución 2:** 44/44 pruebas pasadas (27.8s).
    - Cero flakiness (100 % de fiabilidad en ambos runs consecutivos).
 
+### Resolución de la Revisión del Orquestador (Ronda 4 — Empates en F3, Unidades Dinámicas, Celular y Lighthouse)
+
+1. **Gestión Integral de Empates en F3 [Ítem 1]**:
+   - En consultas de ruta más corta con múltiples soluciones mínimas empatadas (p. ej. `ejemplo6` de 6 nodos con $A \to F$, donde ambas rutas $A-B-D-E-F$ y $A-C-E-F$ tienen longitud 12):
+     - **Pestaña Gráfica:** Lista todas las rutas mínimas de `shortest` en tarjetas individuales con su distancia y secuencia de nodos, permitiendo seleccionar interactivamente cualquiera de ellas mediante `highlightPath({ from: 'shortest', index })`. Se añadió botón para restaurar la vista colectiva de todas las rutas empatadas.
+     - **Lienzo interactivo:** Al no haber selección individual, se resaltan simultáneamente todas las rutas empatadas: la primera con trazo sólido en `purple-600` y las restantes con trazo discontinuo (`stroke-dasharray="6 4"`) en `purple-600`.
+     - **Indicador de distancia:** Chip flotante exhibe el texto dinámico `«{dist} {unit} · {N} rutas empatadas»` (p. ej. «12 unidades · 2 rutas empatadas»).
+     - **Prueba E2E (Escenario 11):** Verifica la presencia de ambas rutas en la pestaña gráfica, su distancia de 12, el trazo sólido y discontinuo en las aristas del lienzo, y la selección interactiva.
+2. **Sustitución de unidades estáticas por `graph.unit` [Ítem 2]**:
+   - Se reemplazó el texto hardcodeado «km» en toda la interfaz (`src/ui`) por la unidad configurada en el grafo (`graph.unit`), con fallback dinámico:
+     - Etiquetas de aristas en el lienzo (`CustomEdge.tsx`): `{weight} {unit}`.
+     - Insignia de distancia acumulada en nodos (`CustomNode.tsx`): `{dist} {unit}`.
+     - Chip de resultado en lienzo (`Canvas.tsx`): `{dist} {unit}`.
+     - Resumen y cabecera de Matriz de Adyacencia en S1 (`TabularTab.tsx`).
+     - Filas y cabeceras de exportación CSV en S3 (`AllPathsTab.tsx`): columnas `Distancia_{unit}` y `Diferencia_{unit}`.
+     - Matrices de distancia $D^{(k)}$ y tooltips en S4 (`FloydTab.tsx`).
+3. **Hoja inferior móvil optimizada con 3 posiciones de arrastre [Ítem 3]**:
+   - Se implementó un estado trifásico `mobileSheetPos: 'collapsed' | 'mid' | 'expanded'` en `uiStore.ts`.
+   - Por defecto, al activar una consulta o abrir una pestaña en dispositivos móviles/tablets, la hoja se abre en posición `mid` (~45 % de la altura del viewport), garantizando $\ge 55\,\%$ de lienzo visible en todo momento.
+   - El tirador táctil (`bottom-sheet-handle`) soporta arrastre interactivo con captura de puntero (`pointerdown`, `pointermove`, `pointerup`) y transición elástica con umbrales hacia las posiciones `colapsada` (56 px), `media` (45vh) y `expandida` (85vh).
+   - El lienzo se redimensiona automáticamente (`ResizeObserver` y `fitView`) según la altura ocupada por la hoja.
+4. **Optimización de accesibilidad y Lighthouse móvil [Ítem 4]**:
+   - Se elevaron las fuentes de la interfaz de usuario a tamaños legibles $\ge 12\text{ px}$ (`text-xs` o superior) en paneles, botones, matrices, filas virtuales y menús.
+   - Se aseguraron objetivos táctiles $\ge 44\text{ px}$ (`min-h-[44px] min-w-[44px]`) en tiradores, botones de paso a paso, filas virtuales y controles interactivos fuera del lienzo.
+5. **Criterio de aceptación: 2 ejecuciones completas consecutivas de Playwright en verde**:
+   - **Ejecución 1:** 48/48 pruebas pasadas (27.9s) en los 4 perfiles (`desktop-chrome`, `iphone-13`, `pixel-7`, `ipad`).
+   - **Ejecución 2:** 48/48 pruebas pasadas (28.2s) en los 4 perfiles.
+   - 4 nuevas capturas de pantalla generadas para el Escenario 11 (`*-11-f3-empates.png`), sumando 44 capturas totales en `docs/informe/capturas/`.
+
 ### Pendiente
 
-- Ninguno. Todos los requerimientos de la Fase F1, la Revisión del Orquestador (Ronda 2) y la Ronda 3 (Móvil y Robustez) han sido completamente satisfechos.
+- Ninguno. Todos los requerimientos de la Fase F1, la Revisión del Orquestador (Rondas 2, 3 y 4) han sido completamente satisfechos.
 
 ### Decisiones
 
@@ -148,6 +177,7 @@ UI completa funcionando con el mock; `npm run lint && npm run typecheck && npm r
 3. **Cálculo de proporción al soltar nodo**: Al calcular la proyección proporcional solo en `onNodeDragStop`, el rendimiento del arrastre a 60 fps se mantiene fluido sin interrupciones ni recálculos bloqueantes.
 4. **Verificación E2E ligada a `verification/resultados.csv`**: Desacopla los tests de constantes fijas arbitrarias y garantiza que cualquier evolución de los algoritmos teóricos se contraste directamente contra la interfaz gráfica.
 5. **Portal DOM para menús contextuales en lienzo interactivo**: Renderizar fuera del árbol SVG/DOM transformado de React Flow elimina cualquier contención de coordenadas en `position: fixed`, garantizando posicionamiento viewport preciso en cualquier resolución de pantalla y nivel de zoom.
+6. **Resaltado dual sólido/discontinuo para empates**: Permite discernir a primera vista que existen múltiples trayectorias óptimas simultáneas sin recargar la paleta cromática, manteniendo el morado `purple-600` institucional para la ruta más corta y diferenciando variantes con patrón `6 4`.
 
 ### Dudas
 

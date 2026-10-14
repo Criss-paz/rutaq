@@ -12,6 +12,7 @@ export default function AllPathsTab() {
   const cancelAllPaths = useApp((s) => s.cancelAllPaths);
   const highlightedPath = useApp((s) => s.highlightedPath);
   const highlightPath = useApp((s) => s.highlightPath);
+  const unit = graph.unit || 'km';
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +40,8 @@ export default function AllPathsTab() {
 
   const handleExportCsv = () => {
     if (paths.length === 0) return;
-    const headers = ['#', 'Origen', 'Destino', 'Secuencia_Nodos', 'Tramos', 'Distancia_km', 'Diferencia_km'];
+    const unit = graph.unit || 'km';
+    const headers = ['#', 'Origen', 'Destino', 'Secuencia_Nodos', 'Tramos', `Distancia_${unit}`, `Diferencia_${unit}`];
     const rows = paths.map((p, idx) => {
       const orig = p.nodes[0] ? getNodeLabel(p.nodes[0]) : '';
       const dest = p.nodes[p.nodes.length - 1] ? getNodeLabel(p.nodes[p.nodes.length - 1]!) : '';
@@ -143,7 +145,7 @@ export default function AllPathsTab() {
           </span>
           {allPaths.result && !allPaths.result.complete && (
             <span
-              className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-200"
+              className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-200"
               title="Se excedió el límite configurado; mostrando las K rutas más cortas calculadas con el algoritmo de Yen."
             >
               Límite alcanzado (Yen)
@@ -205,7 +207,7 @@ export default function AllPathsTab() {
                       height: `${virtualRow.size}px`,
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
-                    className={`grid cursor-pointer grid-cols-12 items-center border-b border-slate-100 px-3 transition-colors dark:border-slate-800 ${
+                    className={`grid min-h-[44px] cursor-pointer grid-cols-12 items-center border-b border-slate-100 px-3 transition-colors dark:border-slate-800 ${
                       isHighlighted
                         ? 'bg-purple-100/90 font-semibold text-purple-950 dark:bg-purple-950/70 dark:text-purple-100'
                         : isShortest
@@ -227,14 +229,14 @@ export default function AllPathsTab() {
                     </div>
 
                     <div className="col-span-2 text-right font-mono font-bold text-blue-600 dark:text-blue-400">
-                      {path.distance} km
+                      {path.distance} {unit}
                     </div>
 
                     <div className="col-span-2 text-right font-mono text-slate-600 dark:text-slate-400">
                       {isShortest ? (
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">+0.0 km</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">+0.0 {unit}</span>
                       ) : (
-                        `+${diff} km`
+                        `+${diff} ${unit}`
                       )}
                     </div>
                   </div>
