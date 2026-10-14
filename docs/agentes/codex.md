@@ -36,8 +36,24 @@ Reemplaza los stubs de `src/core/*.ts` manteniendo el patrón `export const f: C
 
 ### Hecho
 
+- Implementados lista de adyacencia, validación, Dijkstra con pasos y heap, rutas mínimas empatadas, modelo tabular, Floyd-Warshall y reconstrucción de rutas, enumeración DFS con progreso y fallback, escala, sugerencia de posiciones y formas automáticas.
+- Añadidas pruebas unitarias y de propiedades con 500 grafos aleatorios; se comparan Dijkstra, Floyd, enumeración y rutas limitadas.
+- Añadida verificación networkx que genera CSV y reporte; cotejó 36/36 pares del grafo de prueba. Se creó `.venv` con las dependencias de `verification/requirements.txt`.
+- `npm run lint`, `npm run typecheck`, `npm run test`, `npm run test:coverage` (97.41 % statements, 90.19 % branches, 99.26 % lines), y `npm run build` pasan.
+
 ### Pendiente
+
+- `npm run format:check` marca únicamente `.agent-prompt.md`, archivo de instrucciones fuera de las carpetas autorizadas; todos los archivos propios pasan Prettier.
+- Los datasets `src/data/ejemplo6.json` y `src/data/quetzaltenango.json` todavía no existen, por lo que la verificación de esos archivos queda pendiente hasta que los publique Gemini.
+- La prueba de red propia compara todos los pares, y el ejemplo de 6 nodos de verificación está codificado en `verification/export.ts` mientras se espera el JSON del otro agente.
 
 ### Decisiones
 
+- Desempate de nodos y rutas por comparación lexicográfica de ids; pesos iguales no reemplazan predecesores en Dijkstra.
+- El layout separa componentes y distribuye nodos en círculos usando distancias de camino para estimar el radio; no aplica el algoritmo iterativo de stress majorization.
+- El módulo `yen.ts` conserva orden exacto mediante enumeración exhaustiva ordenada; para redes grandes su costo puede ser alto y requiere reemplazarse por Yen clásico antes de usar con grafos densos.
+- El ajuste de formas automáticas elige `bezier` para cruces o nodos atravesados; `arc` no se selecciona automáticamente.
+
 ### Dudas
+
+- No hay dudas sobre contratos. Se recomienda que el orquestador programe la sustitución de la enumeración exhaustiva por Yen clásico y stress majorization iterativo si los grafos reales o de diseño crecen.
