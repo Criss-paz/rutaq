@@ -2,7 +2,7 @@
 
 _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
-## Fase actual: **F5 Informe** — app publicada en https://criss-paz.github.io/rutaq/ (2026-10-14)
+## Estado: **TERMINADO** — app publicada en https://criss-paz.github.io/rutaq/ (2026-10-14)
 
 | Fase           | Estado | Puerta de salida                                                                              |
 | -------------- | ------ | --------------------------------------------------------------------------------------------- |
@@ -11,7 +11,7 @@ _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 | F2 Integración | ✅     | App con núcleo, store y dataset reales                                                        |
 | F3 QA          | ✅     | Sección 8 completa, también contra la URL publicada                                           |
 | F4 Despliegue  | ✅     | https://criss-paz.github.io/rutaq/ · https://github.com/Criss-paz/rutaq · CI y Pages en verde |
-| F5 Informe     | 🔄     | Capturas de producción listas; Gemini integra figuras y exporta .docx/PDF                     |
+| F5 Informe     | ✅     | `docs/informe/INFORME.pdf` (29 págs.) y `INFORME.docx`, con capturas de la versión desplegada |
 
 ## Sección 8 — verificación del orquestador
 
@@ -45,9 +45,9 @@ _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
 Plan completo para los agentes: `docs/PLAN.md`. Rama de integración: `main`.
 
-## Bloqueos y pendientes de Cris
+## Notas para Cris (no bloquean)
 
-- **Formato exacto del método tabular del catedrático:** pendiente de confirmar con los apuntes de Cris; S1 es configurable (`TabularConfig`).
+- **Formato de la tabla del catedrático:** S1 es configurable desde la app (formato de etiqueta, tachado, matriz de adyacencia); confirmar con los apuntes. Resumen de entrega: `docs/RESUMEN.md`.
 
 ## Propiedad de carpetas
 
