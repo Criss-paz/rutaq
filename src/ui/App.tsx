@@ -1,13 +1,74 @@
-// Placeholder de F0 — Antigravity lo reemplaza con el layout principal (sección 6 del plan).
+import { useEffect } from 'react';
+import { ReactFlowProvider } from '@xyflow/react';
+import Canvas from './components/Canvas';
+import Header from './components/Header';
+import ResultsPanel from './components/ResultsPanel';
+import { useApp } from './useApp';
+
 export default function App() {
+  const undo = useApp((s) => s.undo);
+  const redo = useApp((s) => s.redo);
+  const canUndo = useApp((s) => s.canUndo());
+  const canRedo = useApp((s) => s.canRedo());
+  const mode = useApp((s) => s.mode);
+  const validation = useApp((s) => s.validation);
+
+  // Atajos de teclado globales (Ctrl+Z para deshacer, Ctrl+Y para rehacer)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignorar si el usuario está escribiendo en un input
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        document.activeElement instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
+      if (mode === 'design') {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          if (e.shiftKey) {
+            if (canRedo) redo();
+          } else {
+            if (canUndo) undo();
+          }
+          e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          if (canRedo) redo();
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mode, canUndo, canRedo, undo, redo]);
+
   return (
-    <main className="flex h-full items-center justify-center bg-slate-50 p-6 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
-      <div className="max-w-md text-center">
-        <h1 className="text-2xl font-semibold">RutaQ</h1>
-        <p className="mt-2 text-slate-600 dark:text-slate-300">
-          Ruta más corta en la red vial del departamento de Quetzaltenango. En construcción.
-        </p>
-      </div>
-    </main>
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-50 font-sans text-slate-900 select-none dark:bg-slate-950 dark:text-slate-100">
+      {/* Barra superior */}
+      <Header />
+
+      {/* Alerta de validación en caso de advertencia o error en el grafo */}
+      {!validation.ok && (
+        <div
+          data-testid="validation-alert"
+          role="alert"
+          className="flex items-center justify-between border-b border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-800 dark:border-rose-900 dark:bg-rose-950/80 dark:text-rose-200"
+        >
+          <span>⚠️ {validation.issues[0]?.message ?? 'El grafo presenta inconsistencias.'}</span>
+        </div>
+      )}
+
+      {/* Área central del lienzo con React Flow */}
+      <main className="relative flex-1 overflow-hidden" role="main">
+        <ReactFlowProvider>
+          <Canvas />
+        </ReactFlowProvider>
+      </main>
+
+      {/* Panel inferior de resultados con pestañas */}
+      <ResultsPanel />
+    </div>
   );
 }
