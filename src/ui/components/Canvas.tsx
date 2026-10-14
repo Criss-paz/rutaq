@@ -15,6 +15,7 @@ import { useApp } from '../useApp';
 import { useUiStore } from '../uiStore';
 import { CustomEdge } from './CustomEdge';
 import { CustomNode } from './CustomNode';
+import EdgeDialog from './EdgeDialog';
 
 const nodeTypes = {
   customNode: CustomNode,
@@ -42,9 +43,24 @@ export default function Canvas() {
   const keepProportion = useApp((s) => s.keepProportion);
   const setKeepProportion = useApp((s) => s.setKeepProportion);
   const addNode = useApp((s) => s.addNode);
-  const addEdge = useApp((s) => s.addEdge);
   const moveNodes = useApp((s) => s.moveNodes);
+  const selectedNodeIds = useApp((s) => s.selectedNodeIds);
+  const selectedEdgeIds = useApp((s) => s.selectedEdgeIds);
   const theme = useApp((s) => s.theme);
+
+  const [edgeDialogState, setEdgeDialogState] = useState<{
+    isOpen: boolean;
+    sourceId: string;
+    targetId: string;
+    isSelfLoop?: boolean;
+    canSelectEndpoints?: boolean;
+  }>({
+    isOpen: false,
+    sourceId: '',
+    targetId: '',
+    isSelfLoop: false,
+    canSelectEndpoints: false,
+  });
 
   const mobileSheetPos = useUiStore((s) => s.mobileSheetPos);
   const isDesktopCollapsed = useUiStore((s) => s.isDesktopCollapsed);
@@ -130,6 +146,7 @@ export default function Canvas() {
         type: 'customNode',
         position: { x: n.x, y: n.y },
         style: { width: n.w, height: n.h },
+        selected: selectedNodeIds.includes(n.id),
         data: {
           label: n.label,
           isOrigin,
@@ -141,7 +158,7 @@ export default function Canvas() {
         },
       };
     });
-  }, [graph.nodes, query, currentStepCurrent, permanentNodesSet, activePathNodes, dijkstra?.labels]);
+  }, [graph.nodes, query, currentStepCurrent, permanentNodesSet, activePathNodes, dijkstra?.labels, selectedNodeIds]);
 
   // Mapear aristas de Graph a ReactFlow Edges
   const rfEdges: Edge[] = useMemo(() => {
@@ -158,6 +175,7 @@ export default function Canvas() {
         source: e.source,
         target: e.target,
         type: 'customEdge',
+        selected: selectedEdgeIds.includes(e.id),
         data: {
           weight: e.weight,
           shape: e.shape,
@@ -170,7 +188,7 @@ export default function Canvas() {
         },
       };
     });
-  }, [graph.edges, graph.unit, activePathEdges, dashedPathEdges, treeEdgesSet, evaluatedEdgesSet]);
+  }, [graph.edges, graph.unit, activePathEdges, dashedPathEdges, treeEdgesSet, evaluatedEdgesSet, selectedEdgeIds]);
 
   const [prevRfNodes, setPrevRfNodes] = useState<Node[]>(rfNodes);
   const [localNodes, setLocalNodes] = useState<Node[]>(rfNodes);
@@ -311,26 +329,15 @@ export default function Canvas() {
     (params: Connection) => {
       if (mode !== 'design') return;
       if (!params.source || !params.target) return;
-      const unit = graph.unit || 'km';
-      const weightStr = prompt(`Ingrese el peso de la carretera en ${unit}:`, '5.0');
-      if (weightStr === null) return;
-      const weight = parseFloat(weightStr);
-      if (isNaN(weight) || weight <= 0) {
-        alert('El peso debe ser un número positivo.');
-        return;
-      }
-      const res = addEdge(params.source, params.target, weight);
-      if (!res.ok) {
-        if (res.reason === 'duplicate') {
-          alert('Ya existe una arista entre estos dos nodos.');
-        } else if (res.reason === 'self-loop') {
-          alert('No se permiten lazos hacia el mismo nodo.');
-        } else {
-          alert('No fue posible agregar la arista.');
-        }
-      }
+      setEdgeDialogState({
+        isOpen: true,
+        sourceId: params.source,
+        targetId: params.target,
+        isSelfLoop: params.source === params.target,
+        canSelectEndpoints: false,
+      });
     },
-    [mode, addEdge, graph.unit],
+    [mode],
   );
 
   const handleAddNodeClick = () => {
@@ -481,6 +488,27 @@ export default function Canvas() {
 
             <button
               type="button"
+              data-testid="btn-add-edge"
+              onClick={() => {
+                if (graph.nodes.length < 2) return;
+                const src = selectedNodeIds[0] ?? graph.nodes[0]!.id;
+                const tgt = selectedNodeIds[1] ?? graph.nodes.find((n) => n.id !== src)?.id ?? graph.nodes[1]!.id;
+                setEdgeDialogState({
+                  isOpen: true,
+                  sourceId: src,
+                  targetId: tgt,
+                  isSelfLoop: false,
+                  canSelectEndpoints: true,
+                });
+              }}
+              aria-label="Agregar una nueva carretera entre nodos"
+              className="flex min-h-[44px] items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden"
+            >
+              <span>+</span> Carretera
+            </button>
+
+            <button
+              type="button"
               data-testid="btn-suggest-layout"
               onClick={async () => {
                 await applySuggestedLayout();
@@ -555,6 +583,15 @@ export default function Canvas() {
           />
         </ReactFlow>
       </div>
+
+      <EdgeDialog
+        isOpen={edgeDialogState.isOpen}
+        onClose={() => setEdgeDialogState((prev) => ({ ...prev, isOpen: false }))}
+        sourceId={edgeDialogState.sourceId}
+        targetId={edgeDialogState.targetId}
+        isSelfLoop={edgeDialogState.isSelfLoop}
+        canSelectEndpoints={edgeDialogState.canSelectEndpoints}
+      />
     </div>
   );
 }
