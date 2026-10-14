@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   applyNodeChanges,
   Background,
@@ -6,13 +6,11 @@ import {
   type Connection,
   Controls,
   type Edge,
-  MiniMap,
   type Node,
   type NodeChange,
   ReactFlow,
   useReactFlow,
 } from '@xyflow/react';
-import type { NodeId } from '../../core/types';
 import { useApp } from '../useApp';
 import { CustomEdge } from './CustomEdge';
 import { CustomNode } from './CustomNode';
@@ -151,26 +149,92 @@ export default function Canvas() {
     });
   }, [graph.edges, activePathEdges, treeEdgesSet, evaluatedEdgesSet]);
 
-  // Manejador de cambios de posición de nodos
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      const updatedNodes = applyNodeChanges(changes, rfNodes);
-      const moves: Record<NodeId, { x: number; y: number }> = {};
-      let hasPositionChange = false;
+  const [prevRfNodes, setPrevRfNodes] = useState<Node[]>(rfNodes);
+  const [localNodes, setLocalNodes] = useState<Node[]>(rfNodes);
+  const graphName = useApp((s) => s.graphName);
+  const prevGraphNameRef = useRef(graphName);
 
-      for (const change of changes) {
-        if (change.type === 'position' && change.position) {
-          moves[change.id] = change.position;
-          hasPositionChange = true;
+  // Sincronizar nodos locales durante el render cuando cambia el grafo o las consultas del store
+  if (prevRfNodes !== rfNodes) {
+    setPrevRfNodes(rfNodes);
+    setLocalNodes(rfNodes);
+  }
+
+  // Re-ajustar vista automáticamente al cambiar de plantilla
+  useEffect(() => {
+    if (prevGraphNameRef.current !== graphName) {
+      prevGraphNameRef.current = graphName;
+      const timer = setTimeout(() => {
+        fitView({ padding: 0.05, duration: 250 });
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [graphName, fitView]);
+
+  // Manejador durante el arrastre: actualiza ÚNICAMENTE el estado local de React Flow
+  // para evitar saturar el historial de deshacer/rehacer y no recalcular el store en cada píxel.
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    setLocalNodes((prev) => applyNodeChanges(changes, prev));
+  }, []);
+
+  // Al soltar el nodo (onNodeDragStop): se registra una única entrada en el historial de deshacer.
+  // Regla de Mantener Proporción (keepProportion):
+  // Si está activa y scale.pxPerUnit > 0, se busca el vecino conectado más cercano. Se calcula el
+  // ángulo entre dicho vecino y la posición soltada, y se proyecta la nueva posición del nodo a
+  // la distancia euclídea exacta (peso × scale.pxPerUnit) sobre dicha semirrecta.
+  const onNodeDragStop = useCallback(
+    (_event: MouseEvent | TouchEvent, node: Node) => {
+      let finalX = node.position.x;
+      let finalY = node.position.y;
+
+      if (keepProportion && scale.pxPerUnit > 0) {
+        const incidentEdges = graph.edges.filter((e) => e.source === node.id || e.target === node.id);
+
+        if (incidentEdges.length > 0) {
+          const nodeW = node.measured?.width ?? (typeof node.style?.width === 'number' ? node.style.width : 132);
+          const nodeH = node.measured?.height ?? (typeof node.style?.height === 'number' ? node.style.height : 44);
+          const curCenterX = finalX + nodeW / 2;
+          const curCenterY = finalY + nodeH / 2;
+
+          let bestNeighbor: { cx: number; cy: number; targetDist: number } | null = null;
+          let minDistance = Infinity;
+
+          for (const e of incidentEdges) {
+            const neighborId = e.source === node.id ? e.target : e.source;
+            const neighborNode = graph.nodes.find((n) => n.id === neighborId);
+            if (!neighborNode) continue;
+
+            const nCenterX = neighborNode.x + neighborNode.w / 2;
+            const nCenterY = neighborNode.y + neighborNode.h / 2;
+            const dist = Math.hypot(curCenterX - nCenterX, curCenterY - nCenterY);
+            const targetDist = e.weight * scale.pxPerUnit;
+
+            if (dist < minDistance) {
+              minDistance = dist;
+              bestNeighbor = { cx: nCenterX, cy: nCenterY, targetDist };
+            }
+          }
+
+          if (bestNeighbor) {
+            const dx = curCenterX - bestNeighbor.cx;
+            const dy = curCenterY - bestNeighbor.cy;
+            const angle = Math.atan2(dy, dx);
+            const projCenterX = bestNeighbor.cx + bestNeighbor.targetDist * Math.cos(angle);
+            const projCenterY = bestNeighbor.cy + bestNeighbor.targetDist * Math.sin(angle);
+            finalX = projCenterX - nodeW / 2;
+            finalY = projCenterY - nodeH / 2;
+          }
         }
       }
 
-      if (hasPositionChange) {
-        moveNodes(moves);
-      }
-      return updatedNodes;
+      moveNodes({
+        [node.id]: {
+          x: Math.round(finalX),
+          y: Math.round(finalY),
+        },
+      });
     },
-    [rfNodes, moveNodes],
+    [keepProportion, scale.pxPerUnit, graph.edges, graph.nodes, moveNodes],
   );
 
   // Manejador de conexión de nuevas aristas al arrastrar
@@ -386,15 +450,16 @@ export default function Canvas() {
       {/* Contenedor del Lienzo ReactFlow */}
       <div className="relative flex-1 w-full overflow-hidden">
         <ReactFlow
-          nodes={rfNodes}
+          nodes={localNodes}
           edges={rfEdges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
+          onNodeDragStop={onNodeDragStop}
           onConnect={onConnect}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
-          minZoom={0.2}
+          fitViewOptions={{ padding: 0.05 }}
+          minZoom={0.25}
           maxZoom={2.5}
           deleteKeyCode={mode === 'design' ? 'Delete' : null}
         >
@@ -406,13 +471,8 @@ export default function Canvas() {
           />
           <Controls
             showInteractive={false}
-            className="!border !border-slate-200 !bg-white/90 !shadow-xs dark:!border-slate-700 dark:!bg-slate-800/90"
-          />
-          <MiniMap
             position="bottom-left"
-            nodeColor={theme === 'dark' ? '#3b82f6' : '#2563eb'}
-            maskColor={theme === 'dark' ? 'rgba(15, 23, 42, 0.7)' : 'rgba(248, 250, 252, 0.7)'}
-            className="hidden sm:block !rounded-lg !border !border-slate-200 !bg-white/90 dark:!border-slate-700 dark:!bg-slate-800/90"
+            className="!m-3 !overflow-hidden !rounded-lg !border !border-slate-200 !bg-white/95 !shadow-md dark:!border-slate-700 dark:!bg-slate-800/95 [&>button]:!border-b [&>button]:!border-slate-200 dark:[&>button]:!border-slate-700 [&>button]:!bg-white dark:[&>button]:!bg-slate-800 [&>button]:!text-slate-700 dark:[&>button]:!text-slate-200 [&>button:hover]:!bg-slate-100 dark:[&>button:hover]:!bg-slate-700 [&>button>svg]:!fill-current"
           />
         </ReactFlow>
       </div>

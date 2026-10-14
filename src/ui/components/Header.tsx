@@ -151,6 +151,14 @@ export default function Header() {
     setTheme(next);
   };
 
+  const currentTemplate = graphName.toLowerCase().includes('quetzaltenango')
+    ? 'quetzaltenango'
+    : graphName.toLowerCase().includes('ejemplo')
+      ? 'ejemplo6'
+      : graph.nodes.length === 0
+        ? 'vacio'
+        : '';
+
   return (
     <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-2 text-slate-800 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
       {/* Logotipo y título */}
@@ -210,13 +218,18 @@ export default function Header() {
           <select
             data-testid="template-select"
             aria-label="Cargar plantilla"
+            value={currentTemplate}
             onChange={(e) => {
               const val = e.target.value as 'quetzaltenango' | 'ejemplo6' | 'vacio';
-              loadTemplate(val);
+              if (val) loadTemplate(val);
             }}
-            defaultValue="ejemplo6"
             className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
           >
+            {currentTemplate === '' && (
+              <option value="" disabled>
+                Plantillas…
+              </option>
+            )}
             <option value="quetzaltenango">Plantilla: Quetzaltenango (24 muns)</option>
             <option value="ejemplo6">Plantilla: Ejemplo 6 nodos</option>
             <option value="vacio">Plantilla: Grafo vacío</option>

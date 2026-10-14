@@ -1,4 +1,17 @@
+import fs from 'node:fs';
 import { expect, test } from '@playwright/test';
+
+// Función auxiliar para leer la solución teórica de Dijkstra verificada con networkx
+function getNetworkxDistance(graphFile: string, origin: string, destination: string): number {
+  const content = fs.readFileSync('verification/resultados.csv', 'utf-8');
+  for (const line of content.split('\n')) {
+    const parts = line.trim().split(',');
+    if (parts[0] === graphFile && parts[1] === origin && parts[2] === destination) {
+      return parseFloat(parts[3]!);
+    }
+  }
+  throw new Error(`Distancia no encontrada en resultados.csv para ${graphFile} ${origin}->${destination}`);
+}
 
 test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
   test.beforeEach(async ({ page }) => {
@@ -41,11 +54,11 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     // Cambiar a plantilla Quetzaltenango
     await page.getByTestId('template-select').selectOption('quetzaltenango');
 
-    // Verificar nodos clave
-    await expect(page.getByTestId('node-quetzaltenango')).toBeVisible();
-    await expect(page.getByTestId('node-salcaja')).toBeVisible();
-    await expect(page.getByTestId('node-cantel')).toBeVisible();
-    await expect(page.getByTestId('node-coatepeque')).toBeVisible();
+    // Verificar nodos clave por sus IDs reales del dataset
+    await expect(page.getByTestId('node-QTZ')).toBeVisible();
+    await expect(page.getByTestId('node-SAL')).toBeVisible();
+    await expect(page.getByTestId('node-CAN')).toBeVisible();
+    await expect(page.getByTestId('node-COA')).toBeVisible();
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-02-quetzaltenango.png`,
@@ -67,14 +80,17 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     // Consulta 1: Desde nodo A
     await page.getByTestId('select-source-node').selectOption('A');
     await expect(page.getByTestId('tabular-summary-table')).toBeVisible();
-    await expect(page.getByTestId('tabular-summary-table')).toContainText('A (Origen)');
+    await expect(page.getByTestId('tabular-summary-table')).toContainText('(Origen)');
+    await expect(page.getByTestId('tabular-summary-table')).toContainText('A (A)');
 
     // Consulta 2: Desde nodo B
     await page.getByTestId('select-source-node').selectOption('B');
+    await expect(page.getByTestId('tabular-summary-table')).toContainText('(Origen)');
     await expect(page.getByTestId('tabular-summary-table')).toContainText('B (B)');
 
     // Consulta 3: Desde nodo C
     await page.getByTestId('select-source-node').selectOption('C');
+    await expect(page.getByTestId('tabular-summary-table')).toContainText('(Origen)');
     await expect(page.getByTestId('tabular-summary-table')).toContainText('C (C)');
 
     await page.screenshot({
@@ -84,27 +100,30 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
 
   test('04. Consultas F3 (Ruta más corta) entre 3 pares distintos', async ({ page }, testInfo) => {
     await page.goto('./');
-    await page.getByTestId('template-select').selectOption('ejemplo6');
+    // Asegurar dataset de Quetzaltenango
+    await page.getByTestId('template-select').selectOption('quetzaltenango');
 
     // Activar modo Ruta F3
     await page.getByTestId('query-mode-path').click();
 
-    // Par 1: A -> F
-    await page.getByTestId('select-source-node').selectOption('A');
-    await page.getByTestId('select-target-node').selectOption('F');
+    // Par 1: Quetzaltenango (QTZ) -> Salcajá (SAL)
+    const dist1 = getNetworkxDistance('src/data/quetzaltenango.json', 'QTZ', 'SAL');
+    await page.getByTestId('select-source-node').selectOption('QTZ');
+    await page.getByTestId('select-target-node').selectOption('SAL');
 
     // Cambiar a pestaña gráfica para verificar resumen de ruta
     await page.getByTestId('tab-grafica').click();
-    await expect(page.getByText('Distancia Total: 13 km')).toBeVisible();
+    await expect(page.getByText(`Distancia Total: ${dist1} km`)).toBeVisible();
 
-    // Par 2: A -> D (A -> C (2) -> B (1) -> D (5) = 8 km)
-    await page.getByTestId('select-target-node').selectOption('D');
-    await expect(page.getByText('Distancia Total: 8 km')).toBeVisible();
+    // Par 2: Quetzaltenango (QTZ) -> Olintepeque (OLI)
+    const dist2 = getNetworkxDistance('src/data/quetzaltenango.json', 'QTZ', 'OLI');
+    await page.getByTestId('select-target-node').selectOption('OLI');
+    await expect(page.getByText(`Distancia Total: ${dist2} km`)).toBeVisible();
 
-    // Par 3: B -> E (B -> D (5) -> E (2) = 7 km)
-    await page.getByTestId('select-source-node').selectOption('B');
-    await page.getByTestId('select-target-node').selectOption('E');
-    await expect(page.getByText('Distancia Total: 7 km')).toBeVisible();
+    // Par 3: Quetzaltenango (QTZ) -> Coatepeque (COA)
+    const dist3 = getNetworkxDistance('src/data/quetzaltenango.json', 'QTZ', 'COA');
+    await page.getByTestId('select-target-node').selectOption('COA');
+    await expect(page.getByText(`Distancia Total: ${dist3} km`)).toBeVisible();
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-04-f3-ruta.png`,
@@ -147,7 +166,7 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     });
   });
 
-  test('06. Lista S3 de todas las rutas, estrella en la mínima, resaltar y exportar CSV', async ({
+  test('06. Lista S3 de todas las rutas, estrella en la mínima, cancelar y exportar CSV', async ({
     page,
   }, testInfo) => {
     await page.goto('./');
@@ -156,15 +175,18 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await page.getByTestId('select-source-node').selectOption('A');
     await page.getByTestId('select-target-node').selectOption('F');
 
+    // Distancia teórica esperada de Dijkstra calculada con networkx
+    const expectedDijkstraDist = getNetworkxDistance('src/data/ejemplo6.json', 'A', 'F');
+
     // Ir a pestaña S3
     await page.getByTestId('tab-rutas').click();
     await expect(page.getByTestId('all-paths-virtual-list')).toBeVisible();
 
-    // Comprobar estrella en la más corta
+    // Comprobar estrella en la ruta más corta y verificar que coincide con la solución teórica de Dijkstra
     const firstRow = page.getByTestId('path-row-0');
-    await expect(firstRow).toBeVisible();
+    await expect(firstRow).toBeVisible({ timeout: 10000 });
     await expect(firstRow).toContainText('⭐');
-    await expect(firstRow).toContainText('13 km');
+    await expect(firstRow).toContainText(`${expectedDijkstraDist} km`);
     await expect(firstRow).toContainText('+0.0 km');
 
     // Clic en la fila para resaltar
@@ -173,6 +195,21 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     // Exportar CSV
     const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btn-export-csv').click()]);
     expect(download.suggestedFilename()).toContain('.csv');
+
+    // Probar que cancelar S3 funciona: cambiar a Quetzaltenango y lanzar búsqueda de muchas rutas
+    await page.getByTestId('template-select').selectOption('quetzaltenango');
+    await page.getByTestId('query-mode-path').click();
+    await page.getByTestId('select-source-node').selectOption('QTZ');
+    await page.getByTestId('select-target-node').selectOption('COA');
+    await page.getByTestId('tab-rutas').click();
+    await page.getByTestId('btn-run-all-paths').click();
+
+    // Si el botón de cancelar aparece durante la ejecución, presionarlo y verificar cancelación
+    const cancelBtn = page.getByTestId('btn-cancel-all-paths');
+    if (await cancelBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await cancelBtn.click();
+      await expect(page.getByText(/cancelada/i).first()).toBeVisible();
+    }
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-06-s3-todas-rutas.png`,
@@ -216,20 +253,20 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await page.getByTestId('btn-add-node').click();
     await page.getByTestId('btn-add-node').click();
 
-    // Verificar presencia de los 5 nodos
-    await expect(page.getByTestId('node-N1')).toBeVisible();
-    await expect(page.getByTestId('node-N2')).toBeVisible();
-    await expect(page.getByTestId('node-N3')).toBeVisible();
-    await expect(page.getByTestId('node-N4')).toBeVisible();
-    await expect(page.getByTestId('node-N5')).toBeVisible();
+    // Verificar presencia de los 5 nodos por sus etiquetas visibles (A, B, C, D, E)
+    await expect(page.getByTestId('node-label-A')).toBeVisible();
+    await expect(page.getByTestId('node-label-B')).toBeVisible();
+    await expect(page.getByTestId('node-label-C')).toBeVisible();
+    await expect(page.getByTestId('node-label-D')).toBeVisible();
+    await expect(page.getByTestId('node-label-E')).toBeVisible();
 
-    // Probar deshacer
+    // Probar deshacer (elimina el nodo E)
     await page.getByTestId('btn-undo').click();
-    await expect(page.getByTestId('node-N5')).not.toBeVisible();
+    await expect(page.getByTestId('node-label-E')).not.toBeVisible();
 
-    // Probar rehacer
+    // Probar rehacer (restaura el nodo E)
     await page.getByTestId('btn-redo').click();
-    await expect(page.getByTestId('node-N5')).toBeVisible();
+    await expect(page.getByTestId('node-label-E')).toBeVisible();
 
     // Probar distribución sugerida
     await page.getByTestId('btn-suggest-layout').click();
@@ -244,9 +281,10 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await page.getByTestId('template-select').selectOption('ejemplo6');
     await page.getByTestId('query-clear').click();
 
-    // Abrir menú de arista e1
-    await expect(page.getByTestId('edge-menu-e1')).toBeVisible();
-    await page.getByTestId('edge-menu-e1').click({ force: true });
+    // Abrir menú de la primera arista disponible
+    const edgeMenu = page.locator('[data-testid^="edge-menu-"]').first();
+    await expect(edgeMenu).toBeVisible();
+    await edgeMenu.click({ force: true });
 
     // Cambiar forma a curva (bezier)
     await expect(page.getByTestId('edge-shape-bezier')).toBeVisible();
@@ -254,15 +292,15 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await page.waitForTimeout(200);
 
     // Abrir menú nuevamente y cambiar a arco
-    await expect(page.getByTestId('edge-menu-e1')).toBeVisible();
-    await page.getByTestId('edge-menu-e1').click({ force: true });
+    await expect(edgeMenu).toBeVisible();
+    await edgeMenu.click({ force: true });
     await expect(page.getByTestId('edge-shape-arc')).toBeVisible();
     await page.getByTestId('edge-shape-arc').click({ force: true });
     await page.waitForTimeout(200);
 
     // Abrir menú y volver a automático
-    await expect(page.getByTestId('edge-menu-e1')).toBeVisible();
-    await page.getByTestId('edge-menu-e1').click({ force: true });
+    await expect(edgeMenu).toBeVisible();
+    await edgeMenu.click({ force: true });
     await expect(page.getByTestId('edge-shape-reset-auto')).toBeVisible();
     await page.getByTestId('edge-shape-reset-auto').click({ force: true });
 

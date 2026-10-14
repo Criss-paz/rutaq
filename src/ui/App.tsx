@@ -60,15 +60,18 @@ export default function App() {
         </div>
       )}
 
-      {/* Área central del lienzo con React Flow */}
-      <main className="relative flex-1 overflow-hidden" role="main">
-        <ReactFlowProvider>
-          <Canvas />
-        </ReactFlowProvider>
-      </main>
+      {/* Contenedor principal: en pantallas >= 1024px divide en lienzo a la izquierda y panel a la derecha */}
+      <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Área central del lienzo con React Flow */}
+        <main className="relative h-full flex-1 overflow-hidden" role="main">
+          <ReactFlowProvider>
+            <Canvas />
+          </ReactFlowProvider>
+        </main>
 
-      {/* Panel inferior de resultados con pestañas */}
-      <ResultsPanel />
+        {/* Panel de resultados con pestañas (hoja inferior en móvil/tablet, lateral derecho en escritorio) */}
+        <ResultsPanel />
+      </div>
     </div>
   );
 }
