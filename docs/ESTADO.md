@@ -2,36 +2,38 @@
 
 _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
-## Fase actual: **F1 cerrando / F2 integración en curso** (2026-10-14)
+## Fase actual: **F3 QA terminada (local) — F4 Despliegue bloqueado por confirmación de Cris** (2026-10-14)
 
-| Fase           | Estado                                                   | Responsable               | Puerta de salida                                 |
-| -------------- | -------------------------------------------------------- | ------------------------- | ------------------------------------------------ |
-| F0 Base        | ✅ Hecha                                                 | Claude Code               | Repo, contrato, CI y estructura                  |
-| F1 Paralelo    | 🔄 Codex ✅ · Gemini ✅ (datos) · Antigravity 🔄 ronda 2 | Agentes                   | Core verde · dataset validado · UI               |
-| F2 Integración | 🔄                                                       | Claude Code               | App con core y dataset reales; build sin errores |
-| F3 QA          | ⬜                                                       | Claude Code + Antigravity | Sección 8 del plan                               |
-| F4 Despliegue  | ⏳ workflow listo; falta confirmar publicación           | Claude Code               | URL pública; E2E contra producción               |
-| F5 Informe     | 🔄 borrador (Gemini)                                     | Gemini + Claude Code      | Informe .docx + PDF                              |
+| Fase           | Estado   | Puerta de salida                                                                   |
+| -------------- | -------- | ---------------------------------------------------------------------------------- |
+| F0 Base        | ✅       | Repo, contrato, CI y estructura                                                    |
+| F1 Paralelo    | ✅       | Core (Codex, 2 rondas) · dataset (Gemini, 4 rondas) · UI (Antigravity, 6 rondas)   |
+| F2 Integración | ✅       | App con núcleo, store y dataset reales                                             |
+| F3 QA          | ✅ local | Sección 8 completa salvo lo que exige la URL pública                               |
+| F4 Despliegue  | ⏳       | Workflow listo; falta confirmar el repositorio público                             |
+| F5 Informe     | 🔄       | Borrador verificado; faltan capturas de la versión desplegada y exportar .docx/PDF |
 
-## Resultados verificados por el orquestador
+## Sección 8 — verificación del orquestador
 
-- **Núcleo (Codex)**: aprobado en ronda 2 (ronda 1 rechazada: Yen falso, layout circular, formas por esquina).
-  Yen real (5 000 rutas en rejilla 7×7 < 5 s), SMACOF, cobertura ≥ 90 %.
-- **networkx vs programa**: 648/648 (100 %) — los 576 pares de Quetzaltenango, ejemplo de 6 nodos y grafo de prueba.
-- **Solución a mano = tabla S1**: prueba automática `tests/unit/store/teoria-ejemplo6.test.ts`.
-- **Dataset (Gemini)**: aprobado en ronda 2 (ronda 1 rechazada: aristas y códigos de carretera escritos a mano).
-  276 pares OSRM, 55 aristas directas calculadas, 221 descartadas con motivo, reproducible desde caché (SHA-256 idéntico).
-- **Store (Claude Code)**: `src/store/useAppStore.ts` + integración UI ↔ store real; mapa sin nodos encimados.
-- **Despliegue**: `.github/workflows/deploy.yml` (GitHub Pages, `BASE_PATH=/<repo>/`) probado localmente.
+| Prueba                                                                     | Resultado                                                            |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| lint · typecheck · test · build                                            | ✅ 31 pruebas unitarias                                              |
+| Dijkstra = Floyd = fuerza bruta (≥ 500 grafos)                             | ✅ fast-check, 500 corridas                                          |
+| networkx vs programa                                                       | ✅ 648/648 (100 %), incluye los 576 pares de Quetzaltenango          |
+| Solución a mano = tabla S1                                                 | ✅ `tests/unit/store/teoria-ejemplo6.test.ts`                        |
+| S3: UI fluida, cancelar, primera ruta = Dijkstra                           | ✅ `tests/e2e/qa.spec.ts`                                            |
+| Modo diseño completo                                                       | ✅ E2E 08–10                                                         |
+| Validaciones con mensajes claros (peso ≤ 0, lazo, duplicada, desconectado) | ✅ `qa.spec.ts`                                                      |
+| Escala 1–100 / 1–1 000 / 1–10 000 + distribución sugerida                  | ✅ `qa.spec.ts` (escritorio)                                         |
+| E2E 4 dispositivos                                                         | ✅ local: 297/297 con `--repeat-each=3`; ⏳ contra la URL desplegada |
+| Lighthouse móvil ≥ 85 / ≥ 90                                               | ✅ local 96 / 95; ⏳ contra la URL desplegada                        |
+| Sin errores de consola                                                     | ✅                                                                   |
 
-## En curso
+## Datos
 
-| Tarea                                                                                                       | Dueño       | Estado                             |
-| ----------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------- |
-| UI ronda 2: panel lateral en escritorio, arrastre al soltar, «mantener proporción», E2E contra datos reales | Antigravity | 🔄                                 |
-| Validación Google Maps (≥ 15 aristas)                                                                       | Antigravity | 🔄 (depende de acceso a navegador) |
-| Borrador del informe + `carretera: "Unknown"` → `""`                                                        | Gemini      | 🔄                                 |
-| QA sección 8, Lighthouse, E2E contra producción                                                             | Claude Code | ⬜                                 |
+- 24 municipios (Nominatim), 276 pares OSRM, 55 aristas directas calculadas, 221 descartadas con motivo.
+- Validación Google Maps: 20 aristas medidas por Antigravity y verificadas de forma independiente por el orquestador
+  (6/6 coincidencias). 12 dentro de ±10 %; 8 fuera de tolerancia usan el valor de Google Maps (documentado en `nota`).
 
 ## Cómo corren los agentes
 
