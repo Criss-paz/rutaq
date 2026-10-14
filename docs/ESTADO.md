@@ -37,10 +37,19 @@ _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 | Implementación del store (`src/store/`) con Zustand + zundo + Worker               | Claude Code          | ⏳                       |
 | Workflow de despliegue (GitHub Pages)                                              | Claude Code          | ⏳ F4                    |
 
+## Cómo corren los agentes
+
+| Rol         | Herramienta                                                                                                                   | Worktree / rama                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Codex       | `codex exec` (cuenta administrada por Orca)                                                                                   | `../codex-core` · `feat/codex-core`         |
+| Gemini      | `agy -p --model gemini-3.8-flash-high` (la CLI `gemini` ya no admite cuentas personales; Google la reemplazó por Antigravity) | `../gemini-data` · `feat/gemini-data`       |
+| Antigravity | `agy -p --model gemini-3.8-flash-high`                                                                                        | `../antigravity-ui` · `feat/antigravity-ui` |
+
+Plan completo para los agentes: `docs/PLAN.md`. Rama de integración: `main`.
+
 ## Bloqueos
 
 - **Remoto de GitHub:** el repo no tiene `origin`. Para CI y despliegue, Cris debe crear el repositorio en GitHub (o autorizar `gh repo create` iniciando sesión con `gh auth login`). Nadie más crea cuentas ni escribe credenciales.
-- **Rama principal:** el repo usa `master` (no `main`). La integración se hace en `master` salvo que Cris prefiera renombrarla.
 - **Formato exacto del método tabular del catedrático:** pendiente de confirmar con los apuntes de Cris; S1 es configurable (`TabularConfig`).
 
 ## Propiedad de carpetas
