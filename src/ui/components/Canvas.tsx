@@ -9,9 +9,11 @@ import {
   type NodeChange,
   ReactFlow,
   useReactFlow,
+  useViewport,
 } from '@xyflow/react';
+import type { GNode } from '../../core/types';
 import { useApp } from '../useApp';
-import { useUiStore } from '../uiStore';
+import { type EdgeWeightsMode, useUiStore } from '../uiStore';
 import { CustomEdge } from './CustomEdge';
 import { CustomNode } from './CustomNode';
 import EdgeDialog from './EdgeDialog';
@@ -24,14 +26,205 @@ const edgeTypes = {
   customEdge: CustomEdge,
 };
 
+function overlaps(
+  b1: { l: number; t: number; r: number; b: number },
+  b2: { l: number; t: number; r: number; b: number },
+  pad = 2,
+) {
+  return !(b1.r + pad <= b2.l || b1.l >= b2.r + pad || b1.b + pad <= b2.t || b1.t >= b2.b + pad);
+}
+
+/**
+ * Cálculo determinista de colocación de etiquetas evitando chocar con otras etiquetas y puntos
+ * en coordenadas del lienzo. Prueba en orden: derecha, izquierda, arriba, abajo.
+ */
+function computeDeterministicLabelPlacements(nodes: GNode[]): Record<string, 'right' | 'left' | 'top' | 'bottom'> {
+  const mapNodes = nodes.filter((n) => n.lat != null && n.lon != null);
+  if (mapNodes.length === 0) return {};
+
+  const gap = 4;
+  const charWidth = 7.2;
+  const lh = 16;
+
+  const circleBoxes = mapNodes.map((n) => ({
+    id: n.id,
+    l: n.x,
+    t: n.y,
+    r: n.x + n.w,
+    b: n.y + n.h,
+  }));
+
+  const placedLabels: { id: string; l: number; t: number; r: number; b: number }[] = [];
+  const results: Record<string, 'right' | 'left' | 'top' | 'bottom'> = {};
+  const directions: ('right' | 'left' | 'top' | 'bottom')[] = ['right', 'left', 'top', 'bottom'];
+
+  for (const n of mapNodes) {
+    const lw = Math.round(n.label.length * charWidth) + 4;
+    const cx = n.x + n.w / 2;
+    const cy = n.y + n.h / 2;
+
+    let chosenDir: 'right' | 'left' | 'top' | 'bottom' = 'right';
+    let chosenBox: { id: string; l: number; t: number; r: number; b: number } | null = null;
+
+    for (const dir of directions) {
+      let l = 0,
+        t = 0,
+        r = 0,
+        b = 0;
+      if (dir === 'right') {
+        l = n.x + n.w + gap;
+        t = cy - lh / 2;
+        r = l + lw;
+        b = t + lh;
+      } else if (dir === 'left') {
+        r = n.x - gap;
+        l = r - lw;
+        t = cy - lh / 2;
+        b = t + lh;
+      } else if (dir === 'top') {
+        l = cx - lw / 2;
+        r = l + lw;
+        b = n.y - gap;
+        t = b - lh;
+      } else if (dir === 'bottom') {
+        l = cx - lw / 2;
+        r = l + lw;
+        t = n.y + n.h + gap;
+        b = t + lh;
+      }
+
+      const candBox = { id: n.id, l, t, r, b };
+
+      let collides = false;
+      for (const cb of circleBoxes) {
+        if (cb.id === n.id) continue;
+        if (overlaps(candBox, cb, 2)) {
+          collides = true;
+          break;
+        }
+      }
+
+      if (!collides) {
+        for (const pl of placedLabels) {
+          if (overlaps(candBox, pl, 2)) {
+            collides = true;
+            break;
+          }
+        }
+      }
+
+      if (!collides) {
+        chosenDir = dir;
+        chosenBox = candBox;
+        break;
+      }
+    }
+
+    if (!chosenBox) {
+      const l = n.x + n.w + gap;
+      const t = cy - lh / 2;
+      chosenBox = { id: n.id, l, t, r: l + lw, b: t + lh };
+    }
+
+    placedLabels.push(chosenBox);
+    results[n.id] = chosenDir;
+  }
+
+  return results;
+}
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function computeProjectionFactor(nodes: GNode[]): number {
+  const geoNodes = nodes.filter((n) => n.lat != null && n.lon != null);
+  if (geoNodes.length < 2) return 30.4;
+
+  let minNode = geoNodes[0]!;
+  let maxNode = geoNodes[0]!;
+  for (const n of geoNodes) {
+    if (n.x < minNode.x) minNode = n;
+    if (n.x > maxNode.x) maxNode = n;
+  }
+
+  const distPx = Math.hypot(maxNode.x - minNode.x, maxNode.y - minNode.y);
+  const distKm = haversineKm(minNode.lat!, minNode.lon!, maxNode.lat!, maxNode.lon!);
+  if (distKm <= 0) return 30.4;
+  return distPx / distKm;
+}
+
+function MapOrientationAndScale({ nodes }: { nodes: GNode[] }) {
+  const { zoom } = useViewport();
+  const factor = useMemo(() => computeProjectionFactor(nodes), [nodes]);
+
+  const pxPerKm = factor * zoom;
+  const candidates = [1, 2, 5, 10, 20];
+  let bestL = 5;
+  let minDiff = Infinity;
+  for (const c of candidates) {
+    const diff = Math.abs(c * pxPerKm - 80);
+    if (diff < minDiff) {
+      minDiff = diff;
+      bestL = c;
+    }
+  }
+  const barWidth = Math.max(30, Math.min(220, Math.round(bestL * pxPerKm)));
+
+  return (
+    <div className="pointer-events-none absolute top-3 right-3 z-10 flex flex-col items-end gap-2">
+      {/* Rosa de los vientos */}
+      <div
+        data-testid="compass-rose"
+        aria-label="Rosa de los vientos: Norte arriba"
+        className="pointer-events-auto relative flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white/92 shadow-md backdrop-blur-xs select-none dark:border-slate-700 dark:bg-slate-800/92"
+      >
+        <span className="absolute top-0.5 text-[10px] font-black text-rose-600 dark:text-rose-400">N</span>
+        <span className="absolute bottom-0.5 text-[10px] font-bold text-slate-500 dark:text-slate-400">S</span>
+        <span className="absolute right-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">E</span>
+        <span className="absolute left-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">O</span>
+        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
+          <polygon points="12,3 15,12 12,10" fill="#e11d48" />
+          <polygon points="12,3 9,12 12,10" fill="#fb7185" />
+          <polygon points="12,21 15,12 12,14" fill="#64748b" />
+          <polygon points="12,21 9,12 12,14" fill="#94a3b8" />
+          <circle cx="12" cy="12" r="1.5" fill="#0f172a" />
+        </svg>
+      </div>
+
+      {/* Barra de escala en km */}
+      <div
+        data-testid="scale-bar"
+        aria-label={`Escala del mapa: ${bestL} kilómetros`}
+        className="pointer-events-auto flex flex-col items-center rounded-md border border-slate-200 bg-white/92 px-2.5 py-1 shadow-md backdrop-blur-xs select-none dark:border-slate-700 dark:bg-slate-800/92"
+      >
+        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight">{bestL} km</span>
+        <div
+          className="mt-0.5 h-1.5 border-b-2 border-l-2 border-r-2 border-slate-800 dark:border-slate-200 transition-all duration-100"
+          style={{ width: `${barWidth}px` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 interface CanvasFlowProps {
   rfNodes: Node[];
   rfEdges: Edge[];
   onConnect: (params: Connection) => void;
   canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
+  isMapMode: boolean;
+  graphNodes: GNode[];
 }
 
-function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef }: CanvasFlowProps) {
+function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef, isMapMode, graphNodes }: CanvasFlowProps) {
   const mode = useApp((s) => s.mode);
   const graph = useApp((s) => s.graph);
   const theme = useApp((s) => s.theme);
@@ -273,6 +466,7 @@ function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef }: CanvasFlo
           position="bottom-left"
           className="!m-3 !overflow-hidden !rounded-lg !border !border-slate-200 !bg-white/95 !shadow-md dark:!border-slate-700 dark:!bg-slate-800/95 [&>button]:!border-b [&>button]:!border-slate-200 dark:[&>button]:!border-slate-700 [&>button]:!bg-white dark:[&>button]:!bg-slate-800 [&>button]:!text-slate-700 dark:[&>button]:!text-slate-200 [&>button:hover]:!bg-slate-100 dark:[&>button:hover]:!bg-slate-700 [&>button>svg]:!fill-current"
         />
+        {isMapMode && <MapOrientationAndScale nodes={graphNodes} />}
       </ReactFlow>
     </div>
   );
@@ -316,6 +510,11 @@ export default function Canvas() {
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const { fitView } = useReactFlow();
+
+  const isMapMode = useMemo(() => graph.nodes.some((n) => n.lat != null && n.lon != null), [graph.nodes]);
+  const labelPlacements = useMemo(() => computeDeterministicLabelPlacements(graph.nodes), [graph.nodes]);
+  const edgeWeightsMode = useUiStore((s) => s.edgeWeightsMode);
+  const setEdgeWeightsMode = useUiStore((s) => s.setEdgeWeightsMode);
 
   // Determinar aristas y nodos en la ruta activa resaltada
   // Si no hay selección explícita y hay empates en shortest (shortest.length > 1),
@@ -382,6 +581,7 @@ export default function Canvas() {
       const isPermanent = permanentNodesSet.has(n.id);
       const isOnPath = activePathNodes.has(n.id);
       const dist = dijkstra?.labels[n.id]?.dist;
+      const isNodeMap = Boolean(n.lat != null && n.lon != null);
 
       return {
         id: n.id,
@@ -397,10 +597,21 @@ export default function Canvas() {
           isPermanent,
           isOnPath,
           dist,
+          isMapMode: isNodeMap,
+          labelPosition: labelPlacements[n.id] || 'right',
         },
       };
     });
-  }, [graph.nodes, query, currentStepCurrent, permanentNodesSet, activePathNodes, dijkstra?.labels, selectedNodeIds]);
+  }, [
+    graph.nodes,
+    query,
+    currentStepCurrent,
+    permanentNodesSet,
+    activePathNodes,
+    dijkstra?.labels,
+    selectedNodeIds,
+    labelPlacements,
+  ]);
 
   // Mapear aristas de Graph a ReactFlow Edges
   const rfEdges: Edge[] = useMemo(() => {
@@ -409,7 +620,7 @@ export default function Canvas() {
       const isDashedPath = dashedPathEdges.has(e.id);
       const isOnPath = isSolidPath || isDashedPath;
       const isTiedDashed = isDashedPath;
-      const isTreeEdge = treeEdgesSet.has(e.id);
+      const isTreeEdge = query?.kind === 'tree' && treeEdgesSet.has(e.id);
       const isEvaluated = evaluatedEdgesSet.has(e.id);
 
       return {
@@ -427,10 +638,21 @@ export default function Canvas() {
           isTreeEdge,
           isEvaluated,
           unit: graph.unit || 'km',
+          isMapMode,
         },
       };
     });
-  }, [graph.edges, graph.unit, activePathEdges, dashedPathEdges, treeEdgesSet, evaluatedEdgesSet, selectedEdgeIds]);
+  }, [
+    graph.edges,
+    graph.unit,
+    activePathEdges,
+    dashedPathEdges,
+    treeEdgesSet,
+    evaluatedEdgesSet,
+    selectedEdgeIds,
+    isMapMode,
+    query?.kind,
+  ]);
 
   // Manejador de conexión de nuevas aristas al arrastrar
   const onConnect = useCallback(
@@ -464,7 +686,7 @@ export default function Canvas() {
       {/* Barra Superior de Herramientas y Consulta del Lienzo */}
       <div
         data-testid="canvas-toolbar"
-        className="z-10 flex flex-wrap items-center gap-1.5 border-b border-slate-200 bg-white/95 px-3 py-1.5 shadow-xs backdrop-blur-xs dark:border-slate-800 dark:bg-slate-900/95"
+        className="shrink-0 z-10 flex flex-wrap items-center gap-1.5 border-b border-slate-200 bg-white/95 px-3 py-1.5 shadow-xs backdrop-blur-xs dark:border-slate-800 dark:bg-slate-900/95"
       >
         {/* Modos de Consulta */}
         <button
@@ -644,6 +866,25 @@ export default function Canvas() {
           </>
         )}
 
+        {/* Selector de visibilidad de pesos de aristas */}
+        <div className="flex items-center gap-1 pl-1">
+          <label htmlFor="select-edge-weights-mode" className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            Pesos:
+          </label>
+          <select
+            id="select-edge-weights-mode"
+            data-testid="select-edge-weights-mode"
+            value={edgeWeightsMode}
+            onChange={(e) => setEdgeWeightsMode(e.target.value as EdgeWeightsMode)}
+            aria-label="Visibilidad de pesos de aristas"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            <option value="auto">Pesos: automático</option>
+            <option value="all">Pesos: todos</option>
+            <option value="hidden">Pesos: ocultos</option>
+          </select>
+        </div>
+
         {/* Badges de Escala y Error de Ajuste (F6) */}
         <div
           data-testid="scale-badge"
@@ -669,6 +910,8 @@ export default function Canvas() {
         rfEdges={rfEdges}
         onConnect={onConnect}
         canvasWrapperRef={canvasWrapperRef}
+        isMapMode={isMapMode}
+        graphNodes={graph.nodes}
       />
 
       <EdgeDialog

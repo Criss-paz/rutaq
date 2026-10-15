@@ -189,7 +189,7 @@ export default function Header() {
         : '';
 
   return (
-    <header className="flex flex-col gap-1.5 border-b border-slate-200 bg-white px-3 py-1.5 text-slate-800 shadow-xs sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-4 sm:py-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+    <header className="shrink-0 flex flex-col gap-1.5 border-b border-slate-200 bg-white px-3 py-1.5 text-slate-800 shadow-xs sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-4 sm:py-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
       {/* Input de archivo JSON oculto */}
       <input
         type="file"

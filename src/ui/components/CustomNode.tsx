@@ -11,6 +11,8 @@ export interface CustomNodeData {
   isPermanent?: boolean;
   isOnPath?: boolean;
   dist?: number;
+  isMapMode?: boolean;
+  labelPosition?: 'right' | 'left' | 'top' | 'bottom';
   [key: string]: unknown;
 }
 
@@ -22,9 +24,12 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   const isCurrent = nodeData.isCurrent ?? false;
   const isPermanent = nodeData.isPermanent ?? false;
   const isOnPath = nodeData.isOnPath ?? false;
+  const isMapMode = Boolean(nodeData.isMapMode);
+  const labelPosition = nodeData.labelPosition ?? 'right';
   const dist = nodeData.dist;
 
   const mode = useApp((s) => s.mode);
+  const theme = useApp((s) => s.theme);
   const renameNode = useApp((s) => s.renameNode);
   const resizeNode = useApp((s) => s.resizeNode);
   const removeNodes = useApp((s) => s.removeNodes);
@@ -110,6 +115,165 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
       setEditText(label);
     }
   };
+
+  const renderContextMenu = () => {
+    if (!contextMenuPos) return null;
+    return (
+      <div
+        ref={contextMenuRef}
+        style={{
+          position: 'fixed',
+          top: `${contextMenuPos.top}px`,
+          left: `${contextMenuPos.left}px`,
+          zIndex: 9999,
+        }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 text-xs shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
+        role="menu"
+      >
+        <div className="px-3 py-1 text-xs font-bold tracking-wider text-slate-400 uppercase truncate">
+          Nodo: {label}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setShowContextMenu(false);
+            if (query?.kind === 'path') {
+              setPathQuery(id, query.target);
+            } else {
+              setTreeQuery(id);
+            }
+          }}
+          className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/50"
+        >
+          <span className="text-sm">🌳</span>
+          <span>Fijar como origen (A)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setShowContextMenu(false);
+            const source = query ? query.source : id;
+            setPathQuery(source, id);
+          }}
+          className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-700 dark:text-slate-200 dark:hover:bg-rose-950/50"
+        >
+          <span className="text-sm">📍</span>
+          <span>Fijar como destino (B)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setShowContextMenu(false);
+            setEditText(label);
+            setIsEditing(true);
+          }}
+          className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          <span className="text-sm">✏️</span>
+          <span>Renombrar nodo</span>
+        </button>
+        {mode === 'design' && (
+          <>
+            <hr className="my-1 border-slate-200 dark:border-slate-700" />
+            <button
+              type="button"
+              onClick={() => {
+                setShowContextMenu(false);
+                removeNodes([id]);
+              }}
+              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+            >
+              <span className="text-sm">🗑️</span>
+              <span>Eliminar nodo</span>
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  if (isMapMode) {
+    let pointBgClass =
+      'border-slate-400 bg-white text-slate-800 shadow-xs dark:border-slate-500 dark:bg-slate-800 dark:text-slate-100';
+    if (isCurrent) {
+      pointBgClass = 'border-amber-600 bg-amber-500 text-white shadow-md ring-4 ring-amber-400/80 animate-pulse';
+    } else if (isOrigin) {
+      pointBgClass = 'border-emerald-700 bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400';
+    } else if (isTarget) {
+      pointBgClass = 'border-rose-700 bg-rose-600 text-white shadow-md ring-2 ring-rose-400';
+    } else if (isOnPath) {
+      pointBgClass = 'border-purple-700 bg-purple-600 text-white shadow-md ring-2 ring-purple-400';
+    } else if (isPermanent) {
+      pointBgClass = 'border-blue-700 bg-blue-600 text-white shadow-sm ring-2 ring-blue-400';
+    }
+
+    const haloStyle =
+      theme === 'dark'
+        ? {
+            textShadow:
+              '0 0 2px #0f172a, 0 0 4px #0f172a, 0 0 6px #0f172a, -1px -1px 0 #0f172a, 1px -1px 0 #0f172a, -1px 1px 0 #0f172a, 1px 1px 0 #0f172a',
+            color: '#f8fafc',
+          }
+        : {
+            textShadow:
+              '0 0 2px #ffffff, 0 0 4px #ffffff, 0 0 6px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff',
+            color: '#0f172a',
+          };
+
+    let labelPosClass = 'left-full ml-1.5 top-1/2 -translate-y-1/2 text-left';
+    if (labelPosition === 'left') {
+      labelPosClass = 'right-full mr-1.5 top-1/2 -translate-y-1/2 text-right';
+    } else if (labelPosition === 'top') {
+      labelPosClass = 'bottom-full mb-1.5 left-1/2 -translate-x-1/2 text-center';
+    } else if (labelPosition === 'bottom') {
+      labelPosClass = 'top-full mt-1.5 left-1/2 -translate-x-1/2 text-center';
+    }
+
+    return (
+      <div
+        data-testid={`node-${id}`}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openNodeMenu(e.clientX, e.clientY);
+        }}
+        className={`relative flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-all cursor-pointer ${pointBgClass} ${
+          selected ? 'ring-2 ring-blue-600' : ''
+        }`}
+      >
+        <Handle type="target" position={Position.Top} id="top" className="opacity-0 pointer-events-none !w-0 !h-0" />
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="right"
+          className="opacity-0 pointer-events-none !w-0 !h-0"
+        />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          id="bottom"
+          className="opacity-0 pointer-events-none !w-0 !h-0"
+        />
+        <Handle type="target" position={Position.Left} id="left" className="opacity-0 pointer-events-none !w-0 !h-0" />
+
+        <div className={`pointer-events-none absolute whitespace-nowrap ${labelPosClass}`}>
+          <span
+            data-testid={`node-label-${label}`}
+            style={haloStyle}
+            className="text-[12px] font-bold leading-none select-none tracking-tight"
+          >
+            {label}
+          </span>
+        </div>
+
+        {showContextMenu &&
+          contextMenuPos &&
+          typeof document !== 'undefined' &&
+          createPortal(renderContextMenu(), document.body)}
+      </div>
+    );
+  }
 
   // Determinación de clases de borde y fondo según el estado
   let borderClasses =
@@ -311,80 +475,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
       {showContextMenu &&
         contextMenuPos &&
         typeof document !== 'undefined' &&
-        createPortal(
-          <div
-            ref={contextMenuRef}
-            style={{
-              position: 'fixed',
-              top: `${contextMenuPos.top}px`,
-              left: `${contextMenuPos.left}px`,
-              zIndex: 9999,
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 text-xs shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
-            role="menu"
-          >
-            <div className="px-3 py-1 text-xs font-bold tracking-wider text-slate-400 uppercase truncate">
-              Nodo: {label}
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setShowContextMenu(false);
-                if (query?.kind === 'path') {
-                  setPathQuery(id, query.target);
-                } else {
-                  setTreeQuery(id);
-                }
-              }}
-              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/50"
-            >
-              <span className="text-sm">🌳</span>
-              <span>Fijar como origen (A)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowContextMenu(false);
-                const source = query ? query.source : id;
-                setPathQuery(source, id);
-              }}
-              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-700 dark:text-slate-200 dark:hover:bg-rose-950/50"
-            >
-              <span className="text-sm">📍</span>
-              <span>Fijar como destino (B)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowContextMenu(false);
-                setEditText(label);
-                setIsEditing(true);
-              }}
-              className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-            >
-              <span className="text-sm">✏️</span>
-              <span>Renombrar nodo</span>
-            </button>
-            {mode === 'design' && (
-              <>
-                <hr className="my-1 border-slate-200 dark:border-slate-700" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowContextMenu(false);
-                    removeNodes([id]);
-                  }}
-                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
-                >
-                  <span className="text-sm">🗑️</span>
-                  <span>Eliminar nodo</span>
-                </button>
-              </>
-            )}
-          </div>,
-          document.body,
-        )}
+        createPortal(renderContextMenu(), document.body)}
     </div>
   );
 }

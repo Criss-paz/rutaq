@@ -55,11 +55,17 @@ export default function App() {
       <ValidationAlert />
 
       {/* Contenedor principal: en pantallas >= 1024px divide en lienzo a la izquierda y panel a la derecha */}
-      <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">
+      <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden lg:flex-row">
         {/* Área central del lienzo con React Flow */}
         <main
-          className={`relative flex flex-1 flex-col overflow-hidden transition-all duration-300 lg:!mb-0 ${
-            mobileSheetPos === 'expanded' ? 'mb-[85vh]' : mobileSheetPos === 'mid' ? 'mb-[45vh]' : 'mb-14'
+          className={`relative flex flex-1 min-h-0 flex-col overflow-hidden lg:!mb-0 ${
+            mobileSheetPos === 'maximized'
+              ? 'mb-0'
+              : mobileSheetPos === 'expanded'
+                ? 'mb-[85vh]'
+                : mobileSheetPos === 'mid'
+                  ? 'mb-[45vh]'
+                  : 'mb-14'
           }`}
           role="main"
         >

@@ -281,28 +281,28 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await page.getByTestId('template-select').selectOption('ejemplo6');
     await page.getByTestId('query-clear').click();
 
-    // Abrir menú de la primera arista disponible
-    const edgeMenu = page.locator('[data-testid^="edge-menu-"]').first();
-    await expect(edgeMenu).toBeVisible();
-    await edgeMenu.click({ force: true });
+    // Abrir menú de forma haciendo clic en la arista o su etiqueta
+    const firstEdge = page.locator('[data-testid^="edge-interaction-"]').first();
+    const firstWeight = page.locator('[data-testid^="edge-weight-"]').first();
+    await expect(firstEdge).toBeAttached();
+    await expect(firstWeight).toBeVisible();
+    await firstWeight.click();
 
     // Cambiar forma a curva (bezier)
     await expect(page.getByTestId('edge-shape-bezier')).toBeVisible();
-    await page.getByTestId('edge-shape-bezier').click({ force: true });
+    await page.getByTestId('edge-shape-bezier').click();
     await page.waitForTimeout(200);
 
     // Abrir menú nuevamente y cambiar a arco
-    await expect(edgeMenu).toBeVisible();
-    await edgeMenu.click({ force: true });
+    await firstWeight.click();
     await expect(page.getByTestId('edge-shape-arc')).toBeVisible();
-    await page.getByTestId('edge-shape-arc').click({ force: true });
+    await page.getByTestId('edge-shape-arc').click();
     await page.waitForTimeout(200);
 
     // Abrir menú y volver a automático
-    await expect(edgeMenu).toBeVisible();
-    await edgeMenu.click({ force: true });
+    await firstWeight.click();
     await expect(page.getByTestId('edge-shape-reset-auto')).toBeVisible();
-    await page.getByTestId('edge-shape-reset-auto').click({ force: true });
+    await page.getByTestId('edge-shape-reset-auto').click();
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-09-forma-arista.png`,
@@ -561,6 +561,158 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-15-sincronizacion-lienzo.png`,
+    });
+  });
+
+  test('16. Quetzaltenango: 24 nombres visibles sin superposiciones y rosa de los vientos con escala en km', async ({
+    page,
+  }) => {
+    await page.goto('./');
+    await page.getByTestId('template-select').selectOption('quetzaltenango');
+
+    // Rosa de los vientos y barra de escala visibles
+    await expect(page.getByTestId('compass-rose')).toBeVisible();
+    await expect(page.getByTestId('compass-rose')).toContainText('N');
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toContainText(/km/);
+
+    // Los 24 nombres de los municipios visibles
+    const labels = page.locator('[data-testid^="node-label-"]');
+    await expect(labels).toHaveCount(24);
+
+    // Obtener los boundingBox en coordenadas de pantalla
+    const boxes = [];
+    for (let i = 0; i < 24; i++) {
+      const loc = labels.nth(i);
+      await expect(loc).toBeVisible();
+      const box = await loc.boundingBox();
+      expect(box).toBeTruthy();
+      boxes.push({ id: await loc.getAttribute('data-testid'), ...box! });
+    }
+
+    // Ninguna etiqueta se superpone con otra
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const b1 = boxes[i]!;
+        const b2 = boxes[j]!;
+        const overlaps = !(
+          b1.x + b1.width <= b2.x ||
+          b2.x + b2.width <= b1.x ||
+          b1.y + b1.height <= b2.y ||
+          b2.y + b2.height <= b1.y
+        );
+        expect(overlaps, `Las etiquetas ${b1.id} y ${b2.id} no deben superponerse`).toBe(false);
+      }
+    }
+  });
+
+  test('17. Pesos de aristas: visibilidad automática, todas y ocultas', async ({ page }) => {
+    await page.goto('./');
+    await page.getByTestId('template-select').selectOption('quetzaltenango');
+
+    // Selector en modo automático por defecto
+    const weightsSelector = page.getByTestId('select-edge-weights-mode');
+    await expect(weightsSelector).toBeVisible();
+    await expect(weightsSelector).toHaveValue('auto');
+
+    // Sin consulta no hay etiquetas de peso visibles
+    await expect(page.locator('[data-testid^="edge-label-"]')).toHaveCount(0);
+
+    // Consultar una ruta: QTZ -> COA
+    await page.getByTestId('query-mode-path').click();
+    await page.getByTestId('select-source-node').selectOption('QTZ');
+    await page.getByTestId('select-target-node').selectOption('COA');
+
+    // Solo se muestran las etiquetas de peso de la ruta consultada (< 10)
+    const routeWeights = page.locator('[data-testid^="edge-label-"]');
+    const routeWeightsCount = await routeWeights.count();
+    expect(routeWeightsCount).toBeGreaterThan(0);
+    expect(routeWeightsCount).toBeLessThan(10);
+
+    // Cambiar a "todos": se ven los 55 pesos
+    await weightsSelector.selectOption('all');
+    await expect(page.locator('[data-testid^="edge-label-"]')).toHaveCount(55);
+
+    // Cambiar a "ocultos": no se ve ningún peso
+    await weightsSelector.selectOption('hidden');
+    await expect(page.locator('[data-testid^="edge-label-"]')).toHaveCount(0);
+  });
+
+  test('18. Panel de resultados tipo ventana: redimensionar, minimizar y maximizar', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'El panel tipo ventana con tirador lateral aplica en escritorio (≥1024px)');
+
+    await page.goto('./');
+    const panel = page.getByTestId('results-panel');
+    await expect(panel).toBeVisible();
+    const initialBox = await panel.boundingBox();
+    expect(initialBox).toBeTruthy();
+
+    // Redimensionar arrastrando el tirador izquierdo
+    const handle = page.getByTestId('panel-resize-handle');
+    await expect(handle).toBeVisible();
+    const handleBox = await handle.boundingBox();
+    expect(handleBox).toBeTruthy();
+
+    await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(handleBox!.x - 120, handleBox!.y + handleBox!.height / 2);
+    await page.mouse.up();
+
+    const resizedBox = await panel.boundingBox();
+    expect(resizedBox!.width).toBeGreaterThan(initialBox!.width + 40);
+
+    // Redimensionar con teclado (flecha izquierda ensancha el panel)
+    await handle.press('ArrowLeft');
+    await handle.press('ArrowLeft');
+    const kbBox = await panel.boundingBox();
+    expect(kbBox!.width).toBeGreaterThan(resizedBox!.width);
+
+    // Minimizar panel
+    await page.getByTestId('btn-minimize-panel').click();
+    const miniIcon = page.getByTestId('tab-tabla-mini');
+    await expect(miniIcon).toBeVisible();
+    const miniBox = await panel.boundingBox();
+    expect(miniBox!.width).toBeLessThanOrEqual(60);
+
+    // Restaurar tocando un icono de pestaña
+    await page.getByTestId('tab-grafica-mini').click();
+    await expect(page.getByTestId('tab-grafica')).toBeVisible();
+    const restoredBox = await panel.boundingBox();
+    expect(restoredBox!.width).toBeGreaterThan(300);
+
+    // Maximizar panel
+    await page.getByTestId('btn-maximize-panel').click();
+    const maxBox = await panel.boundingBox();
+    expect(maxBox!.width).toBeGreaterThan(700);
+
+    // Restaurar panel
+    await page.getByTestId('btn-restore-panel').click();
+    const normalBox = await panel.boundingBox();
+    expect(normalBox!.width).toBeLessThan(maxBox!.width);
+  });
+
+  test('19. Capturas de Quetzaltenango para el informe (sin consulta y con ruta QTZ -> COA)', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('./');
+    await page.getByTestId('template-select').selectOption('quetzaltenango');
+    await page.getByTestId('query-clear').click();
+    await page.waitForTimeout(400);
+
+    // Captura 1: Quetzaltenango sin consulta
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-quetzaltenango-sin-consulta.png`,
+    });
+
+    // Consultar ruta Quetzaltenango -> Coatepeque
+    await page.getByTestId('query-mode-path').click();
+    await page.getByTestId('select-source-node').selectOption('QTZ');
+    await page.getByTestId('select-target-node').selectOption('COA');
+    await page.waitForTimeout(400);
+
+    // Captura 2: Quetzaltenango con la ruta QTZ -> COA
+    await page.screenshot({
+      path: `docs/informe/capturas/${testInfo.project.name}-quetzaltenango-ruta-coa.png`,
     });
   });
 });
