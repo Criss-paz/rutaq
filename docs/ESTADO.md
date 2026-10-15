@@ -25,15 +25,17 @@ _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 | Modo diseño completo                                                       | ✅ E2E 08–10                                                                   |
 | Validaciones con mensajes claros (peso ≤ 0, lazo, duplicada, desconectado) | ✅ `qa.spec.ts`                                                                |
 | Escala 1–100 / 1–1 000 / 1–10 000 + distribución sugerida                  | ✅ `qa.spec.ts` (escritorio)                                                   |
-| E2E 4 dispositivos                                                         | ✅ producción: 99/99 · local: 297/297 con `--repeat-each=3`                    |
-| Lighthouse móvil ≥ 85 / ≥ 90                                               | ✅ producción: rendimiento 95, accesibilidad 95, buenas prácticas 100, SEO 100 |
+| E2E 4 dispositivos                                                         | ✅ producción: 112/112 (2026-10-15)                                            |
+| Lighthouse móvil ≥ 85 / ≥ 90                                               | ✅ producción: rendimiento 92, accesibilidad 95, buenas prácticas 100, SEO 100 |
 | Sin errores de consola                                                     | ✅                                                                             |
 
 ## Datos
 
-- 24 municipios (Nominatim), 276 pares OSRM, 55 aristas directas calculadas, 221 descartadas con motivo.
-- Validación Google Maps: 20 aristas medidas por Antigravity y verificadas de forma independiente por el orquestador
-  (6/6 coincidencias). 13 dentro de ±10 %; 7 fuera de tolerancia usan el valor de Google Maps (documentado en `nota`).
+- 24 municipios (Nominatim + auditoría contra Wikipedia y Google Maps; El Palmar → El Nuevo Palmar y Cantel corregidos),
+  276 pares OSRM, 50 aristas directas calculadas, 226 descartadas con motivo.
+- Validación Google Maps: 18 aristas (incluidas las 5 más largas); 13 dentro de ±10 %, 5 usan el valor de Google.
+- Mapa: posición geográfica exacta (norte arriba, escala real), rosa de los vientos, escala en km, nombres sin
+  superposición según el zoom; panel de resultados redimensionable, minimizable y maximizable.
 
 ## Cómo corren los agentes
 
