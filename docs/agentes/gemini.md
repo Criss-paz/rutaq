@@ -36,6 +36,29 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Hecho
 
+- **Ronda 6 — Corrección de Coordenadas (El Palmar y Cantel), Auditoría Wikipedia y Reevaluación Topológica:**
+  - **Auditoría de 24 Cabeceras Municipales (`docs/datos/auditoria_coordenadas.csv`):** Se implementó el script `scripts/auditar_coordenadas.py` que consulta la API de Wikipedia en español (`prop=coordinates`) con caché local en `scripts/cache/wikipedia/`, respetando la tasa $\le 1\text{ req/s}$ y User-Agent oficial. Se contrastaron las 24 cabeceras de Nominatim contra Wikipedia: 22 municipios se ubicaron a $\le 1.55\text{ km}$, mientras que El Palmar (`PAL`) mostró $5.26\text{ km}$ y Cantel (`CAN`) $2.67\text{ km}$ de discrepancia.
+  - **Corrección de Coordenadas (`docs/datos/coordenadas_corregidas.csv`):**
+    - `PAL`: Lat 14.6480742, Lon -91.5571834, Fuente `"Google Maps (lugar «El Nuevo Palmar»), contrastado con Wikipedia"`. Motivo: reubicación de la cabecera en El Nuevo Palmar tras el abandono del casco histórico por lahares del volcán Santiaguito.
+    - `CAN`: Lat 14.8098714, Lon -91.450678, Fuente `"Google Maps (lugar «Cantel»), contrastado con Wikipedia"`. Motivo: corrección del punto periférico de Nominatim hacia el parque central y casco urbano de Cantel.
+  - **Actualización de `scripts/build_dataset.py`:**
+    - Carga de `coordenadas_corregidas.csv` después de Nominatim y con prioridad sobre este, actualizando la fuente del nodo antes de calcular rutas OSRM.
+    - Validación y actualización de caché OSRM (`scripts/cache/osrm/`): detección automática de coordenadas discordantes respecto al caché previo, consultando los 45 pares candidatos asociados a `PAL` y `CAN` y persistiendo las nuevas respuestas en caché local.
+    - Reevaluación geométrica integral punto-segmento ($\ge 1.0\text{ km}$) para los 276 pares candidatos contra las nuevas posiciones urbanas.
+  - **Impacto Topológico:**
+    - Grafo resultante: 24 nodos y **50 aristas directas** (226 pares descartados), 100 % conexo.
+    - 0 aristas añadidas.
+    - 5 aristas eliminadas por intercepción con los cascos urbanos corregidos: `CAN-HUI` (interceptada por `SIJ` a 0.076 km), `PAL-SMA` (interceptada por `CCH` a 0.097 km), `FCC-ZUN` (interceptada por `PAL` a 0.812 km), `QTZ-ZUN` (interceptada por `CAN` a 0.291 km) y `SAL-ZUN` (interceptada por `CAN` a 0.291 km).
+    - 8 aristas con cambio de kilometraje OSRM: `ALM-CAN` (16.6 -> 15.0 km), `CAN-QTZ` (13.2 -> 11.6 km), `CAN-SAL` (13.8 -> 16.8 km), `CAN-ZUN` (8.9 -> 6.5 km), `COA-PAL` (58.4 -> 54.9 km), `COL-PAL` (46.6 -> 57.0 km), `FCC-PAL` (53.1 -> 49.6 km) y `PAL-ZUN` (57.2 -> 25.3 km).
+  - **Gestión de Validación Externa Google Maps (`validacion_google.csv` y `remedir_google.csv`):**
+    - Se retiraron de `validacion_google.csv` las 7 mediciones invalidadas con extremo en `PAL` o `CAN` (`PAL-SMA`, `COL-PAL`, `COA-PAL`, `PAL-ZUN`, `FCC-PAL`, `CAN-HUI`, `CAN-SAL`), quedando 13 mediciones válidas.
+    - Se generó `docs/datos/remedir_google.csv` con las 7 aristas invalidadas y sus nuevos kilometrajes OSRM para su remedición por el orquestador; se verificó que no existen aristas nuevas entre las 5 más largas fuera de esta lista.
+  - **Verificaciones y Reproducibilidad:**
+    - Regeneración determinista idéntica byte por byte de `src/data/quetzaltenango.json` en ejecuciones consecutivas offline.
+    - Verificación formal Dijkstra contra NetworkX en los 648 pares (`verification/verify.py`): **100.0 % de coincidencia (648/648)**.
+    - `python scripts/verify_dataset.py`: 24 nodos, 50 aristas, 100 % conexo.
+    - `npm run ci`: eslint (0 errores), typecheck (0 errores), 33 tests unitarios en verde, build de producción en verde.
+    - `npm run format:check`: formato Prettier al 100 %.
 - **Ronda 5 — Informe Final, Integración de Capturas Reales y Exportación Reproducible (.docx y .pdf):**
   - **Integración de Capturas Reales (Sección 5.3 de `INFORME.md`):** Se reemplazaron los 5 marcadores `[PENDIENTE: captura ...]` por 6 figuras con rutas relativas a `capturas/`, numeración consecutiva, subtítulos y descripciones objetivas fieles a las capturas PNG:
     - _Figura 1_ (`capturas/desktop-chrome-02-quetzaltenango.png`): Pantalla principal en navegador de escritorio con la red vial de 24 municipios y panel sincronizado.
