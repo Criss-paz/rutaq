@@ -33,6 +33,13 @@ INPUT_VALIDACION_GOOGLE = os.path.join(BASE_DIR, 'docs', 'datos', 'validacion_go
 INPUT_COORDENADAS_CORREGIDAS = os.path.join(BASE_DIR, 'docs', 'datos', 'coordenadas_corregidas.csv')
 OUTPUT_REMEDIR_GOOGLE = os.path.join(BASE_DIR, 'docs', 'datos', 'remedir_google.csv')
 
+def coordenadas_corregidas_ids():
+    """Ids de municipios cuya coordenada se corrigió en docs/datos/coordenadas_corregidas.csv."""
+    if not os.path.exists(INPUT_COORDENADAS_CORREGIDAS):
+        return []
+    with open(INPUT_COORDENADAS_CORREGIDAS, 'r', encoding='utf-8') as f:
+        return [row['id'] for row in csv.DictReader(f)]
+
 os.makedirs(CACHE_NOMINATIM, exist_ok=True)
 os.makedirs(CACHE_OSRM, exist_ok=True)
 os.makedirs(os.path.dirname(OUTPUT_DATASET), exist_ok=True)
@@ -595,37 +602,16 @@ def build():
                 else:
                     print(f"  [VALIDA GOOGLE] {eid}: OSRM {km_osrm:.1f} km vs Google {km_g:.1f} km (<= 10 %)")
 
-    # 6. Generar docs/datos/remedir_google.csv con mediciones invalidadas y aristas top 5 pendientes
+    # 6. docs/datos/remedir_google.csv: aristas existentes que aún necesitan medición en Google Maps, es decir,
+    #    las que tocan un municipio con coordenada corregida y las 5 más largas, si no tienen medición vigente.
+    ids_corregidos = set(coordenadas_corregidas_ids())
+    top5_ids = {e['id'] for e in sorted(accepted_edges, key=lambda x: -x['km'])[:5]}
     aristas_remedir = []
-    remedir_ids_seen = set()
-
-    edge_by_id = {e['id']: e for e in accepted_edges}
     for e in accepted_edges:
-        edge_by_id[f"{e['target']}-{e['source']}"] = e
-
-    invalidadas_pal_can = ['PAL-SMA', 'COL-PAL', 'COA-PAL', 'PAL-ZUN', 'FCC-PAL', 'CAN-HUI', 'CAN-SAL']
-    for aid in invalidadas_pal_can:
-        if aid in edge_by_id:
-            e = edge_by_id[aid]
+        medida = e['id'] in google_measurements or f"{e['target']}-{e['source']}" in google_measurements
+        requiere = e['id'] in top5_ids or e['source'] in ids_corregidos or e['target'] in ids_corregidos
+        if requiere and not medida:
             aristas_remedir.append({'arista': e['id'], 'km_osrm_nuevo': e['km']})
-            remedir_ids_seen.add(e['id'])
-        else:
-            u, v = aid.split('-')
-            r = get_osrm_route(u, v, nodes_dict)
-            km_nuevo = round(r['distance'] / 1000.0, 1)
-            aristas_remedir.append({'arista': aid, 'km_osrm_nuevo': km_nuevo})
-            remedir_ids_seen.add(aid)
-
-    # Revisar top 5 más largas del nuevo grafo
-    aristas_ordenadas_km = sorted(accepted_edges, key=lambda x: -x['km'])
-    top5_largas = aristas_ordenadas_km[:5]
-    for e in top5_largas:
-        eid = e['id']
-        u, v = e['source'], e['target']
-        rev_eid = f"{v}-{u}"
-        if eid not in google_measurements and rev_eid not in google_measurements and eid not in remedir_ids_seen:
-            aristas_remedir.append({'arista': eid, 'km_osrm_nuevo': e['km']})
-            remedir_ids_seen.add(eid)
 
     with open(OUTPUT_REMEDIR_GOOGLE, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=['arista', 'km_osrm_nuevo'])
