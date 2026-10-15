@@ -9,6 +9,7 @@ import {
   type NodeChange,
   ReactFlow,
   useReactFlow,
+  useStore,
   useViewport,
 } from '@xyflow/react';
 import type { GNode } from '../../core/types';
@@ -34,103 +35,146 @@ function overlaps(
   return !(b1.r + pad <= b2.l || b1.l >= b2.r + pad || b1.b + pad <= b2.t || b1.t >= b2.b + pad);
 }
 
+type LabelDir = 'right' | 'left' | 'top' | 'bottom';
+type Box = { l: number; t: number; r: number; b: number };
+
+/** Ancho real en px de un texto con la tipografía de la app (se cachea); respaldo aproximado sin DOM. */
+const textWidthCache = new Map<string, number>();
+let measureCtx: CanvasRenderingContext2D | null | undefined;
+function textWidth(text: string, font: string, fallbackPerChar: number): number {
+  const key = `${font}|${text}`;
+  const hit = textWidthCache.get(key);
+  if (hit !== undefined) return hit;
+  if (measureCtx === undefined) {
+    measureCtx = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d');
+  }
+  let w = text.length * fallbackPerChar;
+  if (measureCtx) {
+    const family = typeof document === 'undefined' ? 'sans-serif' : getComputedStyle(document.body).fontFamily;
+    measureCtx.font = `${font} ${family}`;
+    w = measureCtx.measureText(text).width;
+  }
+  textWidthCache.set(key, w);
+  return w;
+}
+
+function overlapArea(box: Box, others: Box[]): number {
+  let area = 0;
+  for (const o of others) {
+    const w = Math.min(box.r, o.r) - Math.max(box.l, o.l);
+    const h = Math.min(box.b, o.b) - Math.max(box.t, o.t);
+    if (w > 0 && h > 0) area += w * h;
+  }
+  return area;
+}
+
+interface MapLabelLayout {
+  placements: Record<string, LabelDir>;
+  hiddenLabels: Set<string>;
+  hiddenWeights: Set<string>;
+}
+
 /**
- * Cálculo determinista de colocación de etiquetas evitando chocar con otras etiquetas y puntos
- * en coordenadas del lienzo. Prueba en orden: derecha, izquierda, arriba, abajo.
+ * Coloca los nombres del mapa como un mapa real: el texto mide siempre ~12 px en pantalla (en el lienzo crece
+ * 1/zoom al alejar), así que al alejar caben menos nombres. Se colocan por prioridad (consulta, nodo actual,
+ * seleccionados, luego los municipios con más carreteras) en la primera dirección libre; si ninguna está libre,
+ * el nombre se oculta (los prioritarios nunca). Después se colocan los pesos de las aristas importantes y se
+ * ocultan los que chocarían con un nombre u otro peso. Al acercar, aparecen los demás.
  */
-function computeDeterministicLabelPlacements(nodes: GNode[]): Record<string, 'right' | 'left' | 'top' | 'bottom'> {
+function computeMapLabelLayout(
+  nodes: GNode[],
+  edges: { id: string; source: string; target: string; weight: number }[],
+  zoom: number,
+  priority: string[],
+  weightEdges: Set<string>,
+  unit: string,
+  viewportWidth: number,
+): MapLabelLayout {
+  const layout: MapLabelLayout = { placements: {}, hiddenLabels: new Set(), hiddenWeights: new Set() };
   const mapNodes = nodes.filter((n) => n.lat != null && n.lon != null);
-  if (mapNodes.length === 0) return {};
+  if (mapNodes.length === 0) return layout;
 
-  const gap = 4;
-  const charWidth = 7.2;
-  const lh = 16;
+  const s = 1 / Math.min(zoom, 1);
+  const gap = 4 * s;
+  const lh = 16 * s;
 
-  const circleBoxes = mapNodes.map((n) => ({
+  const dots: (Box & { id: string })[] = mapNodes.map((n) => ({
     id: n.id,
     l: n.x,
     t: n.y,
     r: n.x + n.w,
     b: n.y + n.h,
   }));
+  const placed: Box[] = [];
+  // El lienzo se ajusta a los puntos (fitView, centrado): a cada lado del mapa queda un margen libre que depende del
+  // ancho visible. Un nombre que sobresalga de ese margen quedaría cortado.
+  const minL = Math.min(...dots.map((d) => d.l));
+  const maxR = Math.max(...dots.map((d) => d.r));
+  // Si el mapa ya no cabe a lo ancho (zoom acercado), el usuario desplaza el lienzo: no hay borde que respetar.
+  const visibleWidth = viewportWidth / zoom;
+  const margin = visibleWidth > maxR - minL ? Math.max(0, (visibleWidth - (maxR - minL)) / 2 - 8 * s) : Infinity;
+  const free = (box: Box, ownId?: string) =>
+    box.l >= minL - margin &&
+    box.r <= maxR + margin &&
+    !dots.some((d) => d.id !== ownId && overlaps(box, d, 2 * s)) &&
+    !placed.some((p) => overlaps(box, p, 2 * s));
 
-  const placedLabels: { id: string; l: number; t: number; r: number; b: number }[] = [];
-  const results: Record<string, 'right' | 'left' | 'top' | 'bottom'> = {};
-  const directions: ('right' | 'left' | 'top' | 'bottom')[] = ['right', 'left', 'top', 'bottom'];
+  const degree = new Map<string, number>();
+  for (const e of edges) {
+    degree.set(e.source, (degree.get(e.source) ?? 0) + 1);
+    degree.set(e.target, (degree.get(e.target) ?? 0) + 1);
+  }
+  const prio = new Map(priority.map((id, i) => [id, i]));
+  const xs = mapNodes.map((n) => n.x + n.w / 2);
+  const midX = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const order = [...mapNodes].sort(
+    (a, b) =>
+      (prio.get(a.id) ?? Infinity) - (prio.get(b.id) ?? Infinity) ||
+      (degree.get(b.id) ?? 0) - (degree.get(a.id) ?? 0) ||
+      (a.id < b.id ? -1 : 1),
+  );
 
-  for (const n of mapNodes) {
-    const lw = Math.round(n.label.length * charWidth) + 4;
+  for (const n of order) {
+    const lw = (textWidth(n.label, '700 12px', 7.6) + 6) * s;
     const cx = n.x + n.w / 2;
     const cy = n.y + n.h / 2;
-
-    let chosenDir: 'right' | 'left' | 'top' | 'bottom' = 'right';
-    let chosenBox: { id: string; l: number; t: number; r: number; b: number } | null = null;
-
-    for (const dir of directions) {
-      let l = 0,
-        t = 0,
-        r = 0,
-        b = 0;
-      if (dir === 'right') {
-        l = n.x + n.w + gap;
-        t = cy - lh / 2;
-        r = l + lw;
-        b = t + lh;
-      } else if (dir === 'left') {
-        r = n.x - gap;
-        l = r - lw;
-        t = cy - lh / 2;
-        b = t + lh;
-      } else if (dir === 'top') {
-        l = cx - lw / 2;
-        r = l + lw;
-        b = n.y - gap;
-        t = b - lh;
-      } else if (dir === 'bottom') {
-        l = cx - lw / 2;
-        r = l + lw;
-        t = n.y + n.h + gap;
-        b = t + lh;
-      }
-
-      const candBox = { id: n.id, l, t, r, b };
-
-      let collides = false;
-      for (const cb of circleBoxes) {
-        if (cb.id === n.id) continue;
-        if (overlaps(candBox, cb, 2)) {
-          collides = true;
-          break;
-        }
-      }
-
-      if (!collides) {
-        for (const pl of placedLabels) {
-          if (overlaps(candBox, pl, 2)) {
-            collides = true;
-            break;
-          }
-        }
-      }
-
-      if (!collides) {
-        chosenDir = dir;
-        chosenBox = candBox;
-        break;
-      }
+    const boxes: Record<LabelDir, Box> = {
+      right: { l: n.x + n.w + gap, t: cy - lh / 2, r: n.x + n.w + gap + lw, b: cy + lh / 2 },
+      left: { l: n.x - gap - lw, t: cy - lh / 2, r: n.x - gap, b: cy + lh / 2 },
+      top: { l: cx - lw / 2, t: n.y - gap - lh, r: cx + lw / 2, b: n.y - gap },
+      bottom: { l: cx - lw / 2, t: n.y + n.h + gap, r: cx + lw / 2, b: n.y + n.h + gap + lh },
+    };
+    // En la mitad derecha del mapa el nombre prefiere ir a la izquierda (y viceversa) para no salirse del lienzo.
+    const dirs: LabelDir[] = cx > midX ? ['left', 'right', 'top', 'bottom'] : ['right', 'left', 'top', 'bottom'];
+    const dir = dirs.find((d) => free(boxes[d], n.id));
+    if (dir) {
+      layout.placements[n.id] = dir;
+      placed.push(boxes[dir]);
+    } else if (prio.has(n.id)) {
+      // Prioritario sin hueco libre: la dirección que menos se encima.
+      const best = dirs.reduce((m, d) => (overlapArea(boxes[d], placed) < overlapArea(boxes[m], placed) ? d : m));
+      layout.placements[n.id] = best;
+      placed.push(boxes[best]);
+    } else {
+      layout.hiddenLabels.add(n.id);
     }
-
-    if (!chosenBox) {
-      const l = n.x + n.w + gap;
-      const t = cy - lh / 2;
-      chosenBox = { id: n.id, l, t, r: l + lw, b: t + lh };
-    }
-
-    placedLabels.push(chosenBox);
-    results[n.id] = chosenDir;
   }
 
-  return results;
+  const byId = new Map(mapNodes.map((n) => [n.id, n]));
+  for (const e of edges) {
+    if (!weightEdges.has(e.id)) continue;
+    const a = byId.get(e.source);
+    const b = byId.get(e.target);
+    if (!a || !b) continue;
+    const mx = (a.x + a.w / 2 + b.x + b.w / 2) / 2;
+    const my = (a.y + a.h / 2 + b.y + b.h / 2) / 2;
+    const w = (textWidth(`${e.weight} ${unit}`, '600 11px', 6.6) + 6) * s;
+    const h = 14 * s;
+    const box = { l: mx - w / 2, t: my - h / 2, r: mx + w / 2, b: my + h / 2 };
+    if (free(box)) placed.push(box);
+    else layout.hiddenWeights.add(e.id);
+  }
+  return layout;
 }
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -510,9 +554,10 @@ export default function Canvas() {
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const { fitView } = useReactFlow();
+  const { zoom } = useViewport();
+  const viewportWidth = useStore((st) => st.width);
 
   const isMapMode = useMemo(() => graph.nodes.some((n) => n.lat != null && n.lon != null), [graph.nodes]);
-  const labelPlacements = useMemo(() => computeDeterministicLabelPlacements(graph.nodes), [graph.nodes]);
   const edgeWeightsMode = useUiStore((s) => s.edgeWeightsMode);
   const setEdgeWeightsMode = useUiStore((s) => s.setEdgeWeightsMode);
 
@@ -572,6 +617,50 @@ export default function Canvas() {
   const evaluatedEdgesSet = useMemo(() => new Set(currentStepEvaluated ?? []), [currentStepEvaluated]);
   const permanentNodesSet = useMemo(() => new Set(currentStepPermanent ?? []), [currentStepPermanent]);
 
+  // Colocación de nombres y pesos del mapa según el zoom (cuantizado a pasos de 0.05).
+  const zoomStep = Math.round(zoom * 20) / 20;
+  const mapLayout = useMemo(() => {
+    const priority = [
+      ...(query?.source ? [query.source] : []),
+      ...(query?.kind === 'path' && query.target ? [query.target] : []),
+      ...activePathNodes,
+      ...(currentStepCurrent ? [currentStepCurrent] : []),
+      ...selectedNodeIds,
+    ];
+    const weightEdges = new Set<string>([
+      ...activePathEdges,
+      ...dashedPathEdges,
+      ...(query?.kind === 'tree' ? treeEdgesSet : []),
+      ...evaluatedEdgesSet,
+      ...selectedEdgeIds,
+    ]);
+    return computeMapLabelLayout(
+      graph.nodes,
+      graph.edges,
+      zoomStep,
+      priority,
+      weightEdges,
+      graph.unit || 'km',
+      viewportWidth,
+    );
+  }, [
+    graph.nodes,
+    graph.edges,
+    graph.unit,
+    zoomStep,
+    viewportWidth,
+    query,
+    activePathNodes,
+    activePathEdges,
+    dashedPathEdges,
+    treeEdgesSet,
+    evaluatedEdgesSet,
+    currentStepCurrent,
+    selectedNodeIds,
+    selectedEdgeIds,
+  ]);
+  const labelPlacements = mapLayout.placements;
+
   // Mapear nodos de Graph a ReactFlow Nodes (base del store)
   const rfNodes: Node[] = useMemo(() => {
     return graph.nodes.map((n) => {
@@ -599,6 +688,7 @@ export default function Canvas() {
           dist,
           isMapMode: isNodeMap,
           labelPosition: labelPlacements[n.id] || 'right',
+          labelHidden: mapLayout.hiddenLabels.has(n.id),
         },
       };
     });
@@ -611,6 +701,7 @@ export default function Canvas() {
     dijkstra?.labels,
     selectedNodeIds,
     labelPlacements,
+    mapLayout,
   ]);
 
   // Mapear aristas de Graph a ReactFlow Edges
@@ -639,10 +730,12 @@ export default function Canvas() {
           isEvaluated,
           unit: graph.unit || 'km',
           isMapMode,
+          weightHidden: mapLayout.hiddenWeights.has(e.id),
         },
       };
     });
   }, [
+    mapLayout,
     graph.edges,
     graph.unit,
     activePathEdges,

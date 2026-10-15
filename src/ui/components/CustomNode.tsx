@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Handle, type NodeProps, NodeResizer, Position } from '@xyflow/react';
+import { Handle, type NodeProps, NodeResizer, Position, useViewport } from '@xyflow/react';
 import { useApp } from '../useApp';
 
 export interface CustomNodeData {
@@ -13,10 +13,13 @@ export interface CustomNodeData {
   dist?: number;
   isMapMode?: boolean;
   labelPosition?: 'right' | 'left' | 'top' | 'bottom';
+  /** El nombre no cabe con este zoom (se muestra al acercar, al pasar el cursor o al seleccionarlo). */
+  labelHidden?: boolean;
   [key: string]: unknown;
 }
 
 function CustomNodeComponent({ id, data, selected }: NodeProps) {
+  const { zoom } = useViewport();
   const nodeData = data as CustomNodeData;
   const label = nodeData.label || id;
   const isOrigin = nodeData.isOrigin ?? false;
@@ -26,6 +29,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   const isOnPath = nodeData.isOnPath ?? false;
   const isMapMode = Boolean(nodeData.isMapMode);
   const labelPosition = nodeData.labelPosition ?? 'right';
+  const labelHidden = nodeData.labelHidden ?? false;
   const dist = nodeData.dist;
 
   const mode = useApp((s) => s.mode);
@@ -238,7 +242,9 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           e.stopPropagation();
           openNodeMenu(e.clientX, e.clientY);
         }}
-        className={`relative flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-all cursor-pointer ${pointBgClass} ${
+        title={label}
+        aria-label={label}
+        className={`group relative flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-all cursor-pointer ${pointBgClass} ${
           selected ? 'ring-2 ring-blue-600' : ''
         }`}
       >
@@ -257,11 +263,16 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
         />
         <Handle type="target" position={Position.Left} id="left" className="opacity-0 pointer-events-none !w-0 !h-0" />
 
-        <div className={`pointer-events-none absolute whitespace-nowrap ${labelPosClass}`}>
+        <div
+          className={`pointer-events-none absolute whitespace-nowrap ${labelPosClass} ${
+            labelHidden ? 'hidden group-hover:block' : ''
+          }`}
+        >
           <span
             data-testid={`node-label-${label}`}
-            style={haloStyle}
-            className="text-[12px] font-bold leading-none select-none tracking-tight"
+            // Tamaño constante en pantalla al alejar el zoom: el nombre se lee aunque se vea todo el departamento.
+            style={{ ...haloStyle, fontSize: `${12 / Math.min(zoom, 1)}px` }}
+            className="font-bold leading-none select-none tracking-tight"
           >
             {label}
           </span>

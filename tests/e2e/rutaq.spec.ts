@@ -1,6 +1,11 @@
 import fs from 'node:fs';
 import { expect, test } from '@playwright/test';
 
+const QTZ = JSON.parse(fs.readFileSync('src/data/quetzaltenango.json', 'utf8')) as {
+  nodes: { id: string; label: string }[];
+  edges: unknown[];
+};
+
 // Función auxiliar para leer la solución teórica de Dijkstra verificada con networkx
 function getNetworkxDistance(graphFile: string, origin: string, destination: string): number {
   const content = fs.readFileSync('verification/resultados.csv', 'utf-8');
@@ -549,14 +554,14 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await expect(page.locator('.react-flow__edge')).toHaveCount(9);
     await expect(page.locator('.react-flow__node').first()).toBeVisible();
 
-    // Luego lo mismo terminando en Quetzaltenango (24 nodos, 55 aristas)
+    // Luego lo mismo terminando en Quetzaltenango (conteos tomados del dataset)
     for (let i = 0; i < 5; i++) {
       await page.getByTestId('template-select').selectOption('ejemplo6');
       await page.getByTestId('template-select').selectOption('quetzaltenango');
     }
 
-    await expect(page.locator('.react-flow__node')).toHaveCount(24);
-    await expect(page.locator('.react-flow__edge')).toHaveCount(55);
+    await expect(page.locator('.react-flow__node')).toHaveCount(QTZ.nodes.length);
+    await expect(page.locator('.react-flow__edge')).toHaveCount(QTZ.edges.length);
     await expect(page.locator('.react-flow__node').first()).toBeVisible();
 
     await page.screenshot({
@@ -564,9 +569,9 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     });
   });
 
-  test('16. Quetzaltenango: 24 nombres visibles sin superposiciones y rosa de los vientos con escala en km', async ({
+  test('16. Quetzaltenango: nombres legibles sin superposiciones y rosa de los vientos con escala en km', async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.goto('./');
     await page.getByTestId('template-select').selectOption('quetzaltenango');
 
@@ -576,21 +581,24 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     await expect(page.getByTestId('scale-bar')).toBeVisible();
     await expect(page.getByTestId('scale-bar')).toContainText(/km/);
 
-    // Los 24 nombres de los municipios visibles
-    const labels = page.locator('[data-testid^="node-label-"]');
-    await expect(labels).toHaveCount(24);
+    // Cada municipio sigue identificable aunque su nombre no quepa con este zoom (nombre accesible en el punto).
+    for (const n of QTZ.nodes) await expect(page.getByLabel(n.label, { exact: true }).first()).toBeAttached();
 
-    // Obtener los boundingBox en coordenadas de pantalla
+    // Nombres visibles: la mayoría cabe con el mapa completo, ninguno se encima con otro ni se sale del lienzo.
+    const canvas = (await page.getByTestId('graph-canvas').boundingBox())!;
+    const labels = page.locator('[data-testid^="node-label-"]:visible');
+    const visibles = await labels.count();
+    expect(visibles).toBeGreaterThanOrEqual(testInfo.project.name === 'desktop-chrome' ? 20 : 15);
     const boxes = [];
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < visibles; i++) {
       const loc = labels.nth(i);
-      await expect(loc).toBeVisible();
-      const box = await loc.boundingBox();
-      expect(box).toBeTruthy();
-      boxes.push({ id: await loc.getAttribute('data-testid'), ...box! });
+      const box = (await loc.boundingBox())!;
+      boxes.push({ id: await loc.getAttribute('data-testid'), ...box });
+      expect(box.x, `${await loc.textContent()} dentro del lienzo`).toBeGreaterThanOrEqual(canvas.x - 1);
+      expect(box.x + box.width, `${await loc.textContent()} dentro del lienzo`).toBeLessThanOrEqual(
+        canvas.x + canvas.width + 1,
+      );
     }
-
-    // Ninguna etiqueta se superpone con otra
     for (let i = 0; i < boxes.length; i++) {
       for (let j = i + 1; j < boxes.length; j++) {
         const b1 = boxes[i]!;
@@ -604,6 +612,16 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
         expect(overlaps, `Las etiquetas ${b1.id} y ${b2.id} no deben superponerse`).toBe(false);
       }
     }
+
+    // Al acercar aparecen los demás: con 6 pasos de zoom se leen los nombres de todos los municipios.
+    for (let i = 0; i < 6; i++) {
+      await page
+        .getByRole('button', { name: /zoom in|acercar/i })
+        .first()
+        .click();
+      await page.waitForTimeout(200);
+    }
+    await expect(page.locator('[data-testid^="node-label-"]:visible')).toHaveCount(QTZ.nodes.length);
   });
 
   test('17. Pesos de aristas: visibilidad automática, todas y ocultas', async ({ page }) => {
@@ -629,9 +647,9 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     expect(routeWeightsCount).toBeGreaterThan(0);
     expect(routeWeightsCount).toBeLessThan(10);
 
-    // Cambiar a "todos": se ven los 55 pesos
+    // Cambiar a "todos": se ven todos los pesos del dataset
     await weightsSelector.selectOption('all');
-    await expect(page.locator('[data-testid^="edge-label-"]')).toHaveCount(55);
+    await expect(page.locator('[data-testid^="edge-label-"]')).toHaveCount(QTZ.edges.length);
 
     // Cambiar a "ocultos": no se ve ningún peso
     await weightsSelector.selectOption('hidden');

@@ -23,6 +23,8 @@ export interface CustomEdgeData {
   isEvaluated?: boolean;
   unit?: string;
   isMapMode?: boolean;
+  /** El peso chocaría con un nombre u otro peso con este zoom (solo afecta al modo «automático»). */
+  weightHidden?: boolean;
   [key: string]: unknown;
 }
 
@@ -245,7 +247,9 @@ function CustomEdgeComponent({
       isWeightVisible = false;
     } else {
       // 'auto': solo si zoom >= 1.2 o en ruta, arbol, evaluada, seleccionada o bajo el cursor
-      isWeightVisible = zoom >= 1.2 || isOnPath || isTreeEdge || isEvaluated || Boolean(selected) || isHovered;
+      isWeightVisible =
+        isHovered ||
+        ((zoom >= 1.2 || isOnPath || isTreeEdge || isEvaluated || Boolean(selected)) && !edgeData.weightHidden);
     }
   }
 
@@ -339,8 +343,8 @@ function CustomEdgeComponent({
                     setIsEditingWeight(true);
                   }
                 }}
-                style={haloStyle}
-                className={`text-[11px] font-semibold tracking-tight whitespace-nowrap ${
+                style={{ ...haloStyle, fontSize: `${11 / Math.min(zoom, 1)}px` }}
+                className={`font-semibold tracking-tight whitespace-nowrap ${
                   mode === 'design' ? 'cursor-pointer hover:text-blue-600 dark:hover:text-blue-400' : 'cursor-default'
                 }`}
                 title={mode === 'design' ? 'Doble clic para editar peso, clic para forma' : `${weight} ${unit}`}
