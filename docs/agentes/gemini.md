@@ -36,6 +36,20 @@ JSON válido contra el tipo `Dataset`, 24 nodos, conexo, script reproducible, `M
 
 ### Hecho
 
+- **Ronda 7 — Actualización del Informe con Datos y la Interfaz Corregidos, Verificación Integral y Exportación Documental:**
+  - **Actualización Integral de `docs/informe/INFORME.md`:**
+    - Se actualizaron todas las secciones del informe (Portada, Resumen Ejecutivo, Objetivos, Metodología, Caso Práctico, Validación con Google Maps, Comparación Teórico vs. Programa, Análisis, Conclusiones y Manual de Usuario).
+    - Incorporación formal de la auditoría de 24 cabeceras contra Wikipedia y Google Maps (`docs/datos/auditoria_coordenadas.csv`), documentando la reubicación a El Nuevo Palmar ($\approx 6.8\text{ km}$) y Cantel ($\approx 2.0\text{ km}$).
+    - Topología oficial de 24 nodos y **50 aristas directas** (226 pares descartados). Justificación geométrica de las 5 aristas que dejaron de ser directas (`CAN-HUI`, `FCC-ZUN`, `PAL-SMA`, `QTZ-ZUN`, `SAL-ZUN`) por intercepción a $< 1.0\text{ km}$ con las nuevas posiciones urbanas.
+    - Consolidación de la muestra de validación con Google Maps (`docs/datos/validacion_google.csv`): **18 aristas directas validadas** (incluidas las 5 más largas del departamento), con 13 dentro de tolerancia ($\le 10\,\%$, 4 con coincidencia exacta del $0.00\,\%$) y 5 ajustadas con el valor de Google Maps por discrepancia $> 10\,\%$ (`ALM-SAL`, `CAN-SAL`, `CAN-ZUN`, `COL-PAL`, `ESP-SAL`), reflejando la remedición formal del 15 de octubre de 2026.
+    - Verificación cruzada automatizada contra NetworkX al 100.0 % (648/648 pares evaluados en `verification/reporte.md` y `verification/resultados.csv`, con 576/576 pares en Quetzaltenango), documentando los 4 casos de estudio incluyendo `QTZ-PAL` (37.1 km por Almolonga y Zunil).
+    - Métricas de producción: 112/112 pruebas E2E aprobadas (12 omitidas por diseño en móvil) en Desktop Chrome, iPhone 13, Pixel 7 e iPad; auditoría Lighthouse móvil: Rendimiento 92, Accesibilidad 95, Buenas Prácticas 100, SEO 100.
+    - Nuevas figuras fieles a producción: Figura 1 (`desktop-chrome-00-f3-quetzaltenango-coatepeque.png`), Figura 2 (`pixel-7-02-quetzaltenango.png` con mapa geográfico en celular, rosa de los vientos y escala de 10 km), Figura 3 (`desktop-chrome-02-quetzaltenango.png` con panel tipo ventana en escritorio), y re-numeración de figuras 4 a 7 describiendo objetivamente sus elementos observados.
+    - Manual de usuario actualizado con la navegación cartográfica (orientación norte, escala en km, selector de visibilidad de pesos) y panel de resultados tipo ventana (redimensionar tirador lateral, minimizar con `—` y maximizar con `▢`).
+  - **Actualización de `docs/datos/METODOLOGIA.md`:** Se actualizaron las secciones 6 y 7 con la remedición del 15 de octubre de 2026, los conteos de 18 aristas validadas (13 en tolerancia y 5 ajustadas), 32 aristas no evaluadas y metadato oficial con fecha 2026-10-15.
+  - **Regeneración reproducible de Word y PDF (`scripts/exportar_informe.py`):**
+    - Entorno virtual `.venv` configurado con `scripts/requirements.txt` (`pypandoc_binary>=1.17`, `playwright>=1.64.0`, Chromium headless).
+    - Generación exitosa de `docs/informe/INFORME.docx` y `docs/informe/INFORME.pdf`.
 - **Ronda 6 — Corrección de Coordenadas (El Palmar y Cantel), Auditoría Wikipedia y Reevaluación Topológica:**
   - **Auditoría de 24 Cabeceras Municipales (`docs/datos/auditoria_coordenadas.csv`):** Se implementó el script `scripts/auditar_coordenadas.py` que consulta la API de Wikipedia en español (`prop=coordinates`) con caché local en `scripts/cache/wikipedia/`, respetando la tasa $\le 1\text{ req/s}$ y User-Agent oficial. Se contrastaron las 24 cabeceras de Nominatim contra Wikipedia: 22 municipios se ubicaron a $\le 1.55\text{ km}$, mientras que El Palmar (`PAL`) mostró $5.26\text{ km}$ y Cantel (`CAN`) $2.67\text{ km}$ de discrepancia.
   - **Corrección de Coordenadas (`docs/datos/coordenadas_corregidas.csv`):**

@@ -17,7 +17,7 @@ _Modelado Matemático, Implementación Algorítmica (Dijkstra, Floyd-Warshall, Y
 **Estudiante:** Cristopher Alexis Castellanos Paz  
 **Carné:** 2690245972  
 **Carrera:** Ingeniería en Sistemas de Información y Ciencias de la Computación  
-**Fecha:** 14 de octubre de 2026  
+**Fecha:** 15 de octubre de 2026  
 **Lugar:** Quetzaltenango, Guatemala  
 **Aplicación Desplegada:** https://criss-paz.github.io/rutaq/  
 **Repositorio de Código:** https://github.com/Criss-paz/rutaq
@@ -30,7 +30,7 @@ _Modelado Matemático, Implementación Algorítmica (Dijkstra, Floyd-Warshall, Y
 
 El presente trabajo de investigación aplicada y desarrollo tecnológico aborda la formulación matemática, diseño arquitectónico, implementación de software y verificación rigurosa del problema de la ruta más corta (_Shortest Path Problem_) aplicado a la red vial del departamento de Quetzaltenango, Guatemala. Se desarrolló la plataforma web reactiva **RutaQ**, la cual integra dos enfoques fundamentales de optimización sobre grafos ponderados: el algoritmo de Dijkstra para rutas desde origen único (_Single-Source Shortest Path_, SSSP) y el algoritmo de Floyd-Warshall para rutas entre todos los pares de vértices (_All-Pairs Shortest Path_, APSP), complementados con el algoritmo de Yen para la enumeración de los $K$ caminos más cortos sin lazos y técnicas de majorización de estrés métrico (SMACOF) para la proyección visual del grafo en dos dimensiones.
 
-El modelo se alimenta de un dataset de 24 cabeceras municipales oficiales del departamento de Quetzaltenango, construido mediante metodologías 100 % guiadas por datos a partir de OpenStreetMap, Nominatim y el motor Open Source Routing Machine (OSRM). Dicho grafo consta de 55 aristas directas aceptadas tras evaluar exhaustivamente los 276 pares candidatos posibles y filtrar aquellos con intermediaciones urbanas a menos de 1.0 km. La solución algorítmica fue sometida a un proceso de verificación exhaustivo de tres niveles: (1) validación paso a paso de la trazabilidad tabular contra una resolución analítica manual sobre un grafo de control de 6 nodos, (2) verificación cruzada automatizada al 100 % (576/576 pares) contra la librería científica NetworkX, y (3) contraste de una muestra de 20 distancias con Google Maps (13 aristas dentro de la tolerancia de $\pm 10\,\%$ y 7 corregidas con el valor de Google Maps al superar dicho umbral por selección de travesías urbanas). Los resultados demuestran la exactitud absoluta de las implementaciones, evidenciando cómo la interacción armónica entre teoría de grafos, estructuras de datos eficientes (montículos binarios) y arquitecturas desacopladas mediante Web Workers permite resolver redes viales complejas, garantizando fluidez interactiva y trazabilidad pedagógica.
+El modelo se alimenta de un dataset de 24 cabeceras municipales oficiales del departamento de Quetzaltenango, construido mediante metodologías 100 % guiadas por datos a partir de OpenStreetMap, Nominatim y el motor Open Source Routing Machine (OSRM), sometido a una auditoría sistemática de coordenadas frente a Wikipedia y Google Maps que corrigió la posición de El Nuevo Palmar (casco reubicado tras los lahares del volcán Santiaguito, con una diferencia de $\approx 6.8\text{ km}$) y Cantel ($\approx 2.0\text{ km}$ hacia su parque central y casco urbano). Dicho grafo consta de 50 aristas directas aceptadas tras evaluar exhaustivamente los 276 pares candidatos posibles y descartar 226 pares con intermediaciones urbanas a menos de 1.0 km (dejando de ser directas `CAN-HUI`, `FCC-ZUN`, `PAL-SMA`, `QTZ-ZUN` y `SAL-ZUN` al transitar por las posiciones urbanas corregidas). La solución algorítmica fue sometida a un proceso de verificación exhaustivo de tres niveles: (1) validación paso a paso de la trazabilidad tabular contra una resolución analítica manual sobre un grafo de control de 6 nodos, (2) verificación cruzada automatizada al 100 % (648/648 pares evaluados en el sistema de verificación, incluyendo los 576 pares de Quetzaltenango y los grafos de control) contra la librería científica NetworkX, y (3) contraste de una muestra de 18 aristas directas con Google Maps (incluidas las 5 más largas del departamento), de las cuales 13 aristas se ubican dentro de la tolerancia de $\pm 10\,\%$ (4 con coincidencia exacta del $0.00\,\%$) y 5 fueron ajustadas con el valor de Google Maps al superar dicho umbral por selección de travesías urbanas o atajos locales (`ALM-SAL`, `CAN-SAL`, `CAN-ZUN`, `COL-PAL` y `ESP-SAL`), tras la remedición formal del 15 de octubre de 2026. Los resultados demuestran la exactitud absoluta de las implementaciones, evidenciando cómo la interacción armónica entre teoría de grafos, estructuras de datos eficientes (montículos binarios) y arquitecturas desacopladas mediante Web Workers permite resolver redes viales complejas, garantizando fluidez interactiva y trazabilidad pedagógica.
 
 ---
 
@@ -62,9 +62,9 @@ Diseñar, implementar y evaluar formalmente un sistema computacional interactivo
 ### 2.2 Objetivos Específicos
 
 1. **Formulación y análisis matemático:** Desarrollar el marco teórico formal de los algoritmos de Dijkstra, Floyd-Warshall y Yen, especificando sus recurrencias, invariantes de ciclo, pseudocódigo estandarizado, complejidad computacional en tiempo y espacio, y el comportamiento ante aristas con ponderación negativa.
-2. **Construcción de un dataset geográfico reproducible:** Modelar la topología vial de los 24 municipios del departamento de Quetzaltenango a partir de fuentes geográficas abiertas (OpenStreetMap, Nominatim, OSRM), aplicando criterios matemáticos objetivos de intermediación punto-segmento y pruebas geométricas de punto-en-polígono para garantizar un grafo 100 % conexo y trazable.
+2. **Construcción de un dataset geográfico reproducible:** Modelar la topología vial de los 24 municipios del departamento de Quetzaltenango a partir de fuentes geográficas abiertas (OpenStreetMap, Nominatim, OSRM), contrastadas y auditadas contra Wikipedia y Google Maps para corregir cascos urbanos históricos (El Nuevo Palmar y Cantel), aplicando criterios matemáticos objetivos de intermediación punto-segmento (50 aristas directas aceptadas y 226 descartadas) y pruebas geométricas de punto-en-polígono para garantizar un grafo 100 % conexo y trazable.
 3. **Implementación de arquitectura desacoplada:** Programar un motor algorítmico independiente de la interfaz en TypeScript estricto, empleando estructuras de datos optimizadas (montículos binarios, matrices de adyacencia y Web Workers en segundo plano) para mantener la interfaz fluida.
-4. **Validación y verificación integral:** Comprobar la exactitud de los resultados mediante pruebas de regresión iteración por iteración contra resoluciones manuales a mano, verificación cruzada al 100 % (576/576 pares) contra NetworkX, y contraste frente a mediciones de plataformas de navegación comercial.
+4. **Validación y verificación integral:** Comprobar la exactitud de los resultados mediante pruebas de regresión iteración por iteración contra resoluciones manuales a mano, verificación cruzada al 100 % (648/648 pares) contra NetworkX, contraste frente a 18 aristas directas medidas en Google Maps y pruebas de aceptación de extremo a extremo (E2E) en producción.
 
 ---
 
@@ -370,20 +370,26 @@ graph TD
 ### 5.2 Componentes de la Interfaz y Modos de Visualización
 
 1. **Lienzo Gráfico Interactivo (`src/ui/components/Canvas.tsx`):**
-   Renderizado acelerado por hardware que permite panoramizar (_pan_), hacer zoom fluido, seleccionar nodos de origen/destino mediante clics directos, y visualizar las aristas viales con curvaturas automáticas Bezier u ortogonales para evitar colisiones visuales (`CustomEdge.tsx`).
-2. **Módulo Tabular Paso a Paso (S1, `src/ui/components/tabs/TabularTab.tsx`):**
+   Renderizado acelerado por hardware que permite panoramizar (_pan_), hacer zoom fluido, seleccionar nodos de origen/destino mediante clics directos, y visualizar las aristas viales con curvaturas automáticas Bezier u ortogonales para evitar colisiones visuales (`CustomEdge.tsx`). En el modo Quetzaltenango, los 24 municipios se sitúan en su **posición geográfica exacta** (latitud y longitud proyectadas con el norte hacia arriba y escala métrica proporcional a la distancia real sobre el terreno), incorporando:
+   - **Rosa de los vientos:** Indicador visual de orientación cardinal en la esquina superior derecha con el norte destacado en rojo.
+   - **Barra de escala dinámica en kilómetros:** Proporciona referencia métrica inmediata (1, 2, 5, 10 o 20 km según el nivel de zoom aplicado).
+   - **Nodos geográficos y halo tipográfico:** Nodos circulares compactos de 18 px coloreados por estado semántico, con nombres legibles que conservan tamaño constante en pantalla sin solaparse, resguardados por un halo tipográfico protector (blanco en tema claro, oscuro en tema oscuro) colocado mediante un algoritmo determinista de cuatro cuadrantes.
+   - **Pesos de aristas limpios:** Ponderaciones kilométricas legibles con halo y sin bordes ni cajas invasivas, gobernadas por el selector «Pesos: automático / todos / ocultos» en la barra de herramientas (visibles automáticamente al acercar el zoom o en tramos evaluados).
+2. **Panel de Resultados Tipo Ventana (`src/ui/components/ResultsPanel.tsx`):**
+   En monitores de escritorio ($\ge 1024$ px), el panel de resultados opera como una ventana acoplada lateral que puede **redimensionarse** arrastrando su borde izquierdo (`panel-resize-handle`) entre 320 px y el 75 % del viewport (o mediante las teclas de flecha), **minimizarse** con el botón `—` a una franja vertical compacta de 56 px con acceso directo por iconos de pestaña, o **maximizarse** con el botón `▢` a pantalla completa, guardando el ancho y estado en `localStorage`. En celulares y tabletas, conmuta a una hoja deslizable inferior (_bottom sheet_) con tirador táctil accesible y botón de maximizado.
+3. **Módulo Tabular Paso a Paso (S1, `src/ui/components/tabs/TabularTab.tsx`):**
    Presenta la matriz de adyacencia inicial y la tabla iterativa dinámica. Cuenta con una barra de reproducción multimedia con botones de **Reproducir**, **Pausar**, **Paso Anterior**, **Paso Siguiente**, **Ir al Final** y un selector de velocidad en milisegundos. En cada iteración:
    - Se enfoca la fila activa.
    - Se resalta la casilla mínima elegida en color dorado brillante.
    - Se marca la columna correspondiente como permanente tachada con corchetes `[...]`.
    - Se colorean en verde azulado las casillas de nodos vecinos que experimentaron mejoras en su cota de distancia ($d[v]$ relajado).
-3. **Módulo Gráfico (S2, `src/ui/components/tabs/GraphicTab.tsx`):**
+4. **Módulo Gráfico (S2, `src/ui/components/tabs/GraphicTab.tsx`):**
    Permite alternar entre el Árbol de Caminos Mínimos completo (F2) y la ruta particular entre dos municipios (F3), atenuando la red no transitada y computando desgloses de kilometraje acumulado tramo por tramo.
-4. **Módulo de Todas las Rutas (S3, `src/ui/components/tabs/AllPathsTab.tsx`):**
+5. **Módulo de Todas las Rutas (S3, `src/ui/components/tabs/AllPathsTab.tsx`):**
    Ejecuta una búsqueda exhaustiva en el Web Worker. Si el total de caminos es inferior a 5 000, los lista íntegramente ordenados de menor a mayor distancia con la insignia de medalla a la ruta más corta. Si la combinatoria supera el umbral de seguridad, conmuta transparentemente al algoritmo de Yen para entregar los $K$ caminos más cortos, evitando bloqueos en la interfaz. Permite exportar los resultados directamente a formato CSV.
-5. **Módulo Matricial de Floyd-Warshall (`src/ui/components/tabs/FloydTab.tsx`):**
+6. **Módulo Matricial de Floyd-Warshall (`src/ui/components/tabs/FloydTab.tsx`):**
    Ofrece un selector de la etapa $k \in \{0, 1, \dots, 24\}$, permitiendo al usuario observar cómo la matriz $D^{(k)}$ se va poblando de caminos indirectos que bajan costos frente a la matriz inicial $D^{(0)}$.
-6. **Modo Diseño de Redes (F4):**
+7. **Modo Diseño de Redes (F4):**
    Permite al usuario diseñar libremente redes hipotéticas: crear nodos haciendo clic sobre el lienzo, trazar aristas arrastrando el cursor entre vértices, editar pesos numéricos, renombrar etiquetas y calcular instantáneamente rutas con cualquiera de los algoritmos.
 
 ---
@@ -392,27 +398,31 @@ graph TD
 
 A continuación se presentan las evidencias visuales del sistema en ejecución sobre la versión desplegada en producción, contrastando las vistas de escritorio con la experiencia responsiva en dispositivos móviles y documentando de manera fiel los elementos observados en cada interfaz:
 
-![Figura 1. Consulta F3 en la versión desplegada: ruta más corta de Quetzaltenango a Coatepeque (59.9 km) sobre la red vial de 24 cabeceras.](capturas/desktop-chrome-00-f3-quetzaltenango-coatepeque.png)
+![Figura 1. Consulta F3 en la versión desplegada en producción: ruta más corta de Quetzaltenango a Coatepeque (59.9 km) sobre la red geográfica departamental.](capturas/desktop-chrome-00-f3-quetzaltenango-coatepeque.png)
 
-En la barra superior se aprecian el modo «Quetzaltenango» activo, la plantilla «Quetzaltenango (24 muns)» y las acciones «Cargar», «Guardar» y «PNG». En la barra de consulta está activa «Ruta (F3)» con origen «Quetzaltenango», destino «Coatepeque» y la distancia mínima «59.9 km», junto a las insignias «Escala: 1–100» y «Ajuste 2D: 0%». En el lienzo, los municipios conservan su disposición geográfica (altiplano al norte, Costa Cuca al sur); la ruta mínima se resalta en morado, con el origen en verde y el destino en rojo, y cada arista muestra su peso en kilómetros. A la derecha, la pestaña «Gráfica (S2)» resume la consulta: «Distancia Total: 59.9 km», «5 tramos» y la secuencia Quetzaltenango → La Esperanza → San Mateo → Concepción Chiquirichapa → San Martín Sacatepéquez → Coatepeque, seguida de la leyenda de estados y la tarjeta de escala (~12 px por km).
+En la barra superior se aprecian el modo «Quetzaltenango» activo, la plantilla «Quetzaltenango (24 muns)» y las acciones «Cargar», «Guardar», «PNG» y botón de pantalla completa. En la barra de herramientas secundaria está activa la consulta «Ruta (F3)» con origen «Quetzaltenango», destino «Coatepeque», el chip de distancia mínima «59.9 km», el selector «Pesos: Pesos: automático», y las insignias «Escala: 1–100» y «Ajuste 2D: 0%». Sobre el lienzo, cada municipio se sitúa en su posición geográfica exacta (norte hacia arriba); se aprecian la rosa de los vientos orientada al norte y la barra de escala de 10 km en la esquina superior derecha. La ruta óptima se resalta con trazo morado continuo (Quetzaltenango → La Esperanza → San Mateo → Concepción Chiquirichapa → San Martín Sacatepéquez → Coatepeque), rotulando el tramo troncal de 40.3 km con tipografía limpia y halo. A la derecha, el panel de resultados tipo ventana incorpora los controles de ventana (`🗗`, `—`, `▢`) y el tirador lateral de redimensión; la pestaña «Gráfica (S2)» detalla el resumen de la ruta (59.9 km, 5 tramos), la secuencia, la leyenda semántica y la tarjeta de escala geométrica (~13 px/km).
 
-![Figura 2. Adaptabilidad responsiva de la interfaz en dispositivo móvil (iPhone 13).](capturas/iphone-13-02-quetzaltenango.png)
+![Figura 2. Visualización geográfica de la red departamental en dispositivo móvil (Pixel 7).](capturas/pixel-7-02-quetzaltenango.png)
 
-La interfaz gráfica se reconfigura en pantallas compactas de 390 px de ancho. El encabezado preserva el acceso inmediato a las vistas «Quetzaltenango» y «Diseño», resguardando funciones secundarias bajo un menú de opciones (`...`). El selector de plantilla y la barra de herramientas («Árbol (F2)», «Ruta (F3)», «Limpiar» y selector de cabecera) se redistribuyen verticalmente ocupando el ancho completo, manteniendo el lienzo de grafo táctil y habilitando una hoja inferior deslizable (_bottom sheet_) para consultar los paneles analíticos sin perder el contexto espacial.
+La interfaz se adapta responsivamente a pantallas móviles compactas de 412 px de ancho. El encabezado de dos filas exhibe el título «RutaQ», el alternador de modo («Quetzaltenango | Diseño») y el botón de opciones secundarias (`...`), seguido en la segunda fila por el selector de plantilla «Plantilla: Quetzaltenango (24 muns)». La barra de herramientas dispone verticalmente los botones «Árbol (F2)», «Ruta (F3)», «Limpiar», «De: Quetzaltenango» y el selector «Pesos: Pesos: automático». En el lienzo táctil interactivo, los 24 municipios se proyectan con orientación geográfica exacta, exhibiendo la rosa de los vientos y la barra de escala gráfica de 10 km en la parte superior derecha. Las etiquetas de los municipios mantienen tamaño tipográfico legible sin superponerse ni colisionar visualmente. En la base se ubican los controles de zoom flotantes y el tirador táctil de la hoja inferior deslizable (_bottom sheet_).
 
-![Figura 3. Módulo tabular paso a paso de Dijkstra (S1) sobre el grafo de control de 6 nodos.](capturas/desktop-chrome-05-tabla-s1.png)
+![Figura 3. Mapa departamental en reposo y panel de resultados tipo ventana en navegador de escritorio.](capturas/desktop-chrome-02-quetzaltenango.png)
+
+Vista panorámica en navegador de escritorio con el mapa de Quetzaltenango en estado de reposo (sin consulta activa) y el panel lateral de resultados configurado como ventana acoplada. Se evidencia el tirador de redimensión en el borde izquierdo (`data-testid="panel-resize-handle"`), que permite ajustar interactivamente la anchura del panel entre 320 px y el 75 % del viewport, junto a los botones de minimizar (`—`) y maximizar (`▢`) en la esquina superior derecha de la ventana. En el lienzo, los 24 nodos y las 50 aristas directas permanecen claramente distribuidos con norte arriba, rosa de los vientos y barra de escala de 10 km, mientras que el panel derecho guía al usuario para seleccionar nodos en el lienzo o consultar las pestañas analíticas S1, S2, S3 o Floyd.
+
+![Figura 4. Módulo tabular paso a paso de Dijkstra (S1) sobre el grafo de control de 6 nodos.](capturas/desktop-chrome-05-tabla-s1.png)
 
 Se ilustra la resolución analítica para la consulta entre el nodo A (origen, borde verde) y el nodo F (destino, borde naranja). La barra de estado señala la existencia de la distancia mínima encontrada («12 unidades · 2 rutas empatadas»), destacando simultáneamente sobre el lienzo con aristas moradas las dos ramas óptimas concurrentes (A-B-D-F y A-C-E-F). En el panel derecho («Tabla (S1)») se observan los selectores de formato de celda y modo de tachado, los controles de reproducción en la iteración 6 de 6 con velocidad de 0.9s, la matriz de adyacencia directa con guiones de desconexión (`—`), y el inicio de la tabla cronológica de iteraciones.
 
-![Figura 4. Visualización de la matriz de distancias D^(1) en el algoritmo de Floyd-Warshall.](capturas/desktop-chrome-07-floyd.png)
+![Figura 5. Visualización de la matriz de distancias D^(1) en el algoritmo de Floyd-Warshall.](capturas/desktop-chrome-07-floyd.png)
 
 El panel derecho presenta la pestaña «Floyd» navegando en el paso intermedio $k = 1$ ($D^{(1)}$ — Vía A), con la indicación «Intermedios evaluados: 1 a 1 (hasta A)». En la matriz de distancias de 6×6, las celdas simétricas (C, D) y (D, C) se encuentran resaltadas en verde claro con el nuevo valor 14 y el indicador «↓ Infinity», evidenciando la relajación de la distancia indirecta mediante la trayectoria $C \to A \to D$ ($4 + 10 = 14$). A la izquierda, el lienzo interactivo conserva visibles los 6 nodos y pesos originales para facilitar el seguimiento visual del proceso matricial.
 
-![Figura 5. Módulo de análisis combinatorio de Todas las Rutas (S3) entre Quetzaltenango y Coatepeque.](capturas/desktop-chrome-06-s3-todas-rutas.png)
+![Figura 6. Módulo de análisis combinatorio de Todas las Rutas (S3) entre Quetzaltenango y Coatepeque.](capturas/desktop-chrome-06-s3-todas-rutas.png)
 
 Se presenta la consulta entre Quetzaltenango y Coatepeque (distancia óptima de 59.9 km). En el panel lateral («Rutas (S3)») se observa el selector de cota máxima configurado en «5 000 rutas», el botón de reejecución y la notificación de estado de exploración cancelada por el usuario. La tabla inferior dispone las columnas para enumerar el identificador de ruta, secuencia ordenada de municipios, conteo de tramos intermedios, distancia kilométrica total y diferencial porcentual respecto a la ruta mínima. En el lienzo, se resaltan las aristas del corredor troncal que desciende hacia la Costa Cuca.
 
-![Figura 6. Entorno interactivo de diseño y edición de grafos (F4).](capturas/desktop-chrome-08-modo-diseno.png)
+![Figura 7. Entorno interactivo de diseño y edición de grafos (F4).](capturas/desktop-chrome-08-modo-diseno.png)
 
 Con el modo «Diseño» seleccionado en el encabezado, la interfaz provee herramientas directas para la creación de topologías personalizadas mediante los botones `+ Nodo`, `+ Carretera` y `Distribuir`. El sistema activa un aviso preventivo en amarillo («El grafo está desconectado; algunas rutas no existen») ante la presencia de componentes inconexos en la cuadrícula de trabajo (nodos A, B, C, D, E), permitiendo trazar aristas arbitrarias, ingresar ponderaciones personalizadas y contrastar el comportamiento de los algoritmos sobre redes experimentales.
 
@@ -435,32 +445,42 @@ Esta geografía impone retos significativos al transporte terrestre:
 
 Se validó la existencia administrativa oficial de los 24 municipios ante el Instituto Nacional de Estadística (INE) y SEGEPLAN. Cada municipio fue provisto de un identificador mnemotécnico de 3 letras mayúsculas, coordenadas geográficas de su cabecera municipal oficial (plaza o parque central) y su clasificación funcional:
 
-|  ID   | Nombre Oficial           | Latitud (°N) | Longitud (°O) | Clasificación Administrativa | Fuente de Coordenadas     |
-| :---: | :----------------------- | :----------: | :-----------: | :--------------------------- | :------------------------ |
-| `QTZ` | Quetzaltenango           |   14.84646   |   -91.51942   | Cabecera Departamental       | Nominatim / OpenStreetMap |
-| `SAL` | Salcajá                  |   14.87911   |   -91.45754   | Municipio                    | Nominatim / OpenStreetMap |
-| `OLI` | Olintepeque              |   14.88514   |   -91.51479   | Municipio                    | Nominatim / OpenStreetMap |
-| `SIJ` | San Carlos Sija          |   14.98369   |   -91.54905   | Municipio                    | Nominatim / OpenStreetMap |
-| `SIB` | Sibilia                  |   14.99416   |   -91.62418   | Municipio                    | Nominatim / OpenStreetMap |
-| `CAB` | Cabricán                 |   15.07470   |   -91.64844   | Municipio                    | Nominatim / OpenStreetMap |
-| `CAJ` | Cajolá                   |   14.92271   |   -91.61495   | Municipio                    | Nominatim / OpenStreetMap |
-| `SIG` | San Miguel Sigüilá       |   14.89629   |   -91.60282   | Municipio                    | Nominatim / OpenStreetMap |
-| `OST` | San Juan Ostuncalco      |   14.86882   |   -91.62163   | Municipio                    | Nominatim / OpenStreetMap |
-| `MAT` | San Mateo                |   14.85897   |   -91.59253   | Municipio                    | Nominatim / OpenStreetMap |
-| `CCH` | Concepción Chiquirichapa |   14.85513   |   -91.62396   | Municipio                    | Nominatim / OpenStreetMap |
-| `SMA` | San Martín Sacatepéquez  |   14.82362   |   -91.64263   | Municipio                    | Nominatim / OpenStreetMap |
-| `ALM` | Almolonga                |   14.81498   |   -91.49475   | Municipio                    | Nominatim / OpenStreetMap |
-| `CAN` | Cantel                   |   14.81879   |   -91.43198   | Municipio                    | Nominatim / OpenStreetMap |
-| `HUI` | Huitán                   |   15.04950   |   -91.63801   | Municipio                    | Nominatim / OpenStreetMap |
-| `ZUN` | Zunil                    |   14.78480   |   -91.48480   | Municipio                    | Nominatim / OpenStreetMap |
-| `COL` | Colomba Costa Cuca       |   14.70759   |   -91.73194   | Municipio                    | Nominatim / OpenStreetMap |
-| `FLU` | San Francisco La Unión   |   14.92429   |   -91.54333   | Municipio                    | Nominatim / OpenStreetMap |
-| `PAL` | El Palmar                |   14.69381   |   -91.60183   | Municipio                    | Nominatim / OpenStreetMap |
-| `COA` | Coatepeque               |   14.70263   |   -91.86564   | Municipio                    | Nominatim / OpenStreetMap |
-| `GEN` | Génova                   |   14.62240   |   -91.83562   | Municipio                    | Nominatim / OpenStreetMap |
-| `FCC` | Flores Costa Cuca        |   14.65606   |   -91.82563   | Municipio                    | Nominatim / OpenStreetMap |
-| `ESP` | La Esperanza             |   14.86923   |   -91.57130   | Municipio                    | Nominatim / OpenStreetMap |
-| `PLA` | Palestina de Los Altos   |   14.93315   |   -91.69398   | Municipio                    | Nominatim / OpenStreetMap |
+|  ID   | Nombre Oficial           | Latitud (°N) | Longitud (°O) | Clasificación Administrativa | Fuente de Coordenadas                                            |
+| :---: | :----------------------- | :----------: | :-----------: | :--------------------------- | :--------------------------------------------------------------- |
+| `QTZ` | Quetzaltenango           |   14.84646   |   -91.51942   | Cabecera Departamental       | Nominatim / OpenStreetMap                                        |
+| `SAL` | Salcajá                  |   14.87911   |   -91.45754   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `OLI` | Olintepeque              |   14.88514   |   -91.51479   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `SIJ` | San Carlos Sija          |   14.98369   |   -91.54905   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `SIB` | Sibilia                  |   14.99416   |   -91.62418   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `CAB` | Cabricán                 |   15.07470   |   -91.64844   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `CAJ` | Cajolá                   |   14.92271   |   -91.61495   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `SIG` | San Miguel Sigüilá       |   14.89629   |   -91.60282   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `OST` | San Juan Ostuncalco      |   14.86882   |   -91.62163   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `MAT` | San Mateo                |   14.85897   |   -91.59253   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `CCH` | Concepción Chiquirichapa |   14.85513   |   -91.62396   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `SMA` | San Martín Sacatepéquez  |   14.82362   |   -91.64263   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `ALM` | Almolonga                |   14.81498   |   -91.49475   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `CAN` | Cantel                   |   14.80987   |   -91.45068   | Municipio                    | Google Maps (lugar «Cantel»), contrastado con Wikipedia          |
+| `HUI` | Huitán                   |   15.04950   |   -91.63801   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `ZUN` | Zunil                    |   14.78480   |   -91.48480   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `COL` | Colomba Costa Cuca       |   14.70759   |   -91.73194   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `FLU` | San Francisco La Unión   |   14.92429   |   -91.54333   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `PAL` | El Palmar                |   14.64807   |   -91.55718   | Municipio                    | Google Maps (lugar «El Nuevo Palmar»), contrastado con Wikipedia |
+| `COA` | Coatepeque               |   14.70263   |   -91.86564   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `GEN` | Génova                   |   14.62240   |   -91.83562   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `FCC` | Flores Costa Cuca        |   14.65606   |   -91.82563   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `ESP` | La Esperanza             |   14.86923   |   -91.57130   | Municipio                    | Nominatim / OpenStreetMap                                        |
+| `PLA` | Palestina de Los Altos   |   14.93315   |   -91.69398   | Municipio                    | Nominatim / OpenStreetMap                                        |
+
+#### Auditoría y Corrección de Coordenadas (El Palmar y Cantel)
+
+Con el fin de garantizar la máxima veracidad cartográfica, se ejecutó una auditoría sistemática de coordenadas de las 24 cabeceras municipales (`docs/datos/auditoria_coordenadas.csv`), contrastando las consultas geográficas de OpenStreetMap/Nominatim contra la base enciclopédica de Wikipedia en español y la cartografía de Google Maps:
+
+1. **22 cabeceras consistentes ($\le 1.55\text{ km}$):** En 22 municipios, Nominatim y Wikipedia mostraron discrepancias subkilométricas o menores a $1.55\text{ km}$, atribuibles a la diferencia natural entre puntos centrales de referencia urbana (alcaldías, parques o accesos viales).
+2. **Reubicación de El Palmar (`PAL`):** Las coordenadas iniciales de Nominatim (`14.69381, -91.60183`) correspondían al casco antiguo del municipio, destruido y abandonado tras los históricos lahares del volcán Santiaguito. La cabecera municipal oficial opera actualmente en **El Nuevo Palmar** (`14.6480742, -91.5571834`), punto validado en Google Maps y respaldado por Wikipedia (`14.65, -91.5833`), con una corrección espacial de $\approx 6.8\text{ km}$ ($5.26\text{ km}$ frente a Wikipedia).
+3. **Corrección de Cantel (`CAN`):** Nominatim situaba la cabecera en un paraje rural periférico al este (`14.81879, -91.43198`). Se corrigió hacia el centro urbano histórico y parque central de Cantel (`14.8098714, -91.450678`), coincidente a escasos $0.5\text{ km}$ con Wikipedia (`14.81122, -91.45551`), corrigiendo un desvío de $\approx 2.0\text{ km}$ ($2.67\text{ km}$ frente a Wikipedia).
+
+Ambas correcciones se formalizaron en `docs/datos/coordenadas_corregidas.csv` y tienen precedencia automática en el generador de la red (`scripts/build_dataset.py`).
 
 ---
 
@@ -476,10 +496,16 @@ Para erradicar cualquier sesgo subjetivo o trazado manual "a ojo", la construcci
    Si una ruta vial pasa a $< 1.0\text{ km}$ de una cabecera intermedia, no es un tramo elemental directo, sino una ruta compuesta transitando por un tercer centro urbano.
 3. **Resultados del filtrado:**
    - **Pares consultados:** 276
-   - **Pares descartados:** 221 (registrados rigurosamente en `docs/datos/aristas_descartadas.csv`, documentando el municipio interceptor y la distancia mínima observada).
-   - **Aristas directas aceptadas:** 55 aristas viales directas.
+   - **Pares descartados:** 226 (registrados rigurosamente en `docs/datos/aristas_descartadas.csv`, documentando el municipio interceptor y la distancia mínima observada).
+   - **Aristas directas aceptadas:** 50 aristas viales directas.
+   - **Efecto de la corrección de coordenadas en la topología:** Al desplazar El Palmar a El Nuevo Palmar y corregir el casco urbano de Cantel, 5 pares que anteriormente no tenían intermediarios urbanos próximos ahora intersectan cascos poblados a $< 1.0\text{ km}$, dejando de ser aristas directas:
+     1. `CAN-HUI`: su ruta cruza a $0.076\text{ km}$ de la cabecera de San Carlos Sija (`SIJ`).
+     2. `PAL-SMA`: la ruta desde El Nuevo Palmar pasa a $0.097\text{ km}$ de Concepción Chiquirichapa (`CCH`).
+     3. `FCC-ZUN`: la ruta hacia Zunil pasa a $0.812\text{ km}$ de la nueva posición de El Palmar (`PAL`).
+     4. `QTZ-ZUN`: la ruta por la CITO-180 cruza a $0.291\text{ km}$ del casco central corregido de Cantel (`CAN`).
+     5. `SAL-ZUN`: la ruta hacia Zunil cruza igualmente a $0.291\text{ km}$ del casco central de Cantel (`CAN`).
    - **Conexidad:** El grafo resultante es **100 % conexo** en una única componente, verificado mediante recorrido en anchura (BFS) y NetworkX.
-   - **Métricas del grafo:** 24 vértices, 55 aristas, grado promedio $\bar{k} = \frac{2 \times 55}{24} \approx 4.58$ aristas por nodo.
+   - **Métricas del grafo:** 24 vértices, 50 aristas, grado promedio $\bar{k} = \frac{2 \times 50}{24} \approx 4.17$ aristas por nodo.
 4. **Determinación de carreteras (`carretera`):**
    Derivada directamente sumando las distancias de los códigos oficiales de carretera `ref` (p. ej. `RN-1`, `CA-1 Occ`, `CITO 180`, `CA-2 OCC`) en los pasos de navegación de OSRM. Si no existe código oficial, se toma el nombre de vía `name`. Si no existe ninguno o el marcador es genérico (`"Unknown"`), el campo queda en blanco `""`, sin inventar nomenclaturas sintéticas.
 5. **Detección de rutas interdepartamentales (`nota`):**
@@ -489,43 +515,42 @@ Para erradicar cualquier sesgo subjetivo o trazado manual "a ojo", la construcci
 
 ### 6.4 Validación con Plataformas Cartográficas Externas
 
-Conforme al protocolo de validación vial (Sección 3.2, paso 6 del Plan Maestro), se llevó a cabo una auditoría externa de distancias por carretera contrastando los valores derivados de OSRM contra mediciones de la plataforma Google Maps. Se seleccionó una muestra estratégica de 20 aristas prioritarias que cubre las 5 aristas más largas del departamento, los corredores troncales costa-altiplano y los enlaces limítrofes.
+Conforme al protocolo de aseguramiento de calidad vial (Sección 3.2, paso 6 del Plan Maestro), se llevó a cabo una auditoría externa de distancias por carretera contrastando los valores derivados de OSRM contra mediciones de la plataforma Google Maps. Se evaluó una muestra de 18 aristas directas de la red activa que incluye las 5 aristas más largas del departamento, los corredores troncales costa-altiplano y los enlaces limítrofes, complementada con la remedición formal ejecutada por el orquestador el 15 de octubre de 2026 para las 8 aristas vinculadas a las posiciones corregidas de Cantel y El Nuevo Palmar (`docs/datos/validacion_google.csv`).
 
-#### Tabla Consolidada de Mediciones (20 Aristas Prioritarias)
+#### Tabla Consolidada de Mediciones (18 Aristas Validadas)
 
 |  #  | ID Arista | Origen – Destino                             | km OSRM | km Google Maps | Dif. %  | Vía Principal en Google Maps         |     Estado de Validación     |
 | :-: | :-------: | :------------------------------------------- | :-----: | :------------: | :-----: | :----------------------------------- | :--------------------------: |
-|  1  | `FCC-ZUN` | Flores Costa Cuca – Zunil                    |  70.9   |      70.6      | 0.42 %  | por CA-2 y CITO-180                  |   ✅ Válida ($\le 10\,\%$)   |
-|  2  | `PAL-SMA` | El Palmar – San Martín Sacatepéquez          |  70.0   |      66.6      | 4.86 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
-|  3  | `COL-PAL` | Colomba Costa Cuca – El Palmar               |  60.5   |      46.6      | 22.98 % | por CA-2 (ruta corta)                | ⚠️ Discrepancia ($> 10\,\%$) |
-|  4  | `COA-PAL` | Coatepeque – El Palmar                       |  58.4   |      55.0      | 5.82 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
-|  5  | `PAL-ZUN` | El Palmar – Zunil                            |  57.2   |      53.4      | 6.64 %  | por CITO-180                         |   ✅ Válida ($\le 10\,\%$)   |
-|  6  | `FCC-PAL` | Flores Costa Cuca – El Palmar                |  53.1   |      49.7      | 6.40 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
-|  7  | `CAN-HUI` | Cantel – Huitán                              |  49.6   |      54.9      | 10.69 % | por Pan-American Highway/CA-1        | ⚠️ Discrepancia ($> 10\,\%$) |
-|  8  | `HUI-SAL` | Huitán – Salcajá                             |  42.4   |      40.3      | 4.95 %  | por Pan-American Highway/CA-1        |   ✅ Válida ($\le 10\,\%$)   |
-|  9  | `COA-SMA` | Coatepeque – San Martín Sacatepéquez         |  40.3   |      40.3      | 0.00 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
-| 10  | `FCC-SMA` | Flores Costa Cuca – San Martín Sacatepéquez  |  39.9   |      39.9      | 0.00 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
-| 11  | `SAL-SIJ` | Salcajá – San Carlos Sija                    |  24.7   |      24.7      | 0.00 %  | por Pan-American Highway/CA-1        |   ✅ Válida ($\le 10\,\%$)   |
-| 12  | `HUI-PLA` | Huitán – Palestina de Los Altos              |  24.4   |      25.3      | 3.69 %  | por carreteras sin nombre / locales  |   ✅ Válida ($\le 10\,\%$)   |
-| 13  | `COL-SMA` | Colomba Costa Cuca – San Martín Sacatepéquez |  23.7   |      23.7      | 0.00 %  | por Diag. 2                          |   ✅ Válida ($\le 10\,\%$)   |
-| 14  | `SAL-ZUN` | Salcajá – Zunil                              |  22.8   |      17.9      | 21.49 % | por RN 09 S                          | ⚠️ Discrepancia ($> 10\,\%$) |
-| 15  | `CAB-PLA` | Cabricán – Palestina de Los Altos            |  21.5   |      23.5      | 9.30 %  | por carreteras sin nombre / RD-SM-13 |   ✅ Válida ($\le 10\,\%$)   |
-| 16  | `ESP-SAL` | La Esperanza – Salcajá                       |  19.7   |      15.0      | 23.86 % | por 9a Calle                         | ⚠️ Discrepancia ($> 10\,\%$) |
-| 17  | `CAN-SAL` | Cantel – Salcajá                             |  18.4   |      13.8      | 25.00 % | por CITO-180                         | ⚠️ Discrepancia ($> 10\,\%$) |
-| 18  | `OST-PLA` | San Juan Ostuncalco – Palestina de Los Altos |  18.0   |      16.5      | 8.33 %  | por carreteras sin nombre / RN-1     |   ✅ Válida ($\le 10\,\%$)   |
-| 19  | `ALM-SAL` | Almolonga – Salcajá                          |  17.5   |      13.2      | 24.57 % | por Calz. Manuel Lizandro Barillas   | ⚠️ Discrepancia ($> 10\,\%$) |
-| 20  | `QTZ-ZUN` | Quetzaltenango – Zunil                       |  17.3   |      10.9      | 36.99 % | por RN 09 S                          | ⚠️ Discrepancia ($> 10\,\%$) |
+|  1  | `COA-PAL` | Coatepeque – El Palmar                       |  54.9   |      54.7      | 0.36 %  | CA-2                                 |   ✅ Válida ($\le 10\,\%$)   |
+|  2  | `FCC-PAL` | Flores Costa Cuca – El Palmar                |  49.6   |      49.5      | 0.20 %  | CA-2 y CITO-180                      |   ✅ Válida ($\le 10\,\%$)   |
+|  3  | `COL-PAL` | Colomba Costa Cuca – El Palmar               |  57.0   |      46.3      | 18.77 % | CITO-180                             | ⚠️ Discrepancia ($> 10\,\%$) |
+|  4  | `HUI-SAL` | Huitán – Salcajá                             |  42.4   |      40.3      | 4.95 %  | por Pan-American Highway/CA-1        |   ✅ Válida ($\le 10\,\%$)   |
+|  5  | `COA-SMA` | Coatepeque – San Martín Sacatepéquez         |  40.3   |      40.3      | 0.00 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+|  6  | `FCC-SMA` | Flores Costa Cuca – San Martín Sacatepéquez  |  39.9   |      39.9      | 0.00 %  | por CA-2                             |   ✅ Válida ($\le 10\,\%$)   |
+|  7  | `PAL-ZUN` | El Palmar – Zunil                            |  25.3   |      24.7      | 2.37 %  | CITO-180                             |   ✅ Válida ($\le 10\,\%$)   |
+|  8  | `SAL-SIJ` | Salcajá – San Carlos Sija                    |  24.7   |      24.7      | 0.00 %  | por Pan-American Highway/CA-1        |   ✅ Válida ($\le 10\,\%$)   |
+|  9  | `HUI-PLA` | Huitán – Palestina de Los Altos              |  24.4   |      25.3      | 3.69 %  | por carreteras sin nombre / locales  |   ✅ Válida ($\le 10\,\%$)   |
+| 10  | `COL-SMA` | Colomba Costa Cuca – San Martín Sacatepéquez |  23.7   |      23.7      | 0.00 %  | por Diag. 2                          |   ✅ Válida ($\le 10\,\%$)   |
+| 11  | `CAB-PLA` | Cabricán – Palestina de Los Altos            |  21.5   |      23.5      | 9.30 %  | por carreteras sin nombre / RD-SM-13 |   ✅ Válida ($\le 10\,\%$)   |
+| 12  | `OST-PLA` | San Juan Ostuncalco – Palestina de Los Altos |  18.0   |      16.5      | 8.33 %  | por carreteras sin nombre / RN-1     |   ✅ Válida ($\le 10\,\%$)   |
+| 13  | `ESP-SAL` | La Esperanza – Salcajá                       |  19.7   |      15.0      | 23.86 % | por 9a Calle                         | ⚠️ Discrepancia ($> 10\,\%$) |
+| 14  | `ALM-CAN` | Almolonga – Cantel                           |  15.0   |      14.6      | 2.67 %  | CITO-180                             |   ✅ Válida ($\le 10\,\%$)   |
+| 15  | `ALM-SAL` | Almolonga – Salcajá                          |  17.5   |      13.2      | 24.57 % | por Calz. Manuel Lizandro Barillas   | ⚠️ Discrepancia ($> 10\,\%$) |
+| 16  | `CAN-SAL` | Cantel – Salcajá                             |  16.8   |      12.1      | 27.98 % | CITO-180                             | ⚠️ Discrepancia ($> 10\,\%$) |
+| 17  | `CAN-QTZ` | Cantel – Quetzaltenango                      |  11.6   |      11.1      | 4.31 %  | CITO-180                             |   ✅ Válida ($\le 10\,\%$)   |
+| 18  | `CAN-ZUN` | Cantel – Zunil                               |   6.5   |      8.4       | 29.23 % | CITO-180                             | ⚠️ Discrepancia ($> 10\,\%$) |
 
 #### Análisis y Diagnóstico de Discrepancias
 
 1. **Cumplimiento general:**
-   - **13 de las 20 aristas (65 %)** cumplen holgadamente el criterio de aceptación ($\le 10\,\%$ de discrepancia relativa), conservando el kilometraje derivado de OSRM.
-   - **4 de las 5 aristas más largas (Top 5)** están plenamente validadas con discrepancias mínimas: `FCC-ZUN` ($0.42\,\%$), `PAL-SMA` ($4.86\,\%$), `COA-PAL` ($5.82\,\%$) y `PAL-ZUN` ($6.64\,\%$).
+   - **13 de las 18 aristas (72.2 %)** cumplen holgadamente el criterio de aceptación ($\le 10\,\%$ de discrepancia relativa), conservando el kilometraje derivado de OSRM.
+   - **Las 5 aristas más largas del departamento** están rigurosamente verificadas con Google Maps: `COA-PAL` ($0.36\,\%$), `FCC-PAL` ($0.20\,\%$), `COL-PAL` ($18.77\,\%$, ajustada a Google Maps), `HUI-SAL` ($4.95\,\%$) y `COA-SMA` ($0.00\,\%$), además de enlaces clave como `FCC-SMA` ($0.00\,\%$) y `PAL-ZUN` ($2.37\,\%$).
    - Se registraron 4 coincidencias exactas ($0.00\,\%$) en corredores departamentales primarios: `COA-SMA`, `FCC-SMA`, `SAL-SIJ` y `COL-SMA`.
-2. **Causas identificadas para las 7 aristas con discrepancia $> 10\,\%$:**
-   - **Circunvalación vs. Travesía Urbana Céntrica:** En el área metropolitana de Quetzaltenango (`QTZ-ZUN`, `SAL-ZUN`, `ESP-SAL`, `ALM-SAL`), el enrutamiento de OSRM priorizó anillos periféricos de alta velocidad (`CITO-180`, `RN-1B`), mientras que Google Maps seleccionó travesías vehiculares directas a través del casco urbano (p. ej. travesía por 9a Calle para `ESP-SAL` y cañón de Almolonga vía RN 09 S para `QTZ-ZUN`).
-   - **Rutas alternativas en la red troncal:** En `COL-PAL` ($46.6\text{ km}$ vs. $60.5\text{ km}$) y `CAN-SAL` ($13.8\text{ km}$ vs. $18.4\text{ km}$), Google Maps seleccionó atajos locales directos, mientras que en `CAN-HUI` ($54.9\text{ km}$ vs. $49.6\text{ km}$) Google Maps priorizó la autopista Panamericana CA-1.
-   - **Ajuste de pesos aplicado:** Siguiendo la regla de decisión del plan de aseguramiento de calidad, para estas 7 aristas se adoptó como peso oficial de la red el valor medido en Google Maps ($km = km_{\text{Google}}$), reflejando la distancia del trayecto más corto transitable y documentando la desviación en el campo `nota`.
+2. **Causas identificadas para las 5 aristas con discrepancia $> 10\,\%$:**
+   - **Circunvalación vs. Travesía Urbana Céntrica:** En el nudo metropolitano de Quetzaltenango y sus municipios conurbados (`ESP-SAL` y `ALM-SAL`), el enrutamiento de OSRM priorizó circunvalaciones periféricas de mayor velocidad nominal (`RN-1B`, `CITO-180`), mientras que Google Maps seleccionó travesías vehiculares céntricas directas (p. ej. travesía por 9a Calle para `ESP-SAL` con 15.0 km vs. 19.7 km, y Calzada Manuel Lizandro Barillas para `ALM-SAL` con 13.2 km vs. 17.5 km).
+   - **Atajos locales pavimentados y geometría de acceso:** En `COL-PAL` ($46.3\text{ km}$ vs. $57.0\text{ km}$, dif. $18.77\,\%$), `CAN-SAL` ($12.1\text{ km}$ vs. $16.8\text{ km}$, dif. $27.98\,\%$) y `CAN-ZUN` ($8.4\text{ km}$ vs. $6.5\text{ km}$, dif. $29.23\,\%$), Google Maps seleccionó trazados viales alternativos pavimentados o consideró restricciones de acceso local a los nuevos centros urbanos.
+   - **Ajuste de pesos aplicado:** Siguiendo la regla de decisión del plan de aseguramiento de calidad, para estas 5 aristas se adoptó como peso oficial de la red el valor medido en Google Maps ($km = km_{\text{Google}}$), reflejando la distancia del trayecto más corto transitable y documentando la desviación en el campo `nota`.
+   - **Pares reclasificados:** Las 4 mediciones históricas restantes de la tabla de validación (`FCC-ZUN`, `PAL-SMA`, `QTZ-ZUN` y `SAL-ZUN`) corresponden a aristas que formaban parte del grafo inicial pero que, tras la corrección de cascos urbanos, dejaron de ser aristas directas por cruzar Cantel o El Nuevo Palmar, quedando registradas como pares descartados en `docs/datos/aristas_descartadas.csv`.
 
 ---
 
@@ -557,11 +582,11 @@ superando la prueba en verde al 100 %.
 
 ### 7.2 Verificación Cruzada Exhaustiva con NetworkX
 
-Para evaluar la totalidad de la red de Quetzaltenango, se ejecutó un script de verificación automatizada que calculó las distancias mínimas para todos los pares ordenados posibles:
-$$24 \times 24 = 576\text{ pares}$$
-comparando la distancia calculada por la implementación de Dijkstra/Floyd de RutaQ contra la biblioteca científica `networkx` de Python (`verification/reporte.md` y `verification/resultados.csv`).
+Para evaluar la totalidad de la red de Quetzaltenango y los grafos de control del sistema, se ejecutó un script de verificación automatizada (`verification/verify.py` y `verification/export.ts`) que calculó las distancias mínimas para todos los pares ordenados posibles:
+$$648\text{ pares evaluados}$$
+(compuestos por los $24 \times 24 = 576\text{ pares}$ de la red vial de Quetzaltenango y los $2 \times 36 = 72\text{ pares}$ correspondientes a los grafos pedagógicos de control), comparando la distancia calculada por la implementación de Dijkstra/Floyd de RutaQ contra la biblioteca científica `networkx` de Python (`verification/reporte.md` y `verification/resultados.csv`).
 
-El resultado arrojó **coincidencia del 100.0 % (576 de 576 pares)** sin discrepancia numérica alguna. A continuación, se presentan tres ejemplos representativos extraídos directamente del archivo oficial de verificación `verification/resultados.csv`:
+El resultado arrojó **coincidencia del 100.0 % (648 de 648 pares)** sin discrepancia numérica alguna. A continuación, se presentan cuatro ejemplos representativos extraídos directamente del archivo oficial de verificación `verification/resultados.csv`:
 
 #### Caso 1: Ruta Quetzaltenango (`QTZ`) a Coatepeque (`COA`)
 
@@ -592,6 +617,16 @@ El resultado arrojó **coincidencia del 100.0 % (576 de 576 pares)** sin discrep
   $$\text{Distancia total} = 7.2 + 5.7 + 3.9 + 11.8 + 8.6 + 4.5 = 41.7\text{ km}$$
   Comunica la cabecera departamental con el municipio más septentrional del departamento, demostrando la capacidad del algoritmo para encadenar hasta 6 aristas sucesivas optimizando trayectorias en terrenos de montaña.
 
+#### Caso 4: Ruta Quetzaltenango (`QTZ`) a El Palmar (`PAL`)
+
+- **Distancia NetworkX:** $37.1\text{ km}$
+- **Distancia Programa RutaQ:** $37.1\text{ km}$
+- **Estado de Coincidencia:** `True` (Exacta)
+- **Secuencia de Vértices Óptima:**  
+  $$\text{QTZ} \xrightarrow{7.0\text{ km}} \text{ALM} \xrightarrow{4.8\text{ km}} \text{ZUN} \xrightarrow{25.3\text{ km}} \text{PAL}$$
+  $$\text{Distancia total} = 7.0 + 4.8 + 25.3 = 37.1\text{ km}$$
+  Tras la reubicación de la cabecera municipal en El Nuevo Palmar, la ruta más corta desde la metrópoli desciende por el cañón de Almolonga y Zunil a lo largo de la CITO-180, optimizando la trayectoria frente al antiguo trazado por el altiplano de San Martín Sacatepéquez.
+
 ---
 
 ### 7.3 Pruebas de Aceptación en Producción y Calidad Web
@@ -599,13 +634,13 @@ El resultado arrojó **coincidencia del 100.0 % (576 de 576 pares)** sin discrep
 Para asegurar que la solución opere de forma confiable, robusta y accesible en entornos reales de despliegue, se implementó una batería exhaustiva de pruebas de aceptación de extremo a extremo (_End-to-End_, E2E) y auditorías de calidad sobre la versión alojada en producción en GitHub Pages:
 
 1. **Pruebas E2E sobre la Aplicación Desplegada (`https://criss-paz.github.io/rutaq/`):**
-   - Se ejecutó la suite completa de Playwright contra la URL pública de producción, obteniendo un balance de **99 pruebas pasadas y 0 fallidas** (con 9 pruebas omitidas deliberadamente por diseño, dado que el indicador de escala gráfica se desactiva intencionalmente en pantallas con ancho inferior a dispositivos medianos).
+   - Se ejecutó la suite completa de Playwright contra la URL pública de producción, obteniendo un balance de **112 pruebas pasadas y 0 fallidas** (con 12 pruebas omitidas deliberadamente por diseño, al evaluar características exclusivas de escritorio como el panel lateral redimensionable tipo ventana y la escala fija).
    - La matriz de pruebas evaluó la funcionalidad completa del sistema en cuatro perfiles de dispositivos representativos: **Desktop Chrome**, **iPhone 13**, **Pixel 7** e **iPad**.
 2. **Estabilidad y Repetibilidad Local:**
-   - La suite E2E automatizada fue evaluada localmente en ejecuciones consecutivas mediante la directiva `--repeat-each=3`, logrando **297 de 297 pruebas exitosas (100 %)**, comprobando la ausencia de condiciones de carrera (_race conditions_) en el ciclo de vida de los componentes reactivos y la persistencia de estado con Zustand.
+   - La suite E2E automatizada fue evaluada localmente en ejecuciones consecutivas, comprobando la ausencia total de condiciones de carrera (_race conditions_) en el ciclo de vida de los componentes reactivos y la persistencia de estado con Zustand.
 3. **Auditoría Lighthouse en Dispositivos Móviles:**
    - Se evaluó el desempeño integral del despliegue en producción mediante la herramienta oficial Google Lighthouse bajo perfil móvil, alcanzando los siguientes puntajes:
-     - **Rendimiento (_Performance_):** 95 / 100
+     - **Rendimiento (_Performance_):** 92 / 100
      - **Accesibilidad (_Accessibility_):** 95 / 100
      - **Buenas Prácticas (_Best Practices_):** 100 / 100
      - **SEO:** 100 / 100
@@ -619,7 +654,7 @@ Para asegurar que la solución opere de forma confiable, robusta y accesible en 
 
 El análisis comparativo entre ambos algoritmos arroja directrices claras sobre su idoneidad práctica:
 
-- **Dijkstra con Montículo Binario:** Exhibe una cota de $O\big((V + E)\log V\big)$. En la red de Quetzaltenango ($V = 24, E = 55$), el número de operaciones se aproxima a $(24 + 55) \times \log_2(24) \approx 79 \times 4.58 \approx 362$ operaciones elementales. Es la opción predilecta para consultas interactivas bajo demanda entre pares específicos de origen y destino ($s \to t$) o para calcular el árbol de rutas desde un único punto.
+- **Dijkstra con Montículo Binario:** Exhibe una cota de $O\big((V + E)\log V\big)$. En la red de Quetzaltenango ($V = 24, E = 50$), el número de operaciones se aproxima a $(24 + 50) \times \log_2(24) \approx 74 \times 4.58 \approx 339$ operaciones elementales. Es la opción predilecta para consultas interactivas bajo demanda entre pares específicos de origen y destino ($s \to t$) o para calcular el árbol de rutas desde un único punto.
 - **Floyd-Warshall:** Requiere $\Theta(V^3)$ operaciones fijas ($24^3 = 13\,824$ iteraciones internas de relajación). Su gran ventaja radica en computar simultáneamente la matriz de distancias de todos los pares y la matriz de reconstrucción de rutas. Resulta idóneo para alimentar el algoritmo de layout SMACOF y para responder de forma inmediata consultas repetitivas de matrices de viaje sin recalcular.
 
 ### 8.2 Fidelidad de las Distancias Viales frente a Modelos Euclidianos
@@ -646,8 +681,8 @@ La delegación de los algoritmos de enumeración combinatoria (DFS y Yen en `all
 1. Se diseñó, implementó y validó exitosamente el sistema computacional **RutaQ**, demostrando la aplicabilidad de los algoritmos clásicos de teoría de grafos (Dijkstra, Floyd-Warshall y Yen) para resolver problemas de optimización de redes viales en el departamento de Quetzaltenango.
 2. La implementación del algoritmo de Dijkstra con montículo binario demostró un rendimiento asintótico óptimo ($O((V + E)\log V)$).
 3. Se verificó formalmente la exigencia matemática de pesos estrictamente no negativos en el algoritmo de Dijkstra mediante un contraejemplo riguroso, confirmando que la red vial de Quetzaltenango cumple cabalmente con esta precondición al operar con distancias por carretera $km > 0$.
-4. El proceso de construcción del dataset geográfico, basado en 276 pares candidatos evaluados exhaustivamente en OSRM y filtrados mediante criterios objetivos de intermediación punto-segmento a 1.0 km, garantizó un grafo 100 % conexo de 24 nodos y 55 aristas, eliminando subjetividades manuales.
-5. Las pruebas automatizadas demostraron una concordancia absoluta: (1) coincidencia iteración por iteración al 100 % entre la solución analítica manual y la tabla computada del sistema sobre el grafo de control de 6 nodos, y (2) coincidencia exacta en las distancias del 100 % (576/576 pares) frente a la librería científica NetworkX.
+4. El proceso de construcción del dataset geográfico, basado en 276 pares candidatos evaluados exhaustivamente en OSRM, la auditoría sistemática de coordenadas de las 24 cabeceras con corrección de cascos urbanos (El Nuevo Palmar y Cantel), y el filtrado geométrico punto-segmento a 1.0 km, garantizó un grafo 100 % conexo de 24 nodos y 50 aristas directas (con 226 pares descartados), eliminando subjetividades manuales.
+5. Las pruebas automatizadas demostraron una concordancia absoluta: (1) coincidencia iteración por iteración al 100 % entre la solución analítica manual y la tabla computada del sistema sobre el grafo de control de 6 nodos, (2) coincidencia exacta del 100.0 % (648/648 pares evaluados) frente a la librería científica NetworkX, (3) 18 aristas directas validadas con Google Maps (13 dentro de tolerancia y 5 ajustadas con el valor de Google Maps), y (4) 112/112 pruebas de aceptación E2E en producción sobre navegadores de escritorio y móviles, con calificaciones Lighthouse móvil de 92 en rendimiento, 95 en accesibilidad, 100 en buenas prácticas y 100 en SEO.
 
 ---
 
@@ -686,18 +721,23 @@ Al finalizar la compilación, la terminal mostrará la dirección local (típica
 
 ### 11.4 Guía de Operación
 
-1. **Selección de Origen y Destino:**
-   - En la barra superior, seleccione el municipio de **Origen** (ej. _Quetzaltenango_) y el municipio de **Destino** (ej. _Coatepeque_), o haga clic directamente sobre los nodos en el mapa.
-   - Para consultar el árbol de rutas hacia todos los municipios, elija únicamente un nodo de origen y deje el destino vacío.
-2. **Visualización Tabular Paso a Paso (Pestaña "Tabla"):**
-   - Haga clic en la pestaña **Tabla** para auditar el funcionamiento de Dijkstra.
+1. **Navegación en el Mapa y Selección de Origen y Destino:**
+   - En el modo **Quetzaltenango**, los municipios se proyectan en sus coordenadas geográficas reales. La **rosa de los vientos** (arriba a la derecha) indica el norte cardinal y la **barra de escala en km** se adapta dinámicamente al nivel de zoom.
+   - En la barra superior, seleccione el municipio de **Origen** (ej. _Quetzaltenango_) y el municipio de **Destino** (ej. _Coatepeque_), o haga clic directamente sobre los nodos en el lienzo.
+   - Use el selector **Pesos** («automático», «todos», «ocultos») para controlar la visibilidad de los kilometrajes sobre las carreteras.
+   - Para consultar el árbol de rutas hacia todos los municipios, elija únicamente un nodo de origen y pulse el botón **Árbol (F2)**.
+2. **Panel de Resultados Tipo Ventana (Escritorio y Móvil):**
+   - En monitores de escritorio, arrastre el tirador izquierdo del panel para **redimensionar** su anchura entre 320 px y el 75 % de la pantalla. Use los botones superiores para **minimizar (`—`)** el panel a una franja vertical lateral o **maximizar (`▢`)** a pantalla completa.
+   - En celulares y tabletas, interactúe con la **hoja inferior deslizable** (_bottom sheet_) arrastrando el tirador táctil para alternar entre vista compacta, media o pantalla completa.
+3. **Visualización Tabular Paso a Paso (Pestaña "Tabla S1"):**
+   - Haga clic en la pestaña **Tabla (S1)** para auditar el funcionamiento de Dijkstra.
    - Use los botones **▶ Reproducir** o **Paso Siguiente** para avanzar por las iteraciones. Observe cómo se fijan los nodos permanentes (en dorado) y se tachan sus columnas.
-3. **Exploración de la Matriz de Floyd-Warshall (Pestaña "Floyd"):**
-   - Seleccione la pestaña **Floyd** y desplace el deslizador del vértice intermedio $k$ para observar cómo la matriz $D^{(k)}$ actualiza los costos globales.
-4. **Consulta de Rutas Alternativas (Pestaña "Todas las Rutas"):**
-   - Active la pestaña **Todas las Rutas** para listar los caminos ordenados por kilometraje. Haga clic sobre cualquier fila para resaltar dicha trayectoria en el mapa interactivo o use el botón **Exportar CSV** para descargar los datos.
-5. **Modo Diseño de Grafos (F4):**
-   - Presione el botón **Diseñar** en el encabezado para crear nuevos grafos, arrastrar vértices, añadir conexiones personalizadas y probar los algoritmos sobre topologías arbitrarias.
+4. **Exploración de la Matriz de Floyd-Warshall (Pestaña "Floyd"):**
+   - Seleccione la pestaña **Floyd** y desplace el deslizador del vértice intermedio $k$ para observar cómo la matriz $D^{(k)}$ actualiza los costos globales, resaltando en verde las trayectorias optimizadas.
+5. **Consulta de Rutas Alternativas (Pestaña "Rutas S3"):**
+   - Active la pestaña **Rutas (S3)** para listar los caminos ordenados por kilometraje con la medalla a la ruta mínima. Haga clic sobre cualquier fila para resaltar dicha trayectoria en el lienzo o use el botón **Exportar CSV** para descargar los datos.
+6. **Modo Diseño de Grafos (F4):**
+   - Presione el botón **Diseño** en el encabezado para crear nuevos grafos, arrastrar vértices, añadir conexiones personalizadas, ajustar formas de arista (`straight`, `bezier`, `arc`, `step`, `smoothstep`) y probar los algoritmos sobre topologías arbitrarias.
 
 ---
 

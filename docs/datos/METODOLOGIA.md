@@ -137,13 +137,12 @@ El relieve quebrado de la Sierra Madre y los cañones del río Samalá obligan a
 
 Conforme al protocolo de aseguramiento de calidad vial del Plan Maestro (Sección 3.2, paso 6), se implementó la contrastación con mediciones de la plataforma Google Maps sobre ejes troncales y las aristas más largas del departamento.
 
-### 6.1 Invalidación por Corrección de Coordenadas (Ronda 6)
+### 6.1 Remedición por Corrección de Coordenadas (Ronda 7)
 
-Dado que las mediciones originales asociadas a cabeceras de `PAL` y `CAN` se calcularon utilizando las coordenadas antiguas de Nominatim:
+Dado que las mediciones originales asociadas a cabeceras de `PAL` y `CAN` se calcularon en la Ronda 4 utilizando las coordenadas antiguas de Nominatim:
 
-1. **Invalidación de 7 mediciones:** Las 7 aristas con extremo en `PAL` o `CAN` (`PAL-SMA`, `COL-PAL`, `COA-PAL`, `PAL-ZUN`, `FCC-PAL`, `CAN-HUI` y `CAN-SAL`) quedaron invalidadas y fueron retiradas de `docs/datos/validacion_google.csv`.
-2. **Listado de remedición (`docs/datos/remedir_google.csv`):** Dichas 7 aristas se listan con su nuevo kilometraje OSRM (`arista,km_osrm_nuevo`) junto con cualquier arista nueva entre las 5 más largas del nuevo grafo para que el orquestador proceda a su remedición formal sin inventar datos.
-3. **Muestra activa actual en `docs/datos/validacion_google.csv`:** Conserva 13 mediciones no afectadas por el cambio de coordenadas de PAL o CAN.
+1. **Invalidación y remedición:** Las mediciones con extremo en `PAL` o `CAN` quedaron invalidadas tras corregir las coordenadas hacia El Nuevo Palmar y el casco histórico de Cantel. El 15 de octubre de 2026 el orquestador realizó la remedición formal en Google Maps de las 8 aristas directas asociadas a las nuevas posiciones (`ALM-CAN`, `CAN-QTZ`, `CAN-SAL`, `CAN-ZUN`, `COA-PAL`, `COL-PAL`, `FCC-PAL` y `PAL-ZUN`), consolidándolas en `docs/datos/validacion_google.csv`.
+2. **Muestra consolidada:** El archivo `docs/datos/validacion_google.csv` contiene 22 registros: 18 correspondientes a aristas directas de la red activa (incluyendo las 5 aristas más largas del departamento) y 4 mediciones sobre pares que formaron parte de la red inicial pero fueron reclasificados a pares descartados (`FCC-ZUN`, `PAL-SMA`, `QTZ-ZUN` y `SAL-ZUN`).
 
 ### 6.2 Protocolo de Aplicación Automatizada en `scripts/build_dataset.py`
 
@@ -155,17 +154,20 @@ El script constructor procesa `docs/datos/validacion_google.csv` al finalizar la
 3. **Aristas fuera de tolerancia ($> 10\,\%$):** Si la discrepancia supera el umbral de aceptación del $10\,\%$, el peso oficial del grafo pasa a ser el provisto por Google Maps ($km = km_{\text{Google}}$). En el campo `nota` se concatena:
    `"Distancia de Google Maps (OSRM: X km, diferencia Y %)"`
 4. **Aristas dentro de tolerancia ($\le 10\,\%$):** Se conserva el peso original derivado de OSRM ($km = km_{\text{OSRM}}$).
-5. **Aristas no evaluadas:** Las 40 aristas restantes conservan su distancia OSRM con `verificado_google = false` y `km_google = null`.
+5. **Aristas no evaluadas:** Las 32 aristas restantes conservan su distancia OSRM con `verificado_google = false` y `km_google = null`.
 
 ### 6.3 Resultados de la Validación Activa
 
-De las 13 mediciones válidas en `validacion_google.csv`, 10 pertenecen a la red directa aceptada:
+De las 22 mediciones registradas en `validacion_google.csv`, exactamente 18 pertenecen a la red directa aceptada:
 
-- **Aristas dentro de tolerancia (8 aristas):** Conservan su kilometraje OSRM: `SAL-SIJ` ($24.7\text{ km}$), `HUI-SAL` ($42.4\text{ km}$), `CAB-PLA` ($21.5\text{ km}$), `OST-PLA` ($18.0\text{ km}$), `COL-SMA` ($23.7\text{ km}$), `COA-SMA` ($40.3\text{ km}$), `FCC-SMA` ($39.9\text{ km}$) y `HUI-PLA` ($24.4\text{ km}$). Cuatro de ellas presentan coincidencia exacta ($0.00\,\%$).
-- **Aristas ajustadas con valor de Google Maps (2 aristas con discrepancia $> 10\,\%$):**
-  1. `ESP-SAL`: $15.0\text{ km}$ (OSRM: $19.7\text{ km}$, dif. $23.86\,\%$)
-  2. `ALM-SAL`: $13.2\text{ km}$ (OSRM: $17.5\text{ km}$, dif. $24.57\,\%$)
-- **Mediciones sobre pares ahora descartados (3 aristas):** `FCC-ZUN`, `SAL-ZUN` y `QTZ-ZUN` ya no forman aristas directas independientes al ser interceptadas por los cascos céntricos de `PAL` y `CAN`.
+- **Aristas dentro de tolerancia (13 aristas, 72.2 %):** Conservan su kilometraje OSRM. Cuatro presentan coincidencia exacta ($0.00\,\%$): `COA-SMA` ($40.3\text{ km}$), `FCC-SMA` ($39.9\text{ km}$), `SAL-SIJ` ($24.7\text{ km}$) y `COL-SMA` ($23.7\text{ km}$). Las otras nueve aristas presentan discrepancias mínimas: `FCC-PAL` ($0.20\,\%$), `COA-PAL` ($0.36\,\%$), `PAL-ZUN` ($2.37\,\%$), `ALM-CAN` ($2.67\,\%$), `HUI-PLA` ($3.69\,\%$), `CAN-QTZ` ($4.31\,\%$), `HUI-SAL` ($4.95\,\%$), `OST-PLA` ($8.33\,\%$) y `CAB-PLA` ($9.30\,\%$).
+- **Aristas ajustadas con valor de Google Maps (5 aristas con discrepancia $> 10\,\%$):**
+  1. `COL-PAL`: $46.3\text{ km}$ (OSRM: $57.0\text{ km}$, dif. $18.77\,\%$)
+  2. `ESP-SAL`: $15.0\text{ km}$ (OSRM: $19.7\text{ km}$, dif. $23.86\,\%$)
+  3. `ALM-SAL`: $13.2\text{ km}$ (OSRM: $17.5\text{ km}$, dif. $24.57\,\%$)
+  4. `CAN-SAL`: $12.1\text{ km}$ (OSRM: $16.8\text{ km}$, dif. $27.98\,\%$)
+  5. `CAN-ZUN`: $8.4\text{ km}$ (OSRM: $6.5\text{ km}$, dif. $29.23\,\%$)
+- **Mediciones sobre pares descartados (4 aristas):** `FCC-ZUN`, `PAL-SMA`, `QTZ-ZUN` y `SAL-ZUN` ya no forman aristas directas independientes al ser interceptadas por los cascos céntricos de `PAL` y `CAN`.
 
 ---
 
@@ -174,8 +176,8 @@ De las 13 mediciones válidas en `validacion_google.csv`, 10 pertenecen a la red
 El dataset cumple rigurosamente con el contrato TypeScript `Dataset` de `src/core/types.ts`:
 
 - `nodes`: 24 objetos `{id, label, lat, lon, fuente}` (22 fuentes Nominatim y 2 fuentes Google Maps contrastado con Wikipedia).
-- `edges`: 50 objetos `{id, source, target, km, carretera, fuente, verificado_google, km_google, nota, geometry}` (10 aristas con `verificado_google: true`, de las cuales 2 adoptan el peso de Google Maps por discrepancia $> 10\,\%$, y 40 con `verificado_google: false` y `km_google: null`).
-- `meta`: unidad `'km'`, fuentes oficiales y fecha `'2026-10-14'`.
+- `edges`: 50 objetos `{id, source, target, km, carretera, fuente, verificado_google, km_google, nota, geometry}` (18 aristas con `verificado_google: true`, de las cuales 5 adoptan el peso de Google Maps por discrepancia $> 10\,\%$, y 32 con `verificado_google: false` y `km_google: null`).
+- `meta`: unidad `'km'`, fuentes oficiales y fecha `'2026-10-15'`.
 
 ### Ejecución 100 % Reproducible desde Caché
 
