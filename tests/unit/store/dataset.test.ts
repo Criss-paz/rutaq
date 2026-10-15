@@ -52,18 +52,45 @@ describe('datasetToGraph', () => {
 });
 
 describe('datasetToGraph con el dataset real', () => {
-  it('ningún par de municipios queda encimado', async () => {
+  it('conserva la orientación geográfica exacta (N/S/E/O) entre todos los pares de municipios', async () => {
     const { default: q } = await import('../../../src/data/quetzaltenango.json');
     const g = datasetToGraph(q as Dataset);
     expect(g.nodes).toHaveLength(24);
     for (const [i, a] of g.nodes.entries())
       for (const b of g.nodes.slice(i + 1)) {
+        // Más al norte ⇒ más arriba (y menor); más al este ⇒ más a la derecha (x mayor). Se omiten pares a < ~100 m.
+        if (Math.abs(a.lat! - b.lat!) > 0.001)
+          expect(Math.sign(b.y - a.y), `${a.label} / ${b.label} (N-S)`).toBe(Math.sign(a.lat! - b.lat!));
+        if (Math.abs(a.lon! - b.lon!) > 0.001)
+          expect(Math.sign(b.x - a.x), `${a.label} / ${b.label} (E-O)`).toBe(Math.sign(b.lon! - a.lon!));
+      }
+  });
+
+  it('las distancias en pantalla son proporcionales a las distancias reales en línea recta', async () => {
+    const { default: q } = await import('../../../src/data/quetzaltenango.json');
+    const g = datasetToGraph(q as Dataset);
+    const R = 6371;
+    const rad = (d: number) => (d * Math.PI) / 180;
+    const km = (a: (typeof g.nodes)[0], b: (typeof g.nodes)[0]) => {
+      const h =
+        Math.sin(rad(b.lat! - a.lat!) / 2) ** 2 +
+        Math.cos(rad(a.lat!)) * Math.cos(rad(b.lat!)) * Math.sin(rad(b.lon! - a.lon!) / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    };
+    const px = (a: (typeof g.nodes)[0], b: (typeof g.nodes)[0]) => Math.hypot(a.x - b.x, a.y - b.y);
+    const ratios = g.nodes.flatMap((a, i) => g.nodes.slice(i + 1).map((b) => px(a, b) / km(a, b)));
+    const mean = ratios.reduce((s, r) => s + r, 0) / ratios.length;
+    // Proyección equirectangular en un área de ~50 km: error de escala < 2 % (más el redondeo a px).
+    for (const r of ratios) expect(Math.abs(r - mean) / mean).toBeLessThan(0.03);
+  });
+
+  it('ningún par de municipios queda encimado', async () => {
+    const { default: q } = await import('../../../src/data/quetzaltenango.json');
+    const g = datasetToGraph(q as Dataset);
+    for (const [i, a] of g.nodes.entries())
+      for (const b of g.nodes.slice(i + 1)) {
         const libre = a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
         expect(libre, `${a.label} / ${b.label}`).toBe(true);
       }
-    // La geografía se conserva: Coatepeque (costa, oeste) queda al sur-oeste de Quetzaltenango.
-    const by = (id: string) => g.nodes.find((n) => n.id === id)!;
-    expect(by('COA').y).toBeGreaterThan(by('QTZ').y);
-    expect(by('COA').x).toBeLessThan(by('QTZ').x);
   });
 });
