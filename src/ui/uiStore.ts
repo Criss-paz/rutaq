@@ -1,6 +1,33 @@
 import { create } from 'zustand';
 
-export type MobileSheetPosition = 'collapsed' | 'mid' | 'expanded';
+export type MobileSheetPosition = 'collapsed' | 'mid' | 'expanded' | 'maximized';
+export type DesktopPanelState = 'normal' | 'minimized' | 'maximized';
+export type EdgeWeightsMode = 'auto' | 'all' | 'hidden';
+
+function getInitialWidth(): number {
+  if (typeof window === 'undefined') return 460;
+  try {
+    const saved = localStorage.getItem('rutaq_panel_width');
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed >= 320) return parsed;
+    }
+  } catch {
+    // ignorar si localStorage no está disponible
+  }
+  return 460;
+}
+
+function getInitialState(): DesktopPanelState {
+  if (typeof window === 'undefined') return 'normal';
+  try {
+    const saved = localStorage.getItem('rutaq_panel_state');
+    if (saved === 'minimized' || saved === 'maximized' || saved === 'normal') return saved;
+  } catch {
+    // ignorar si localStorage no está disponible
+  }
+  return 'normal';
+}
 
 export interface UiStore {
   mobileSheetPos: MobileSheetPosition;
@@ -11,7 +38,17 @@ export interface UiStore {
   isDesktopCollapsed: boolean;
   setIsDesktopCollapsed: (val: boolean | ((prev: boolean) => boolean)) => void;
   toggleDesktopCollapsed: () => void;
+
+  panelWidth: number;
+  setPanelWidth: (width: number | ((prev: number) => number)) => void;
+  panelState: DesktopPanelState;
+  setPanelState: (state: DesktopPanelState | ((prev: DesktopPanelState) => DesktopPanelState)) => void;
+
+  edgeWeightsMode: EdgeWeightsMode;
+  setEdgeWeightsMode: (mode: EdgeWeightsMode) => void;
 }
+
+const initialPanelState = getInitialState();
 
 export const useUiStore = create<UiStore>((set) => ({
   mobileSheetPos: 'collapsed',
@@ -40,10 +77,65 @@ export const useUiStore = create<UiStore>((set) => ({
         mobileSheetPos: nextExpanded ? 'mid' : 'collapsed',
       };
     }),
-  isDesktopCollapsed: false,
+  isDesktopCollapsed: initialPanelState === 'minimized',
   setIsDesktopCollapsed: (val) =>
-    set((state) => ({
-      isDesktopCollapsed: typeof val === 'function' ? val(state.isDesktopCollapsed) : val,
-    })),
-  toggleDesktopCollapsed: () => set((state) => ({ isDesktopCollapsed: !state.isDesktopCollapsed })),
+    set((state) => {
+      const nextCollapsed = typeof val === 'function' ? val(state.isDesktopCollapsed) : val;
+      const nextState: DesktopPanelState = nextCollapsed ? 'minimized' : 'normal';
+      try {
+        localStorage.setItem('rutaq_panel_state', nextState);
+      } catch {
+        // ignorar si localStorage no está disponible
+      }
+      return {
+        isDesktopCollapsed: nextCollapsed,
+        panelState: nextState,
+      };
+    }),
+  toggleDesktopCollapsed: () =>
+    set((state) => {
+      const nextCollapsed = !state.isDesktopCollapsed;
+      const nextState: DesktopPanelState = nextCollapsed ? 'minimized' : 'normal';
+      try {
+        localStorage.setItem('rutaq_panel_state', nextState);
+      } catch {
+        // ignorar si localStorage no está disponible
+      }
+      return {
+        isDesktopCollapsed: nextCollapsed,
+        panelState: nextState,
+      };
+    }),
+
+  panelWidth: getInitialWidth(),
+  setPanelWidth: (width) =>
+    set((state) => {
+      const nextWidth = typeof width === 'function' ? width(state.panelWidth) : width;
+      const maxW = typeof window !== 'undefined' ? Math.round(window.innerWidth * 0.75) : 1200;
+      const clamped = Math.max(320, Math.min(maxW, nextWidth));
+      try {
+        localStorage.setItem('rutaq_panel_width', String(clamped));
+      } catch {
+        // ignorar si localStorage no está disponible
+      }
+      return { panelWidth: clamped };
+    }),
+
+  panelState: initialPanelState,
+  setPanelState: (panelStateOrFn) =>
+    set((state) => {
+      const nextState = typeof panelStateOrFn === 'function' ? panelStateOrFn(state.panelState) : panelStateOrFn;
+      try {
+        localStorage.setItem('rutaq_panel_state', nextState);
+      } catch {
+        // ignorar si localStorage no está disponible
+      }
+      return {
+        panelState: nextState,
+        isDesktopCollapsed: nextState === 'minimized',
+      };
+    }),
+
+  edgeWeightsMode: 'auto',
+  setEdgeWeightsMode: (mode) => set({ edgeWeightsMode: mode }),
 }));

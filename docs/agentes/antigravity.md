@@ -166,9 +166,37 @@ UI completa funcionando con el mock; `npm run lint && npm run typecheck && npm r
    - **Ejecución 2:** 48/48 pruebas pasadas (28.2s) en los 4 perfiles.
    - 4 nuevas capturas de pantalla generadas para el Escenario 11 (`*-11-f3-empates.png`), sumando 44 capturas totales en `docs/informe/capturas/`.
 
+### Resolución de la Revisión del Orquestador (Ronda 7 — Mapa Legible, Geografía Real y Panel Tipo Ventana)
+
+1. **Nodos en modo mapa (nodos con lat/lon) [Ítem 1]**:
+   - Representación como puntos circulares de 18 px coloreados por estado semántico (origen `#16a34a`, destino `#dc2626`, actual `#d97706`, permanente `#2563eb`, en ruta `#9333ea`).
+   - Nombre de cada municipio al lado en texto de 12 px sin caja ni borde, con halo tipográfico protector (blanco en modo claro `#ffffff`, oscuro en modo oscuro `#0f172a`) para lectura nítida sobre carreteras.
+   - Algoritmo determinista de posicionamiento de etiquetas (`computeDeterministicLabelPlacements`) que ensaya derecha, izquierda, arriba y abajo contra puntos y etiquetas previas, logrando 0 colisiones en los 24 municipios del departamento.
+   - Se desactivó `NodeResizer` en modo mapa conservando cajas editables en modo diseño.
+2. **Pesos de aristas limpios y selector de visibilidad [Ítem 2]**:
+   - Tipografía de 11 px con halo, sin cajas, píldoras, botones ni bordes.
+   - En modo mapa, selector «Pesos: automático / todos / ocultos» en la barra de herramientas, con modo automático por defecto (visible si zoom $\ge 1.2$, arista en ruta consultada, árbol, evaluada, seleccionada o bajo el cursor).
+   - Menú contextual de forma flotante (`createPortal`) al hacer clic en la arista mediante un trazado invisible de interacción amplia (`interactionWidth ≈ 20`) o al tocar el peso. Doble clic sobre el peso permite edición numérica directa en modo diseño.
+3. **Orientación geográfica y escala dinámica [Ítem 3]**:
+   - Componente superpuesto `MapOrientationAndScale` con rosa de los vientos (Norte destacado en rojo arriba, O, S, E) en la esquina superior derecha.
+   - Barra de escala dinámica en kilómetros calculada con la relación de proyección geográfica real $\times$ zoom, ajustada a escalones estándar (1, 2, 5, 10, 20 km).
+4. **Panel de resultados tipo ventana (escritorio $\ge 1024$ px) [Ítem 4]**:
+   - Borde izquierdo redimensionable arrastrando su tirador lateral (`data-testid="panel-resize-handle"`, `role="separator"`, `aria-valuenow`, `aria-valuemin="320"`, `aria-valuemax="75% viewport"`) y controlable mediante flechas de teclado.
+   - Botón Minimizar (`btn-minimize-panel`, `─`) que colapsa el panel a una franja vertical de 56 px con iconos de pestaña (al pulsar cualquiera se restaura en dicha pestaña).
+   - Botón Maximizar (`btn-maximize-panel`, `🗖`) y Restaurar (`btn-restore-panel`, `🗗`).
+   - Persistencia de ancho y estado en `localStorage` (`rutaq_panel_width`, `rutaq_panel_state`).
+   - En tableta y celular, la hoja inferior incluye botón Maximizar / Restaurar a pantalla completa (`btn-sheet-maximize`, `btn-sheet-restore`).
+5. **Pruebas E2E y Capturas [Ítem 5]**:
+   - Se añadieron en `tests/e2e/rutaq.spec.ts` los escenarios 16 (24 etiquetas sin solapes de `boundingBox`, rosa y escala), 17 (visibilidad automática/todos/ocultos), 18 (redimensión por ratón/teclado, minimizado/maximizado) y 19 (capturas del informe).
+   - Se actualizó el escenario 09 para interactuar con la arista y su peso sin depender del botón retirado `edge-menu-*`.
+   - Se generaron las 8 nuevas capturas requeridas en `docs/informe/capturas/`: escritorio y móvil para Quetzaltenango sin consulta y con la ruta Quetzaltenango $\to$ Coatepeque.
+6. **Criterio de aceptación: 2 ejecuciones completas consecutivas de Playwright en verde**:
+   - **Ejecución 1:** 112/112 pruebas pasadas (53.0s) en los 4 perfiles (`desktop-chrome`, `iphone-13`, `pixel-7`, `ipad`), 12 omitidas (condicionales de solo escritorio).
+   - **Ejecución 2:** 112/112 pruebas pasadas (53.2s) en los 4 perfiles. Cero fallos, cero flakiness.
+
 ### Pendiente
 
-- Ninguno. Todos los requerimientos de la Fase F1, la Revisión del Orquestador (Rondas 2, 3 y 4) han sido completamente satisfechos.
+- Ninguno. Todos los requerimientos de la Ronda 7 han sido completamente implementados y verificados.
 
 ### Decisiones
 
@@ -178,6 +206,8 @@ UI completa funcionando con el mock; `npm run lint && npm run typecheck && npm r
 4. **Verificación E2E ligada a `verification/resultados.csv`**: Desacopla los tests de constantes fijas arbitrarias y garantiza que cualquier evolución de los algoritmos teóricos se contraste directamente contra la interfaz gráfica.
 5. **Portal DOM para menús contextuales en lienzo interactivo**: Renderizar fuera del árbol SVG/DOM transformado de React Flow elimina cualquier contención de coordenadas en `position: fixed`, garantizando posicionamiento viewport preciso en cualquier resolución de pantalla y nivel de zoom.
 6. **Resaltado dual sólido/discontinuo para empates**: Permite discernir a primera vista que existen múltiples trayectorias óptimas simultáneas sin recargar la paleta cromática, manteniendo el morado `purple-600` institucional para la ruta más corta y diferenciando variantes con patrón `6 4`.
+7. **Posicionamiento determinista sin fuerza física**: En lugar de simulaciones dinámicas por fuerza que inducen carreras o movimientos no deterministas, un algoritmo greedy cuadrático verifica secuencialmente las 4 posiciones cardinales, garantizando estabilidad absoluta y renderizado instantáneo.
+8. **Separación de transiciones CSS entre escritorio y móvil**: Eliminar la transición animada del panel en escritorio (`lg:transition-none`) permite que el arrastre y navegación por teclado sean 100% responsivos y sin latencia perceptiva.
 
 ### Dudas
 
