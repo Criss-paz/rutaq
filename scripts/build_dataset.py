@@ -30,6 +30,15 @@ CACHE_OSRM = os.path.join(BASE_DIR, 'scripts', 'cache', 'osrm')
 OUTPUT_DATASET = os.path.join(BASE_DIR, 'src', 'data', 'quetzaltenango.json')
 OUTPUT_DISCARDED = os.path.join(BASE_DIR, 'docs', 'datos', 'aristas_descartadas.csv')
 INPUT_VALIDACION_GOOGLE = os.path.join(BASE_DIR, 'docs', 'datos', 'validacion_google.csv')
+INPUT_COORDENADAS_CORREGIDAS = os.path.join(BASE_DIR, 'docs', 'datos', 'coordenadas_corregidas.csv')
+OUTPUT_REMEDIR_GOOGLE = os.path.join(BASE_DIR, 'docs', 'datos', 'remedir_google.csv')
+
+def coordenadas_corregidas_ids():
+    """Ids de municipios cuya coordenada se corrigió en docs/datos/coordenadas_corregidas.csv."""
+    if not os.path.exists(INPUT_COORDENADAS_CORREGIDAS):
+        return []
+    with open(INPUT_COORDENADAS_CORREGIDAS, 'r', encoding='utf-8') as f:
+        return [row['id'] for row in csv.DictReader(f)]
 
 os.makedirs(CACHE_NOMINATIM, exist_ok=True)
 os.makedirs(CACHE_OSRM, exist_ok=True)
@@ -321,12 +330,16 @@ def get_node_coords(m_id, label, query):
 def get_osrm_route(u, v, nodes_dict):
     """
     Obtiene la ruta OSRM entre u y v con overview=full, geometries=polyline y steps=true.
-    Garantiza que la respuesta contenga steps no vacíos; de lo contrario reintenta/descarga.
+    Garantiza que la respuesta contenga steps no vacíos y corresponda a las coordenadas actuales;
+    de lo contrario reintenta/descarga.
     """
     src = min(u, v)
     tgt = max(u, v)
     pair_key = f"{src}_{tgt}"
     cache_path = os.path.join(CACHE_OSRM, f"{pair_key}.json")
+
+    n1 = nodes_dict[src]
+    n2 = nodes_dict[tgt]
 
     has_valid_cache = False
     if os.path.exists(cache_path):
@@ -336,13 +349,26 @@ def get_osrm_route(u, v, nodes_dict):
             if data.get('routes') and len(data['routes']) > 0:
                 legs = data['routes'][0].get('legs', [])
                 if legs and len(legs[0].get('steps', [])) > 0:
-                    has_valid_cache = True
+                    # Validar si las coordenadas cacheadas o de los waypoints coinciden con las actuales
+                    if '_query_coords' in data:
+                        qc = data['_query_coords']
+                        if (abs(qc.get('lat1', 0) - n1['lat']) < 1e-4 and
+                            abs(qc.get('lon1', 0) - n1['lon']) < 1e-4 and
+                            abs(qc.get('lat2', 0) - n2['lat']) < 1e-4 and
+                            abs(qc.get('lon2', 0) - n2['lon']) < 1e-4):
+                            has_valid_cache = True
+                    elif 'waypoints' in data and len(data['waypoints']) >= 2:
+                        wp1 = data['waypoints'][0]['location']  # [lon, lat]
+                        wp2 = data['waypoints'][1]['location']
+                        d1 = haversine_km(n1['lat'], n1['lon'], wp1[1], wp1[0])
+                        d2 = haversine_km(n2['lat'], n2['lon'], wp2[1], wp2[0])
+                        if d1 < 1.0 and d2 < 1.0:
+                            has_valid_cache = True
         except Exception:
             has_valid_cache = False
 
     if not has_valid_cache:
-        n1 = nodes_dict[src]
-        n2 = nodes_dict[tgt]
+        print(f"  [OSRM] Consultando ruta para {src}-{tgt} ({n1['label']} -> {n2['label']})...")
         url = (
             f"https://router.project-osrm.org/route/v1/driving/"
             f"{n1['lon']},{n1['lat']};{n2['lon']},{n2['lat']}"
@@ -351,6 +377,14 @@ def get_osrm_route(u, v, nodes_dict):
         req = urllib.request.Request(url, headers={'User-Agent': USER_AGENT})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode('utf-8'))
+        data['_query_coords'] = {
+            'src': src,
+            'tgt': tgt,
+            'lat1': n1['lat'],
+            'lon1': n1['lon'],
+            'lat2': n2['lat'],
+            'lon2': n2['lon']
+        }
         with open(cache_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         time.sleep(1.05)
@@ -432,6 +466,22 @@ def build():
         nodes.append(node)
         nodes_dict[m_id] = node
         print(f"  [{m_id}] {label:<26} -> {node['lat']:.5f}, {node['lon']:.5f}")
+
+    # Aplicar correcciones de coordenadas (coordenadas_corregidas.csv) antes de OSRM
+    if os.path.exists(INPUT_COORDENADAS_CORREGIDAS):
+        print(f"\n--- Aplicando correcciones de coordenadas desde {INPUT_COORDENADAS_CORREGIDAS} ---")
+        with open(INPUT_COORDENADAS_CORREGIDAS, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                cid = row['id'].strip()
+                if cid in nodes_dict:
+                    lat_corr = float(row['lat'].strip())
+                    lon_corr = float(row['lon'].strip())
+                    fuente_corr = row['fuente'].strip()
+                    nodes_dict[cid]['lat'] = lat_corr
+                    nodes_dict[cid]['lon'] = lon_corr
+                    nodes_dict[cid]['fuente'] = fuente_corr
+                    print(f"  [CORRECCION] [{cid}] {nodes_dict[cid]['label']}: {lat_corr}, {lon_corr} | fuente: {fuente_corr}")
 
     if len(nodes) != 24:
         raise ValueError(f"Se esperaban 24 nodos, se obtuvieron {len(nodes)}")
@@ -552,7 +602,24 @@ def build():
                 else:
                     print(f"  [VALIDA GOOGLE] {eid}: OSRM {km_osrm:.1f} km vs Google {km_g:.1f} km (<= 10 %)")
 
-    # 6. Verificación de conexidad topológica
+    # 6. docs/datos/remedir_google.csv: aristas existentes que aún necesitan medición en Google Maps, es decir,
+    #    las que tocan un municipio con coordenada corregida y las 5 más largas, si no tienen medición vigente.
+    ids_corregidos = set(coordenadas_corregidas_ids())
+    top5_ids = {e['id'] for e in sorted(accepted_edges, key=lambda x: -x['km'])[:5]}
+    aristas_remedir = []
+    for e in accepted_edges:
+        medida = e['id'] in google_measurements or f"{e['target']}-{e['source']}" in google_measurements
+        requiere = e['id'] in top5_ids or e['source'] in ids_corregidos or e['target'] in ids_corregidos
+        if requiere and not medida:
+            aristas_remedir.append({'arista': e['id'], 'km_osrm_nuevo': e['km']})
+
+    with open(OUTPUT_REMEDIR_GOOGLE, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['arista', 'km_osrm_nuevo'])
+        writer.writeheader()
+        writer.writerows(aristas_remedir)
+    print(f"  Guardado reporte para remedir en Google: {OUTPUT_REMEDIR_GOOGLE}")
+
+    # 7. Verificación de conexidad topológica
     adj = {n['id']: [] for n in nodes}
     for e in accepted_edges:
         adj[e['source']].append(e['target'])

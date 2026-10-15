@@ -34,38 +34,48 @@ Todos los datos que integran la red provienen de fuentes primarias geográficas 
 
 Se asignaron identificadores únicos, concisos y estables de 3 letras en mayúscula (`NodeId`):
 
-|  ID   | Nombre Oficial del Municipio | Latitud (°N) | Longitud (°O) | Clasificación Administrativa  | Fuente de Coordenadas     |
-| :---: | :--------------------------- | :----------: | :-----------: | :---------------------------- | :------------------------ |
-| `QTZ` | Quetzaltenango               |   14.84646   |   -91.51942   | Cabecera departamental (City) | Nominatim / OpenStreetMap |
-| `SAL` | Salcajá                      |   14.87911   |   -91.45754   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `OLI` | Olintepeque                  |   14.88514   |   -91.51479   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `SIJ` | San Carlos Sija              |   14.98369   |   -91.54905   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `SIB` | Sibilia                      |   14.99416   |   -91.62418   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `CAB` | Cabricán                     |   15.07470   |   -91.64844   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `CAJ` | Cajolá                       |   14.92271   |   -91.61495   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `SIG` | San Miguel Sigüilá           |   14.89629   |   -91.60282   | Municipio / County            | Nominatim / OpenStreetMap |
-| `OST` | San Juan Ostuncalco          |   14.86882   |   -91.62163   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `MAT` | San Mateo                    |   14.85897   |   -91.59253   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `CCH` | Concepción Chiquirichapa     |   14.85513   |   -91.62396   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `SMA` | San Martín Sacatepéquez      |   14.82362   |   -91.64263   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `ALM` | Almolonga                    |   14.81498   |   -91.49475   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `CAN` | Cantel                       |   14.81879   |   -91.43198   | Municipio / County            | Nominatim / OpenStreetMap |
-| `HUI` | Huitán                       |   15.04950   |   -91.63801   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `ZUN` | Zunil                        |   14.78480   |   -91.48480   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `COL` | Colomba Costa Cuca           |   14.70759   |   -91.73194   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `FLU` | San Francisco La Unión       |   14.92429   |   -91.54333   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `PAL` | El Palmar                    |   14.69381   |   -91.60183   | Municipio / County            | Nominatim / OpenStreetMap |
-| `COA` | Coatepeque                   |   14.70263   |   -91.86564   | Municipio / City              | Nominatim / OpenStreetMap |
-| `GEN` | Génova                       |   14.62240   |   -91.83562   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `FCC` | Flores Costa Cuca            |   14.65606   |   -91.82563   | Municipio / Town              | Nominatim / OpenStreetMap |
-| `ESP` | La Esperanza                 |   14.86923   |   -91.57130   | Municipio / County            | Nominatim / OpenStreetMap |
-| `PLA` | Palestina de Los Altos       |   14.93315   |   -91.69398   | Municipio / Village           | Nominatim / OpenStreetMap |
+|  ID   | Nombre Oficial del Municipio | Latitud (°N) | Longitud (°O) | Clasificación Administrativa  | Fuente de Coordenadas                                            |
+| :---: | :--------------------------- | :----------: | :-----------: | :---------------------------- | :--------------------------------------------------------------- |
+| `QTZ` | Quetzaltenango               |   14.84646   |   -91.51942   | Cabecera departamental (City) | Nominatim / OpenStreetMap                                        |
+| `SAL` | Salcajá                      |   14.87911   |   -91.45754   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `OLI` | Olintepeque                  |   14.88514   |   -91.51479   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `SIJ` | San Carlos Sija              |   14.98369   |   -91.54905   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `SIB` | Sibilia                      |   14.99416   |   -91.62418   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `CAB` | Cabricán                     |   15.07470   |   -91.64844   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `CAJ` | Cajolá                       |   14.92271   |   -91.61495   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `SIG` | San Miguel Sigüilá           |   14.89629   |   -91.60282   | Municipio / County            | Nominatim / OpenStreetMap                                        |
+| `OST` | San Juan Ostuncalco          |   14.86882   |   -91.62163   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `MAT` | San Mateo                    |   14.85897   |   -91.59253   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `CCH` | Concepción Chiquirichapa     |   14.85513   |   -91.62396   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `SMA` | San Martín Sacatepéquez      |   14.82362   |   -91.64263   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `ALM` | Almolonga                    |   14.81498   |   -91.49475   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `CAN` | Cantel                       |   14.80987   |   -91.45068   | Municipio / County            | Google Maps (lugar «Cantel»), contrastado con Wikipedia          |
+| `HUI` | Huitán                       |   15.04950   |   -91.63801   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `ZUN` | Zunil                        |   14.78480   |   -91.48480   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `COL` | Colomba Costa Cuca           |   14.70759   |   -91.73194   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `FLU` | San Francisco La Unión       |   14.92429   |   -91.54333   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `PAL` | El Palmar                    |   14.64807   |   -91.55718   | Municipio / County            | Google Maps (lugar «El Nuevo Palmar»), contrastado con Wikipedia |
+| `COA` | Coatepeque                   |   14.70263   |   -91.86564   | Municipio / City              | Nominatim / OpenStreetMap                                        |
+| `GEN` | Génova                       |   14.62240   |   -91.83562   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `FCC` | Flores Costa Cuca            |   14.65606   |   -91.82563   | Municipio / Town              | Nominatim / OpenStreetMap                                        |
+| `ESP` | La Esperanza                 |   14.86923   |   -91.57130   | Municipio / County            | Nominatim / OpenStreetMap                                        |
+| `PLA` | Palestina de Los Altos       |   14.93315   |   -91.69398   | Municipio / Village           | Nominatim / OpenStreetMap                                        |
 
 ### Selección y Verificación de Cabeceras
 
 Se comprobó que el campo `display_name` y `addresstype` de Nominatim para los 24 municipios situara el punto dentro del departamento de Quetzaltenango:
 
 - **Caso de Almolonga:** La búsqueda inicial genérica devolvía la cima del Volcán Almolonga (`type=volcano`) en la zona rural alta. Se seleccionó la entidad administrativa de cabecera municipal situada en el valle poblado (`14.81498, -91.49475`), resolviendo la conectividad real sobre la RN-9S hacia Quetzaltenango y Zunil.
+
+### Auditoría y Corrección de Coordenadas (El Palmar y Cantel)
+
+En la auditoría sistemática de coordenadas de las 24 cabeceras municipales contrastando Nominatim (OpenStreetMap), Wikipedia en español (API `prop=coordinates` con caché local persistente en `scripts/cache/wikipedia/`) y Google Maps, consolidada en `docs/datos/auditoria_coordenadas.csv`, se identificaron dos discrepancias críticas:
+
+1. **22 cabeceras consistentes ($\le 1.55\text{ km}$):** En 22 de los 24 municipios, las coordenadas de Nominatim y Wikipedia difieren en menos de $1.55\text{ km}$ (promedio subkilométrico), lo cual corresponde a la variabilidad esperada según el punto exacto seleccionado dentro del casco urbano (parque central, alcaldía o acceso principal).
+2. **El Palmar (`PAL`):** Nominatim situaba la cabecera en `14.69381, -91.60183`, punto correspondiente al antiguo casco urbano de El Palmar, destruido y abandonado tras los lahares del volcán Santiaguito. La cabecera oficial contemporánea se encuentra reubicada en **El Nuevo Palmar**: Google Maps `14.6480742, -91.5571834` (consulta «El Palmar, Quetzaltenango, Guatemala» $\to$ lugar «El Nuevo Palmar») y Wikipedia (`14.65, -91.5833`, baja precisión histórica). Discrepancia real acumulada $\approx 6.8\text{ km}$ (error respecto a Wikipedia: $5.26\text{ km}$).
+3. **Cantel (`CAN`):** Nominatim marcaba `14.81879, -91.43198` en la periferia este rural, mientras que Google Maps (`14.8098714, -91.450678`, lugar «Cantel») y Wikipedia (`14.81122, -91.45551`) coinciden a escasos $\approx 0.5\text{ km}$ situando la cabecera en el parque central histórico y casco urbano. Nominatim presentaba un desvío de $\approx 2.2\text{ km}$ (error respecto a Wikipedia: $2.67\text{ km}$).
+
+Ambas correcciones se plasmaron en `docs/datos/coordenadas_corregidas.csv` y se integran automáticamente en `scripts/build_dataset.py` inmediatamente después de Nominatim y con prioridad sobre este, actualizando la fuente del nodo a `"Google Maps (lugar «…»), contrastado con Wikipedia"`.
 
 ---
 
@@ -81,8 +91,14 @@ Para erradicar cualquier lista manual de aristas y asegurar reproducibilidad mat
 3. **Registro de descarte:** Todo par que pasa a $< 1.0\text{ km}$ de una cabecera intermedia se rechaza y se almacena en `docs/datos/aristas_descartadas.csv` indicando el origen, destino, municipio intermedio interceptor y la distancia mínima observada.
 4. **Resultados del filtrado:**
    - **Pares consultados:** 276
-   - **Aristas directas aceptadas:** 55
-   - **Pares descartados:** 221
+   - **Aristas directas aceptadas:** 50
+   - **Pares descartados:** 226
+   - **Efecto de la reubicación de PAL y CAN en la topología:** Con las coordenadas corregidas, se reevaluó el criterio de arista directa para todos los 276 pares de OSRM. Cinco aristas directas previas fueron reclasificadas a pares descartados debido a que sus rutas viales ahora intersectan los nuevos cascos urbanos a $< 1.0\text{ km}$:
+     1. `CAN-HUI`: la ruta recalculada pasa a $0.076\text{ km}$ de la cabecera de San Carlos Sija (`SIJ`).
+     2. `PAL-SMA`: la ruta desde El Nuevo Palmar pasa a $0.097\text{ km}$ de Concepción Chiquirichapa (`CCH`).
+     3. `FCC-ZUN`: la ruta hacia Zunil pasa a $0.812\text{ km}$ de la nueva posición de El Palmar (`PAL`).
+     4. `QTZ-ZUN`: la ruta por la CITO-180 cruza a $0.291\text{ km}$ del casco central corregido de Cantel (`CAN`).
+     5. `SAL-ZUN`: la ruta hacia Zunil cruza igualmente a $0.291\text{ km}$ del casco de Cantel (`CAN`).
    - **Topología resultante:** Grafo 100 % conexo verificado mediante recorrido BFS y `networkx`.
 
 ---
@@ -117,39 +133,39 @@ El relieve quebrado de la Sierra Madre y los cañones del río Samalá obligan a
 
 ---
 
-## 6. Validación Externa con Google Maps y Ajuste de Pesos
+## 6. Validación Externa con Google Maps, Invalidación y Ajuste de Pesos
 
-Conforme al protocolo de aseguramiento de calidad vial del Plan Maestro (Sección 3.2, paso 6), se realizó una validación externa con la plataforma de navegación vehicular comercial Google Maps sobre una muestra representativa de **20 aristas prioritarias**, la cual incluye obligatoriamente las 5 aristas más largas de toda la red, ejes troncales intermunicipales y corredores limítrofes.
+Conforme al protocolo de aseguramiento de calidad vial del Plan Maestro (Sección 3.2, paso 6), se implementó la contrastación con mediciones de la plataforma Google Maps sobre ejes troncales y las aristas más largas del departamento.
 
-### 6.1 Protocolo de Aplicación Automatizada en `scripts/build_dataset.py`
+### 6.1 Invalidación por Corrección de Coordenadas (Ronda 6)
 
-Las 20 mediciones obtenidas y verificadas de forma independiente por el orquestador (`docs/datos/VALIDACION.md`) se transcribieron en `docs/datos/validacion_google.csv` (columnas: `arista,km_google,via_google,fecha`).
+Dado que las mediciones originales asociadas a cabeceras de `PAL` y `CAN` se calcularon utilizando las coordenadas antiguas de Nominatim:
 
-El script constructor `scripts/build_dataset.py` procesa dicho archivo al finalizar la determinación geométrica de las aristas y aplica las siguientes reglas de ajuste:
+1. **Invalidación de 7 mediciones:** Las 7 aristas con extremo en `PAL` o `CAN` (`PAL-SMA`, `COL-PAL`, `COA-PAL`, `PAL-ZUN`, `FCC-PAL`, `CAN-HUI` y `CAN-SAL`) quedaron invalidadas y fueron retiradas de `docs/datos/validacion_google.csv`.
+2. **Listado de remedición (`docs/datos/remedir_google.csv`):** Dichas 7 aristas se listan con su nuevo kilometraje OSRM (`arista,km_osrm_nuevo`) junto con cualquier arista nueva entre las 5 más largas del nuevo grafo para que el orquestador proceda a su remedición formal sin inventar datos.
+3. **Muestra activa actual en `docs/datos/validacion_google.csv`:** Conserva 13 mediciones no afectadas por el cambio de coordenadas de PAL o CAN.
 
-1. **Atributos de verificación:** Para cada arista registrada en el CSV, se asigna `verificado_google = true` y `km_google = <valor>`.
+### 6.2 Protocolo de Aplicación Automatizada en `scripts/build_dataset.py`
+
+El script constructor procesa `docs/datos/validacion_google.csv` al finalizar la determinación geométrica de las aristas y aplica las siguientes reglas:
+
+1. **Atributos de verificación:** Para cada arista registrada en el CSV que forme parte de las aristas directas aceptadas, se asigna `verificado_google = true` y `km_google = <valor>`.
 2. **Evaluación de discrepancia:** Se calcula la discrepancia relativa respecto a OSRM:
    $$\text{Diferencia \%} = \frac{|km_{\text{OSRM}} - km_{\text{Google}}|}{km_{\text{OSRM}}} \times 100$$
-3. **Aristas fuera de tolerancia ($> 10\,\%$):** Si la discrepancia supera el umbral de aceptación del $10\,\%$, el peso oficial del grafo pasa a ser el provisto por Google Maps ($km = km_{\text{Google}}$). En el campo `nota` se concatena (separado por « · » si ya existía una anotación previa):
+3. **Aristas fuera de tolerancia ($> 10\,\%$):** Si la discrepancia supera el umbral de aceptación del $10\,\%$, el peso oficial del grafo pasa a ser el provisto por Google Maps ($km = km_{\text{Google}}$). En el campo `nota` se concatena:
    `"Distancia de Google Maps (OSRM: X km, diferencia Y %)"`
 4. **Aristas dentro de tolerancia ($\le 10\,\%$):** Se conserva el peso original derivado de OSRM ($km = km_{\text{OSRM}}$).
-5. **Aristas no evaluadas:** Las 35 aristas restantes conservan su distancia OSRM con `verificado_google = false` y `km_google = null`.
+5. **Aristas no evaluadas:** Las 40 aristas restantes conservan su distancia OSRM con `verificado_google = false` y `km_google = null`.
 
-### 6.2 Resultados de la Validación
+### 6.3 Resultados de la Validación Activa
 
-- **Aristas dentro de tolerancia (13 aristas, 65 % de la muestra):**
-  - Conservan el valor de OSRM: `FCC-ZUN` ($70.9\text{ km}$), `PAL-SMA` ($70.0\text{ km}$), `COA-PAL` ($58.4\text{ km}$), `PAL-ZUN` ($57.2\text{ km}$), `FCC-PAL` ($53.1\text{ km}$), `HUI-SAL` ($42.4\text{ km}$), `COA-SMA` ($40.3\text{ km}$), `FCC-SMA` ($39.9\text{ km}$), `SAL-SIJ` ($24.7\text{ km}$), `HUI-PLA` ($24.4\text{ km}$), `COL-SMA` ($23.7\text{ km}$), `CAB-PLA` ($21.5\text{ km}$) y `OST-PLA` ($18.0\text{ km}$).
-  - 4 aristas troncales mostraron coincidencia exacta ($0.00\,\%$): `COA-SMA`, `FCC-SMA`, `SAL-SIJ` y `COL-SMA`.
-  - 4 de las 5 aristas más largas del departamento cumplieron holgadamente la cota (diferencias de $0.42\,\%$ a $6.64\,\%$).
-- **Aristas ajustadas con valor de Google Maps (7 aristas, 35 % de la muestra):**
-  - Superaron el umbral del $10\,\%$ debido a la elección de rutas urbanas céntricas en Google Maps frente a circunvalaciones periféricas de alta velocidad en OSRM:
-    1. `COL-PAL`: $46.6\text{ km}$ (OSRM: $60.5\text{ km}$, dif. $22.98\,\%$)
-    2. `CAN-HUI`: $54.9\text{ km}$ (OSRM: $49.6\text{ km}$, dif. $10.69\,\%$)
-    3. `SAL-ZUN`: $17.9\text{ km}$ (OSRM: $22.8\text{ km}$, dif. $21.49\,\%$)
-    4. `ESP-SAL`: $15.0\text{ km}$ (OSRM: $19.7\text{ km}$, dif. $23.86\,\%$)
-    5. `CAN-SAL`: $13.8\text{ km}$ (OSRM: $18.4\text{ km}$, dif. $25.00\,\%$)
-    6. `ALM-SAL`: $13.2\text{ km}$ (OSRM: $17.5\text{ km}$, dif. $24.57\,\%$)
-    7. `QTZ-ZUN`: $10.9\text{ km}$ (OSRM: $17.3\text{ km}$, dif. $36.99\,\%$)
+De las 13 mediciones válidas en `validacion_google.csv`, 10 pertenecen a la red directa aceptada:
+
+- **Aristas dentro de tolerancia (8 aristas):** Conservan su kilometraje OSRM: `SAL-SIJ` ($24.7\text{ km}$), `HUI-SAL` ($42.4\text{ km}$), `CAB-PLA` ($21.5\text{ km}$), `OST-PLA` ($18.0\text{ km}$), `COL-SMA` ($23.7\text{ km}$), `COA-SMA` ($40.3\text{ km}$), `FCC-SMA` ($39.9\text{ km}$) y `HUI-PLA` ($24.4\text{ km}$). Cuatro de ellas presentan coincidencia exacta ($0.00\,\%$).
+- **Aristas ajustadas con valor de Google Maps (2 aristas con discrepancia $> 10\,\%$):**
+  1. `ESP-SAL`: $15.0\text{ km}$ (OSRM: $19.7\text{ km}$, dif. $23.86\,\%$)
+  2. `ALM-SAL`: $13.2\text{ km}$ (OSRM: $17.5\text{ km}$, dif. $24.57\,\%$)
+- **Mediciones sobre pares ahora descartados (3 aristas):** `FCC-ZUN`, `SAL-ZUN` y `QTZ-ZUN` ya no forman aristas directas independientes al ser interceptadas por los cascos céntricos de `PAL` y `CAN`.
 
 ---
 
@@ -157,13 +173,13 @@ El script constructor `scripts/build_dataset.py` procesa dicho archivo al finali
 
 El dataset cumple rigurosamente con el contrato TypeScript `Dataset` de `src/core/types.ts`:
 
-- `nodes`: 24 objetos `{id, label, lat, lon, fuente}`.
-- `edges`: 55 objetos `{id, source, target, km, carretera, fuente, verificado_google, km_google, nota, geometry}` (20 aristas con `verificado_google: true`, de las cuales 7 adoptan el peso de Google Maps por discrepancia $> 10\,\%$, y 35 con `verificado_google: false` y `km_google: null`).
+- `nodes`: 24 objetos `{id, label, lat, lon, fuente}` (22 fuentes Nominatim y 2 fuentes Google Maps contrastado con Wikipedia).
+- `edges`: 50 objetos `{id, source, target, km, carretera, fuente, verificado_google, km_google, nota, geometry}` (10 aristas con `verificado_google: true`, de las cuales 2 adoptan el peso de Google Maps por discrepancia $> 10\,\%$, y 40 con `verificado_google: false` y `km_google: null`).
 - `meta`: unidad `'km'`, fuentes oficiales y fecha `'2026-10-14'`.
 
 ### Ejecución 100 % Reproducible desde Caché
 
-El script `scripts/build_dataset.py` puede ejecutarse de manera offline y determinista utilizando los archivos cacheados en `scripts/cache/` y la tabla `docs/datos/validacion_google.csv`:
+El script `scripts/build_dataset.py` puede ejecutarse de manera offline y determinista utilizando los archivos cacheados en `scripts/cache/` y las tablas de datos en `docs/datos/`:
 
 ```bash
 python scripts/build_dataset.py
