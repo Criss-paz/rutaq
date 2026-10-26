@@ -157,11 +157,31 @@ pre {
   border: 1px solid #e2e8f0;
   border-radius: 4px;
   padding: 8px 10px;
-  font-size: 8pt;
-  line-height: 1.4;
+  font-size: 7.5pt;
+  line-height: 1.35;
   overflow-x: auto;
+  page-break-inside: auto;
+  break-inside: auto;
+}
+
+pre.numberSource {
+  margin-left: 3.5em;
+  border-left: 2px solid #cbd5e0;
+  padding-left: 6px;
+  page-break-inside: auto;
+  break-inside: auto;
+}
+
+pre.numberSource code > span {
   page-break-inside: avoid;
   break-inside: avoid;
+  display: block;
+}
+
+pre.numberSource code > span > a:first-child::before {
+  color: #718096;
+  font-weight: 500;
+  padding-right: 8px;
 }
 
 code {
@@ -175,6 +195,17 @@ pre code {
   background-color: transparent;
   padding: 0;
 }
+
+/* Código compacto: una línea de código = una línea impresa (el estilo por defecto de pandoc la espaciaba). */
+pre code, pre code > span, pre.numberSource code > span {
+  font-size: 7.5pt !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 0 !important;
+}
+pre.numberSource code > span, pre code > span { display: inline !important; page-break-inside: auto; break-inside: auto; }
 
 blockquote {
   border-left: 3px solid #3182ce;
@@ -213,10 +244,18 @@ def exportar_informe(
     output_docx: Path,
     output_pdf: Path,
     resource_dir: Path,
+    header_title: str | None = None,
 ) -> None:
+    if header_title is None:
+        if "proyecto2" in str(input_file).lower():
+            header_title = "RutaQ — Transporte Express · Red Vial Departamental y Árbol de Expansión Mínima"
+        else:
+            header_title = "RutaQ — Sistema Integral de Optimización de Rutas Mínimas"
+
     print(f"=== Exportación de Informe Técnico ===")
     print(f"Origen: {input_file}")
     print(f"Directorio de recursos: {resource_dir}")
+    print(f"Título encabezado: {header_title}")
 
     if not input_file.exists():
         raise FileNotFoundError(f"No existe el archivo de entrada: {input_file}")
@@ -227,6 +266,15 @@ def exportar_informe(
     output_docx.parent.mkdir(parents=True, exist_ok=True)
     output_pdf.parent.mkdir(parents=True, exist_ok=True)
 
+    root_dir = input_file.resolve().parent.parent.parent
+    resource_paths = os.pathsep.join([
+        str(resource_dir),
+        str(resource_dir.parent),
+        str(root_dir / "docs"),
+        str(root_dir / "docs" / "capturas" / "proyecto2"),
+        str(root_dir / "docs" / "informe" / "capturas"),
+    ])
+
     # 1. Generar Microsoft Word (.docx) con Pandoc
     print(f"\n[1/3] Generando Word (.docx)...")
     pypandoc.convert_text(
@@ -235,7 +283,7 @@ def exportar_informe(
         format="markdown",
         outputfile=str(output_docx),
         extra_args=[
-            f"--resource-path={resource_dir}",
+            f"--resource-path={resource_paths}",
             "--toc",
         ],
     )
@@ -264,7 +312,7 @@ def exportar_informe(
                 "--mathml",
                 "--embed-resources",
                 "--standalone",
-                f"--resource-path={resource_dir}",
+                f"--resource-path={resource_paths}",
                 f"--css={css_tmp_path.as_posix()}",
             ],
         )
@@ -283,6 +331,7 @@ def exportar_informe(
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
+            page.set_default_timeout(180000)
             # Cargar HTML autónomo con protocolo file://
             file_url = html_tmp_path.resolve().as_uri()
             page.goto(file_url, wait_until="networkidle")
@@ -293,12 +342,12 @@ def exportar_informe(
                 format="Letter",
                 display_header_footer=True,
                 header_template=(
-                    '<div style="font-size: 7.5pt; width: 100%; padding: 0 18mm; '
-                    'display: flex; justify-content: space-between; color: #718096; '
-                    'border-bottom: 1px solid #e2e8f0; margin-bottom: 4mm;">'
-                    '<span>RutaQ — Sistema Integral de Optimización de Rutas Mínimas</span>'
-                    '<span>Universidad Mariano Gálvez</span>'
-                    '</div>'
+                    f'<div style="font-size: 7.5pt; width: 100%; padding: 0 18mm; '
+                    f'display: flex; justify-content: space-between; color: #718096; '
+                    f'border-bottom: 1px solid #e2e8f0; margin-bottom: 4mm;">'
+                    f'<span>{header_title}</span>'
+                    f'<span>Universidad Mariano Gálvez</span>'
+                    f'</div>'
                 ),
                 footer_template=(
                     '<div style="font-size: 7.5pt; width: 100%; text-align: center; '
@@ -363,6 +412,12 @@ def main() -> None:
         default=default_resources,
         help="Directorio base para resolver rutas relativas de recursos (capturas)",
     )
+    parser.add_argument(
+        "--header-title",
+        type=str,
+        default=None,
+        help="Título a desplegar en el encabezado superior del PDF",
+    )
 
     args = parser.parse_args()
     exportar_informe(
@@ -370,6 +425,7 @@ def main() -> None:
         output_docx=args.output_docx,
         output_pdf=args.output_pdf,
         resource_dir=args.resource_dir,
+        header_title=args.header_title,
     )
 
 
