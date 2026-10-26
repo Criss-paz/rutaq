@@ -332,3 +332,87 @@ export interface Dataset {
   nodes: DatasetNode[];
   edges: DatasetEdge[];
 }
+
+// ═════════════════════════════ PROYECTO II — Transporte Express (solo adiciones) ═════════════════════════════
+// Nada de lo anterior cambia. Ver docs/PLAN_PROYECTO2.md.
+
+/**
+ * Un paso de la solución tabulada del árbol de expansión mínima (AEM).
+ * - `iter = 0`: inicialización (Prim: `inTree = [start]`; Kruskal: `inTree = []`), `chosenEdge = null`, `totalSoFar = 0`.
+ * - Prim, `iter = k ≥ 1`: `chosenEdge` es la arista de menor peso que cruza el corte (árbol → fuera); su extremo nuevo
+ *   se agrega a `inTree` y a `crossedOut` (columna tachada). `candidates` = aristas del corte evaluadas en el paso
+ *   (incluida la elegida), en orden de peso ascendente.
+ * - Kruskal, `iter = k ≥ 1`: se examina la k-ésima arista en orden ascendente de peso. Si une dos componentes distintas,
+ *   `chosenEdge = id`; si formaría ciclo, `chosenEdge = null` y `rejectedEdge = id`. `inTree` = nodos tocados por las
+ *   aristas aceptadas hasta ahora; `crossedOut = []`; `candidates = [id]`.
+ * - Desempate determinista: a igual peso gana el `id` de arista menor (comparación `<`, sin locale).
+ * - `totalSoFar` = suma de pesos aceptados hasta este paso (tolerancia relativa 1e-9 en comparaciones).
+ */
+export interface MSTStep {
+  iter: number;
+  chosenEdge: string | null;
+  rejectedEdge?: string;
+  inTree: NodeId[];
+  crossedOut: NodeId[];
+  candidates: string[];
+  totalSoFar: number;
+}
+
+/**
+ * `edges` en orden de selección. Grafo conexo ⇒ `edges.length = V − 1`. Grafo desconexo ⇒ bosque de expansión mínima
+ * (Kruskal) o árbol de la componente de `start` (Prim); la UI lo informa.
+ */
+export interface MSTResult {
+  algorithm: 'prim' | 'kruskal';
+  edges: string[];
+  total: number;
+  steps: MSTStep[];
+}
+
+/**
+ * Desglose de una ruta para el asistente de Transporte Express.
+ * `legs[i]` = tramo nodes[i] → nodes[i+1]; `road` = `meta.carretera` de la arista si existe y no está vacía;
+ * `cumulative` = suma de km hasta ese tramo inclusive. `total` = suma de los tramos (= distancia de Dijkstra).
+ * `formula` = "12.5 + 30.2 + … = 245.7 km" (pesos tal como están en el grafo, total redondeado a 1 decimal, unidad
+ * del grafo). Ruta de un solo nodo ⇒ `legs = []`, `total = 0`, `formula = "0 km"`.
+ */
+export interface RouteBreakdown {
+  nodes: NodeId[];
+  legs: { from: NodeId; to: NodeId; edgeId: string; road?: string; km: number; cumulative: number }[];
+  total: number;
+  formula: string;
+}
+
+/** Recorrido de reparto aproximado (vecino más cercano + 2-opt) sobre distancias de camino más corto. Cerrado: vuelve a `order[0]`. */
+export interface TourResult {
+  order: NodeId[];
+  total: number;
+  method: 'nn+2opt';
+}
+
+/** API añadida del núcleo (Proyecto II). Mismas convenciones que `CoreApi`. */
+export interface CoreApiP2 {
+  /** mst.ts — Prim con min-heap desde `start` (por defecto, el primer nodo de `graph.nodes`). */
+  prim(g: Graph, start?: NodeId): MSTResult;
+  /** mst.ts — Kruskal con Union-Find (compresión de caminos y unión por rango). */
+  kruskal(g: Graph): MSTResult;
+  /** route.ts — desglose de una ruta (`path` de `shortestPaths` o `PathResult` equivalente). */
+  routeBreakdown(g: Graph, path: PathResult): RouteBreakdown;
+  /** tour.ts — recorrido de reparto que visita todos los nodos alcanzables desde `start`. */
+  deliveryTour(g: Graph, start: NodeId): TourResult;
+}
+
+/** API del Worker con las adiciones del Proyecto II (el Worker existente la implementa completa). */
+export interface CoreWorkerApiP2 extends CoreWorkerApi {
+  deliveryTour(g: Graph, start: NodeId): Promise<TourResult>;
+}
+
+/** Nodo de src/data/guatemala.json: `label` = nombre del departamento; `cabecera` = cabecera departamental. */
+export interface GuatemalaDatasetNode extends DatasetNode {
+  cabecera: string;
+}
+
+/** src/data/guatemala.json: mismo formato que `Dataset`, con la cabecera en cada nodo. */
+export interface GuatemalaDataset extends Omit<Dataset, 'nodes'> {
+  nodes: GuatemalaDatasetNode[];
+}

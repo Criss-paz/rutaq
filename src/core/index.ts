@@ -9,3 +9,7 @@ export { yenKShortest } from './yen';
 export { detectScale } from './scale';
 export { suggestLayout } from './layout';
 export { autoEdgeShapes } from './edgeShape';
+// Proyecto II — Transporte Express
+export { prim, kruskal } from './mst';
+export { routeBreakdown } from './route';
+export { deliveryTour } from './tour';
