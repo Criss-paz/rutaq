@@ -10,16 +10,21 @@ import type {
   FloydResult,
   Graph,
   GraphFile,
+  GuatemalaDataset,
   LayoutSuggestion,
+  MSTResult,
   NodeId,
   PathResult,
+  RouteBreakdown,
   ScaleInfo,
   TabularConfig,
   TabularModel,
+  TourResult,
   ValidationResult,
 } from '../core/types';
 
-export type AppMode = 'quetzaltenango' | 'design';
+/** `guatemala` = módulo Transporte Express (Proyecto II). */
+export type AppMode = 'quetzaltenango' | 'guatemala' | 'design';
 export type ResultTab = 'tabla' | 'grafica' | 'rutas' | 'floyd';
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -51,6 +56,32 @@ export type AddEdgeResult =
   | { ok: false; reason: 'duplicate'; existingEdgeId: string };
 
 export type ImportResult = { ok: true } | { ok: false; message: string };
+
+// ───────────────────────────── Proyecto II — Transporte Express ─────────────────────────────
+
+export type Template = 'quetzaltenango' | 'guatemala' | 'ejemplo6' | 'ejemplo_mst' | 'vacio';
+
+/** G4: qué responde «recorrer y conectar todos los nodos». */
+export type CoverMode = 'mst' | 'spt' | 'tour';
+
+export interface DepartmentInput {
+  label: string;
+  cabecera: string;
+  /** Si hay lat y lon, el punto se proyecta en su posición real; si no, se coloca en `at` (centro, px del lienzo). */
+  lat?: number;
+  lon?: number;
+  at?: { x: number; y: number };
+}
+
+export type AddDepartmentResult =
+  { ok: true; id: NodeId } | { ok: false; reason: 'empty-name' | 'duplicate-name' | 'invalid-coords' };
+
+export interface TourState {
+  status: JobStatus;
+  start: NodeId | null;
+  result: TourResult | null;
+  error: string | null;
+}
 
 export interface AppState {
   // ── Datos ──
@@ -86,7 +117,7 @@ export interface AppState {
 
   // ── Acciones: modo y archivos ──
   setMode(mode: AppMode): void;
-  loadTemplate(template: 'quetzaltenango' | 'ejemplo6' | 'vacio'): void;
+  loadTemplate(template: Template): void;
   exportGraphFile(): GraphFile;
   importGraphFile(json: string): ImportResult;
 
@@ -129,6 +160,38 @@ export interface AppState {
   cancelAllPaths(): void;
   setAllPathsLimit(limit: number): void;
   highlightPath(sel: AppState['highlightedPath']): void;
+
+  // ── Proyecto II: Transporte Express (estado) ──
+  /** Cabecera de cada departamento del módulo Guatemala (vacío en los otros modos). */
+  departments: Record<NodeId, { cabecera: string }>;
+  /** Contorno del país proyectado al lienzo (anillos de puntos en px), solo en modo `guatemala`. */
+  outline: { x: number; y: number }[][] | null;
+  /** Desglose de cada ruta mínima de `shortest` (mismo índice): listado, tramos, acumulados y fórmula. */
+  breakdown: RouteBreakdown[] | null;
+  coverMode: CoverMode;
+  /** Árbol de expansión mínima con ambos algoritmos (deben dar el mismo total). */
+  mst: { prim: MSTResult; kruskal: MSTResult } | null;
+  /** Nodo de inicio de Prim (por defecto el primero). */
+  mstStart: NodeId | null;
+  tour: TourState;
+
+  // ── Proyecto II: Transporte Express (acciones; editar registra deshacer/rehacer y autoguarda) ──
+  addDepartment(input: DepartmentInput): AddDepartmentResult;
+  /** Cambia nombre, cabecera o coordenadas (si cambian lat/lon, el punto se reubica). */
+  updateDepartment(id: NodeId, patch: Partial<Omit<DepartmentInput, 'at'>>): AddDepartmentResult;
+  /** Carretera bidireccional con nombre opcional (CA-1, CA-9…). Mismas validaciones que `addEdge`. */
+  addRoad(source: NodeId, target: NodeId, km: number, road?: string): AddEdgeResult;
+  updateRoad(id: string, patch: { km?: number; road?: string }): boolean;
+  /** Descarta los cambios guardados del módulo Guatemala y vuelve al dataset original. */
+  restoreOriginal(): void;
+  /** Exporta el módulo Guatemala como `GuatemalaDataset` (conserva cabeceras y coordenadas). */
+  exportGuatemalaDataset(): GuatemalaDataset;
+  setCoverMode(mode: CoverMode): void;
+  setMstStart(id: NodeId): void;
+  runTour(start: NodeId): void;
+  cancelTour(): void;
+  /** Proyecta lat/lon con la proyección del mapa actual (centro del punto en px); null si el grafo no es geográfico. */
+  projectLatLon(lat: number, lon: number): { x: number; y: number } | null;
 
   // ── Acciones: preferencias ──
   setActiveTab(tab: ResultTab): void;
