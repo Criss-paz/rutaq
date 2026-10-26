@@ -56,7 +56,7 @@ _Al seleccionar origen y destino, el sistema ejecuta el **Algoritmo de Dijkstra*
 **Qué decir:**  
 _«Veamos nuestro primer caso: un envío transversal de costa a costa, desde el altiplano occidental en **Quetzaltenango (QUE)** hasta la costa del Caribe en **Puerto Barrios, Izabal (IZA)**._
 
-_Observen cómo el algoritmo encuentra la ruta óptima sobre las carreteras entre departamentos vecinos con una distancia total de **490.3 km** ([km: QUE→IZA]). El camino transita desde Quetzaltenango por Totonicapán y Quiché, enlaza directamente a través de Baja Verapaz hacia Zacapa, conectando con la **CA-9 Norte** hasta Puerto Barrios, mostrando en pantalla cada tramo y eliminando cualquier desvío innecesario.»_
+_Observen cómo el algoritmo encuentra la ruta óptima sobre las carreteras entre departamentos vecinos con una distancia total de **494.0 km** ([km: QUE→IZA: 494.0 km, secuencia: QUE → TOT → QUI → BVE → ZAC → IZA]). El camino transita desde Quetzaltenango por Totonicapán (28.8 km) y Quiché (36.2 km), enlaza directamente a través de Baja Verapaz (128.6 km) hacia Zacapa (128.3 km), conectando con la **CA-9 Norte** hasta Puerto Barrios (172.1 km), mostrando en pantalla cada tramo y eliminando cualquier desvío innecesario.»_
 
 ---
 
@@ -67,7 +67,7 @@ _Observen cómo el algoritmo encuentra la ruta óptima sobre las carreteras entr
 **Qué decir:**  
 _«Nuestro segundo ejemplo conecta la sede central en **Ciudad de Guatemala (GUA)** con el destino más septentrional de la república: **Flores, Petén (PET)**._
 
-_Petén se encuentra a una gran distancia hacia el norte. El sistema calcula una distancia total de **415.3 km** ([km: GUA→PET]). Noten cómo el algoritmo avanza por la ruta norte conectando con Baja Verapaz (Salamá), asciende hacia Alta Verapaz por la **CA-14** y empalma directamente con Petén a través de la **Franja Transversal del Norte (RD PET-11 / RD AV-09)**. El mapa proyectado en Web Mercator mantiene la orientación geográfica real norte-arriba, permitiendo hacer zoom fluido y ajustar la pantalla sin deformar la geografía nacional.»_
+_Petén se encuentra a una gran distancia hacia el norte. El sistema calcula una distancia total de **415.3 km** ([km: GUA→PET: 415.3 km, secuencia: GUA → BVE → AVE → PET]). Noten cómo el algoritmo avanza por la ruta norte conectando con Baja Verapaz (Salamá, 89.0 km), asciende hacia Alta Verapaz por la **CA-14** (69.0 km) y empalma directamente con Petén a través de la **Franja Transversal del Norte (RD PET-11 / RD AV-09, 257.3 km)**. El mapa proyectado en Web Mercator mantiene la orientación geográfica real norte-arriba, permitiendo hacer zoom fluido y ajustar la pantalla sin deformar la geografía nacional.»_
 
 ---
 
@@ -78,7 +78,7 @@ _Petén se encuentra a una gran distancia hacia el norte. El sistema calcula una
 **Qué decir:**  
 _«El tercer ejemplo une el extremo occidental fronterizo de **San Marcos (SMA)** con el oriente del país en **Jutiapa (JUT)**._
 
-_Aquí el paquete recorre el país de oeste a este, cubriendo un trayecto óptimo de **368.3 km** ([km: SMA→JUT]). El desglose muestra el descenso desde el altiplano por San Marcos y Quetzaltenango (RN-1 / CITO-180) hacia la costa sur en Suchitepéquez (CA-2 Occidente), conectando por Escuintla y Santa Rosa hasta la **CA-1 Oriente** en Jutiapa, permitiendo al despachador calcular con exactitud la hora estimada de llegada a la bodega receptora.»_
+_Aquí el paquete recorre el país de oeste a este, cubriendo un trayecto óptimo de **368.3 km** ([km: SMA→JUT: 368.3 km, secuencia: SMA → QUE → SUC → ESC → SRO → JUT]). El desglose muestra el descenso desde el altiplano por San Marcos a Quetzaltenango (49.6 km) y hacia la costa sur en Suchitepéquez (60.2 km por CITO-180), conectando por Escuintla (102.5 km por CA-02 Occidente) y Santa Rosa (100.0 km) hasta la **CA-1 Oriente** en Jutiapa (56.0 km), permitiendo al despachador calcular con exactitud la hora estimada de llegada a la bodega receptora.»_
 
 ---
 
@@ -94,7 +94,7 @@ _Esto se modela con el **Árbol de Expansión Mínima (AEM)**. En RutaQ implemen
 - _Prim construye el árbol de forma expansiva a partir de un nodo raíz._
 - _Kruskal ordena todas las aristas y las incorpora evitando ciclos mediante la estructura Union-Find._
 
-_Ambos algoritmos arrojan exactamente la misma red óptima de 21 carreteras con un kilometraje total de **1 389.0 km** ([km: TOTAL_MST]). Además, la interfaz presenta la solución tabulada paso a paso idéntica al método enseñado en clase, mostrando las aristas examinadas, los nodos incorporados y las aristas descartadas por formar ciclo.»_
+_Ambos algoritmos arrojan exactamente la misma red óptima de 21 carreteras con un kilometraje total de **1 425.3 km** ([km: TOTAL_MST: 1 425.3 km]). Además, la interfaz presenta la solución tabulada paso a paso idéntica al método enseñado en clase, mostrando las aristas examinadas, los nodos incorporados y las aristas descartadas por formar ciclo.»_
 
 ---
 

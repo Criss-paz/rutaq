@@ -25,6 +25,7 @@ import json
 import time
 import math
 import csv
+import re
 import urllib.request
 import urllib.parse
 from shapely.geometry import shape
@@ -42,6 +43,7 @@ OUTPUT_AUDITORIA = os.path.join(BASE_DIR, 'docs', 'datos', 'auditoria_coordenada
 INPUT_COORDENADAS_CORREGIDAS = os.path.join(BASE_DIR, 'docs', 'datos', 'coordenadas_corregidas_guatemala.csv')
 OUTPUT_VECINDAD = os.path.join(BASE_DIR, 'docs', 'datos', 'vecindad_departamentos.csv')
 OUTPUT_DISCARDED = os.path.join(BASE_DIR, 'docs', 'datos', 'aristas_descartadas_guatemala.csv')
+INPUT_VALIDACION_GOOGLE = os.path.join(BASE_DIR, 'docs', 'datos', 'validacion_google_guatemala.csv')
 
 os.makedirs(CACHE_NOMINATIM, exist_ok=True)
 os.makedirs(CACHE_OSRM, exist_ok=True)
@@ -705,7 +707,53 @@ def build():
         writer.writerows(discarded_pairs)
     print(f"  Guardado reporte de descartes: {OUTPUT_DISCARDED}")
 
-    # 6. Verificación de conexidad topológica
+    # 6. Aplicar validación con Google Maps (docs/datos/validacion_google_guatemala.csv)
+    if os.path.exists(INPUT_VALIDACION_GOOGLE):
+        print(f"\n--- 6. Aplicando validación con Google Maps desde {INPUT_VALIDACION_GOOGLE} ---")
+        val_map = {}
+        with open(INPUT_VALIDACION_GOOGLE, 'r', encoding='utf-8') as f:
+            for row in csv.DictReader(f):
+                val_map[row['arista'].strip()] = row
+
+        def append_nota(current_nota, new_text):
+            return f"{current_nota} · {new_text}" if current_nota else new_text
+
+        for edge in accepted_edges:
+            eid = edge['id']
+            if eid in val_map:
+                row = val_map[eid]
+                tol = row['dentro_tolerancia'].strip()
+                km_osrm = float(row['km_osrm'])
+                km_google_rec = float(row['km_google_recomendada'])
+                km_usado = float(row['km_usado'])
+                criterio = row['criterio'].strip()
+
+                edge['verificado_google'] = True
+                edge['km_google'] = km_google_rec
+                edge['km'] = km_usado
+
+                if tol == 'no':
+                    diff_pct = abs(km_osrm - km_google_rec) / km_osrm * 100.0
+                    edge['nota'] = append_nota(
+                        edge['nota'],
+                        f"Distancia de Google Maps (OSRM: {km_osrm:.1f} km, diferencia {diff_pct:.2f} %)"
+                    )
+                elif tol == 'alternativa':
+                    m = re.search(r'coincide con una ruta alternativa de Google:\s*([\d.]+)\s*km', criterio)
+                    z_km = m.group(1) if m else row['km_google_alternativas'].split('/')[0].strip()
+                    edge['nota'] = append_nota(
+                        edge['nota'],
+                        f"Coincide con una ruta alternativa de Google Maps ({z_km} km)"
+                    )
+
+                if eid == 'IZA-PET' and km_usado == 287.0:
+                    edge['carretera'] = 'CA-13'
+                    edge['nota'] = append_nota(
+                        edge['nota'],
+                        "Carretera actualizada a CA-13 (vía de Google Maps)"
+                    )
+
+    # 7. Verificación de conexidad topológica
     G = nx.Graph()
     G.add_nodes_from(dept_codes)
     for e in accepted_edges:
@@ -722,11 +770,11 @@ def build():
     print(f"  [OK] Grafo 100 % CONEXO con los 22 departamentos.")
     print(f"  [OK] Petén (PET) conectado directamente con: {', '.join(pet_neighbors)}")
 
-    # 7. Construir contorno simplificado de Guatemala
-    print("\n--- 6. Construcción de contorno simplificado de Guatemala ---")
+    # 8. Construir contorno simplificado de Guatemala
+    print("\n--- 8. Construcción de contorno simplificado de Guatemala ---")
     build_guatemala_contorno()
 
-    # 8. Guardar dataset JSON
+    # 9. Guardar dataset JSON
     dataset = {
         'meta': {
             'nombre': 'Red Vial Nacional de la República de Guatemala (Transporte Express)',

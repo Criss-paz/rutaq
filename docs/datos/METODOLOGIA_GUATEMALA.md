@@ -131,7 +131,7 @@ Omitir carreteras directas consolidadas obligaba al programa a calcular trayecto
 
 La red vial definitiva consta de exactamente **49 aristas directas** (dentro del rango meta de 35 a 50 aristas). El grafo es **100 % conexo** y cubre armónicamente la totalidad de los 22 departamentos:
 
-- **Conectividad de Petén (`PET`):** Petén queda conectado de manera robusta y bimodal a la red nacional a través de sus dos fronteras departamentales directas: con Alta Verapaz (`AVE-PET`, $257.3\text{ km}$ por la Franja Transversal del Norte) y con Izabal (`IZA-PET`, $387.1\text{ km}$ por la RD PET-11 / FTN).
+- **Conectividad de Petén (`PET`):** Petén queda conectado de manera robusta y bimodal a la red nacional a través de sus dos fronteras departamentales directas: con Alta Verapaz (`AVE-PET`, $257.3\text{ km}$ por la Franja Transversal del Norte) y con Izabal (`IZA-PET`, $287.0\text{ km}$ por la CA-13, validada con Google Maps).
 - **Integridad del modelo:** No se inventó ninguna arista. Todas las 49 conexiones corresponden a trayectorias reales de navegación OSRM entre cabeceras de departamentos geográficamente adyacentes.
 
 ---
@@ -173,3 +173,40 @@ El proceso de construcción está completamente desacoplado de la red una vez ge
   ```
 - Se ejecuta en **$0$ peticiones de red**, produciendo un JSON exactamente idéntico y garantizando consistencia byte a byte.
 - La ejecución preserva íntegramente el dataset del Proyecto I ([`src/data/quetzaltenango.json`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/src/data/quetzaltenango.json)), conservando su suma de verificación SHA-256 inalterada.
+
+---
+
+## 8. Protocolo de Validación Empírica con Google Maps y Regla de Tolerancia
+
+Para certificar la fidelidad métrica del grafo vial frente a la operación cotidiana en carretera, se midieron las **49 aristas** en Google Maps (ruta vehicular en automóvil entre las coordenadas exactas de las cabeceras departamentales).
+
+### 8.1. Regla de Decisión a Tres Niveles ($\pm 10\,\%$)
+
+La integración entre las trayectorias de OSRM y las mediciones de Google Maps se rige por la siguiente regla sistemática:
+
+1. **Ruta Recomendada de Google Maps (Tolerancia $\pm 10\,\%$):** Si la distancia de OSRM se encuentra dentro del $\pm 10\,\%$ respecto a la ruta vehicular principal recomendada por Google Maps, se conserva el valor de OSRM.
+2. **Ruta Alternativa de Google Maps (Tolerancia $\pm 10\,\%$):** Si OSRM difiere de la ruta recomendada por más del $10\,\%$, pero se encuentra a $\pm 10\,\%$ de alguna de las **rutas alternativas** que Google Maps ofrece para el mismo trayecto, se conserva el valor de OSRM. Esto valida que el corredor vial físico existe y es transitable con esa longitud.
+3. **Fuera de Tolerancia:** Si ninguna de las opciones de Google Maps se ubica a $\pm 10\,\%$ de OSRM, se sustituye el kilometraje por el valor de la **ruta recomendada de Google Maps**. Si la vía principal observada difiere sustancialmente, se actualiza también la nomenclatura de la carretera.
+
+### 8.2. Evolución Respecto al Proyecto I (Quetzaltenango)
+
+En el **Proyecto I** (red departamental de Quetzaltenango), la validación contrastaba el valor exclusivamente contra la **ruta recomendada** de Google Maps. Para el **Proyecto II** (red nacional de 22 departamentos), se amplió la regla para aceptar también **rutas alternativas de Google Maps**, debido a razones técnicas fundadas:
+
+- OSRM optimiza rutas vectoriales priorizando el menor tiempo teórico sobre la jerarquía de vías de OpenStreetMap sin considerar la congestión urbana en tiempo real.
+- Google Maps frecuentemente presenta dos o tres rutas reales físicamente viables entre cabeceras lejanas, variando su recomendación principal según las condiciones dinámicas de tráfico en el momento de la consulta.
+- Aceptar una ruta alternativa válida confirma que el camino modelado en OSRM es un trazado real existente sobre la red vial nacional, evitando descartar datos vectoriales válidos cuando solo varían por factores coyunturales de tráfico.
+
+### 8.3. Resultados de la Validación
+
+El resultado de la aplicación de esta regla en las 49 aristas ([`docs/datos/validacion_google_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/validacion_google_guatemala.csv)) es:
+
+- **35 aristas** validadas con la ruta recomendada (dentro del $\pm 10\,\%$): se conserva OSRM.
+- **9 aristas** validadas con una ruta alternativa de Google Maps (dentro del $\pm 10\,\%$): se conserva OSRM (`BVE-GUA`, `CHQ-JAL`, `AVE-BVE`, `HUE-QUI`, `HUE-SMA`, `REU-SMA`, `QUE-REU`, `QUE-SUC`, `SOL-TOT`).
+- **5 aristas** fuera de tolerancia donde se adoptó la distancia recomendada de Google Maps:
+  - `CHI-SOL`: $85.4\text{ km}$ (OSRM: $69.2\text{ km}$, diferencia $23.41\,\%$).
+  - `CHI-SUC`: $155.0\text{ km}$ (OSRM: $122.3\text{ km}$, diferencia $26.74\,\%$).
+  - `JAL-PRO`: $68.4\text{ km}$ (OSRM: $52.0\text{ km}$, diferencia $31.54\,\%$).
+  - `IZA-PET`: $287.0\text{ km}$ (OSRM: $387.1\text{ km}$, diferencia $25.86\,\%$). Además, su carretera se actualizó formalmente a **`CA-13`** (la vía troncal indicada por Google Maps).
+  - `QUE-TOT`: $28.8\text{ km}$ (OSRM: $25.1\text{ km}$, diferencia $14.74\,\%$).
+
+El detalle completo de cada arista, tolerancias y rutas alternativas se encuentra formalizado en [`docs/datos/VALIDACION_GUATEMALA.md`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/VALIDACION_GUATEMALA.md).
