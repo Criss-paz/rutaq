@@ -7,12 +7,26 @@ import {
   detectScale,
   dijkstra,
   floydWarshall,
+  kruskal,
+  prim,
+  routeBreakdown,
   shortestPaths,
   validateGraph,
 } from '../core';
-import type { CoreWorkerApi, Dataset, GEdge, Graph, GraphFile, NodeId, TabularConfig, ValidationResult } from '../core';
-import { DEFAULT_NODE_SIZE, datasetToGraph } from './dataset';
-import type { AllPathsState, AppMode, AppState, Query, Theme } from './types';
+import type {
+  CoreWorkerApiP2,
+  Dataset,
+  GEdge,
+  GNode,
+  Graph,
+  GraphFile,
+  GuatemalaDataset,
+  NodeId,
+  TabularConfig,
+  ValidationResult,
+} from '../core';
+import { DATASET_NODE_SIZE, DEFAULT_NODE_SIZE, datasetToGraph, makeProjection, type GeoProjection } from './dataset';
+import type { AllPathsState, AppMode, AppState, Query, Template, Theme, TourState } from './types';
 
 // ───────────────────────────── Datos empaquetados ─────────────────────────────
 
@@ -22,7 +36,67 @@ const dataFile = (name: string): unknown => dataFiles[`../data/${name}.json`]?.d
 
 const EMPTY_GRAPH: Graph = { nodes: [], edges: [], directed: false, unit: 'km' };
 
-function templateGraph(t: 'quetzaltenango' | 'ejemplo6' | 'vacio'): { graph: Graph; name: string } {
+// ───────────── Proyecto II: módulo Guatemala (Transporte Express) ─────────────
+
+const guatemalaOriginal = dataFile('guatemala') as GuatemalaDataset | undefined;
+/**
+ * Proyección Web Mercator fija, construida con las cabeceras del dataset ORIGINAL: así un departamento agregado o
+ * importado cae siempre en el mismo lugar y el contorno del país coincide con los puntos.
+ */
+const gtProjection: GeoProjection | null = guatemalaOriginal?.nodes.length
+  ? makeProjection(guatemalaOriginal.nodes, 'mercator')
+  : null;
+const qtzDataset = dataFile('quetzaltenango') as Dataset | undefined;
+const qtzProjection: GeoProjection | null = qtzDataset?.nodes.length
+  ? makeProjection(qtzDataset.nodes, 'equirect')
+  : null;
+
+/** Grafo del módulo Guatemala con la proyección fija; devuelve también las cabeceras. */
+function guatemalaToGraph(ds: GuatemalaDataset): { graph: Graph; departments: Record<NodeId, { cabecera: string }> } {
+  const proj = gtProjection ?? makeProjection(ds.nodes, 'mercator');
+  const base = datasetToGraph(ds, undefined, 'mercator');
+  const nodes = base.nodes.map((n) => {
+    const c = proj.project(n.lat!, n.lon!);
+    return { ...n, x: Math.round(c.x - DATASET_NODE_SIZE.w / 2), y: Math.round(c.y - DATASET_NODE_SIZE.h / 2) };
+  });
+  const departments = Object.fromEntries(ds.nodes.map((n) => [n.id, { cabecera: n.cabecera || n.label }]));
+  return { graph: { ...base, nodes }, departments };
+}
+
+type GeoGeometry = { type?: string; coordinates?: unknown };
+
+/** Anillos del contorno de Guatemala (GeoJSON en lon/lat) proyectados al lienzo. */
+function guatemalaOutline(): { x: number; y: number }[][] | null {
+  const geo = dataFile('guatemala_contorno') as
+    (GeoGeometry & { geometry?: GeoGeometry; features?: { geometry?: GeoGeometry }[] }) | undefined;
+  const proj = gtProjection;
+  if (!geo || !proj) return null;
+  const geometries: GeoGeometry[] = geo.features
+    ? geo.features.map((f) => f.geometry ?? {})
+    : geo.geometry
+      ? [geo.geometry]
+      : [geo];
+  const rings: number[][][] = [];
+  for (const gm of geometries) {
+    if (gm.type === 'Polygon') rings.push(...(gm.coordinates as number[][][]));
+    if (gm.type === 'MultiPolygon') for (const poly of gm.coordinates as number[][][][]) rings.push(...poly);
+  }
+  if (!rings.length) return null;
+  return rings.map((ring) => ring.map(([lon, lat]) => proj.project(lat!, lon!)));
+}
+
+function guatemalaTemplate() {
+  if (!guatemalaOriginal) return { graph: EMPTY_GRAPH, name: 'Guatemala (sin datos)', departments: {} };
+  const { graph, departments } = guatemalaToGraph(guatemalaOriginal);
+  return { graph, name: guatemalaOriginal.meta.nombre, departments };
+}
+
+function templateGraph(t: Template): { graph: Graph; name: string } {
+  if (t === 'guatemala') return guatemalaTemplate();
+  if (t === 'ejemplo_mst') {
+    const f = dataFile('ejemplo_mst') as GraphFile | undefined;
+    return { graph: f?.graph ?? EMPTY_GRAPH, name: f?.name ?? 'Ejemplo de árbol de expansión mínima (sin datos)' };
+  }
   if (t === 'quetzaltenango') {
     const ds = dataFile('quetzaltenango') as Dataset | undefined;
     return { graph: ds ? datasetToGraph(ds) : EMPTY_GRAPH, name: ds?.meta.nombre ?? 'Quetzaltenango (sin datos)' };
@@ -37,6 +111,7 @@ function templateGraph(t: 'quetzaltenango' | 'ejemplo6' | 'vacio'): { graph: Gra
 // ───────────────────────────── Persistencia local ─────────────────────────────
 
 const KEY_DESIGN = 'rutaq:design';
+const KEY_GUATEMALA = 'rutaq:guatemala';
 const KEY_PREFS = 'rutaq:prefs';
 
 const storage = typeof localStorage === 'undefined' ? null : localStorage;
@@ -95,8 +170,15 @@ function derive(graph: Graph, query: Query | null) {
     solvable && query?.kind === 'path' && query.target
       ? safe(() => shortestPaths(graph, query.source, query.target!), null)
       : null;
+  // Proyecto II: desglose de cada ruta mínima (tramos, acumulados, fórmula) y árbol de expansión mínima.
+  const breakdown = shortest ? safe(() => shortest.map((p) => routeBreakdown(graph, p)), null) : null;
+  const start = mstStart && ids.has(mstStart) ? mstStart : (graph.nodes[0]?.id ?? null);
+  const mst = validation.ok && start ? safe(() => ({ prim: prim(graph, start), kruskal: kruskal(graph) }), null) : null;
 
   return {
+    breakdown,
+    mst,
+    mstStart: start,
     query,
     validation,
     scale,
@@ -114,16 +196,21 @@ function derive(graph: Graph, query: Query | null) {
 const IDLE_ALL_PATHS: AllPathsState = { status: 'idle', found: 0, result: null, error: null };
 
 let speedMs = 900;
+/** Inicio de Prim elegido por el usuario (se valida contra el grafo en `derive`). */
+let mstStart: NodeId | null = null;
+
+const IDLE_TOUR: TourState = { status: 'idle', start: null, result: null, error: null };
+let tourRun = 0;
 
 // ───────────────────────────── Worker de S3 / layout ─────────────────────────────
 
 let worker: Worker | null = null;
-let workerApi: Comlink.Remote<CoreWorkerApi> | null = null;
+let workerApi: Comlink.Remote<CoreWorkerApiP2> | null = null;
 
-function getWorker(): Comlink.Remote<CoreWorkerApi> {
+function getWorker(): Comlink.Remote<CoreWorkerApiP2> {
   if (!workerApi) {
     worker = new Worker(new URL('../core/worker.ts', import.meta.url), { type: 'module' });
-    workerApi = Comlink.wrap<CoreWorkerApi>(worker);
+    workerApi = Comlink.wrap<CoreWorkerApiP2>(worker);
   }
   return workerApi;
 }
@@ -193,6 +280,34 @@ function normalizeGraph(g: Graph): Graph {
   };
 }
 
+/** Quita tildes y pasa a minúsculas para comparar nombres. */
+const plain = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+/** Id de 3 letras a partir del nombre (sin tildes), único en el grafo: «Petén» → PET, luego PE2… */
+function departmentId(g: Graph, label: string): NodeId {
+  const base =
+    plain(label)
+      .replace(/[^a-z]/g, '')
+      .toUpperCase()
+      .slice(0, 3) || 'DEP';
+  const ids = new Set(g.nodes.map((n) => n.id));
+  if (!ids.has(base)) return base;
+  for (let i = 2; ; i++) {
+    const id = `${base.slice(0, 2)}${i}`;
+    if (!ids.has(id)) return id;
+  }
+}
+
+const validCoords = (lat?: number, lon?: number) =>
+  lat === undefined && lon === undefined
+    ? true
+    : Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat!) <= 90 && Math.abs(lon!) <= 180;
+
 // ───────────────────────────── Tema ─────────────────────────────
 
 function applyTheme(theme: Theme) {
@@ -222,7 +337,22 @@ interface Prefs {
 
 const prefs = readJson<Partial<Prefs>>(KEY_PREFS) ?? {};
 
-function initialGraph(mode: AppMode) {
+function initialGraph(mode: AppMode): {
+  graph: Graph;
+  name: string;
+  departments?: Record<NodeId, { cabecera: string }>;
+} {
+  if (mode === 'guatemala') {
+    const saved = readJson<GuatemalaDataset>(KEY_GUATEMALA);
+    if (saved && Array.isArray(saved.nodes) && Array.isArray(saved.edges) && saved.meta) {
+      try {
+        return { ...guatemalaToGraph(saved), name: saved.meta.nombre };
+      } catch {
+        // Guardado dañado: se usa el dataset original.
+      }
+    }
+    return guatemalaTemplate();
+  }
   if (mode === 'design') {
     const saved = readJson<GraphFile>(KEY_DESIGN);
     if (saved && isGraph(saved.graph)) return { graph: normalizeGraph(saved.graph), name: saved.name };
@@ -236,7 +366,7 @@ const initial = initialGraph(initialMode);
 const initialG = applyAutoShapes(initial.graph);
 
 /** Historial de deshacer/rehacer (con tipo explícito para evitar la referencia circular). */
-function history(): TemporalState<{ graph: Graph }> {
+function history(): TemporalState<{ graph: Graph; departments: Record<NodeId, { cabecera: string }> }> {
   return useAppStore.temporal.getState();
 }
 
@@ -275,10 +405,24 @@ export const useAppStore = create<AppState>()(
           selectedNodeIds: [],
           selectedEdgeIds: [],
           layoutSuggestion: null,
+          tour: IDLE_TOUR,
+          departments: {},
           ...derive(g, null),
           ...extra,
         });
+        set({ outline: get().mode === 'guatemala' ? guatemalaOutline() : null });
         history().clear();
+      };
+
+      /** Coloca un departamento: con coordenadas en su posición real; si no, en `at` o en el centro del mapa. */
+      const placeDepartment = (g: Graph, lat?: number, lon?: number, at?: { x: number; y: number }) => {
+        if (lat !== undefined && lon !== undefined && gtProjection) return gtProjection.project(lat, lon);
+        if (at) return at;
+        const xs = g.nodes.map((n) => n.x + n.w / 2);
+        const ys = g.nodes.map((n) => n.y + n.h / 2);
+        return xs.length
+          ? { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 }
+          : { x: 0, y: 0 };
       };
 
       return {
@@ -293,15 +437,24 @@ export const useAppStore = create<AppState>()(
         allPathsLimit: prefs.allPathsLimit ?? 5000,
         theme: prefs.theme ?? 'system',
         keepProportion: prefs.keepProportion ?? false,
+        departments: initial.departments ?? {},
+        outline: initialMode === 'guatemala' ? guatemalaOutline() : null,
+        coverMode: 'mst',
+        tour: IDLE_TOUR,
         ...derive(initialG, null),
 
         // ── Modo y archivos ──
         setMode(mode) {
           if (mode === get().mode) return;
           const t = initialGraph(mode);
-          replaceGraph(t.graph, t.name, { mode });
+          replaceGraph(t.graph, t.name, { mode, departments: t.departments ?? {} });
         },
         loadTemplate(template) {
+          if (template === 'guatemala') {
+            const t = guatemalaTemplate();
+            replaceGraph(t.graph, t.name, { mode: 'guatemala', departments: t.departments });
+            return;
+          }
           const t = templateGraph(template);
           replaceGraph(t.graph, t.name, { mode: template === 'quetzaltenango' ? 'quetzaltenango' : 'design' });
         },
@@ -323,6 +476,12 @@ export const useAppStore = create<AppState>()(
             graph = normalizeGraph(f.graph);
             name = typeof f.name === 'string' ? f.name : name;
           } else if (f.meta && Array.isArray(f.nodes) && Array.isArray(f.edges)) {
+            // Proyecto II: un dataset con cabeceras es del módulo Guatemala (exportado con «Guardar» en ese modo).
+            if (f.nodes.every((n) => typeof (n as { cabecera?: unknown }).cabecera === 'string')) {
+              const gt = guatemalaToGraph(f as GuatemalaDataset);
+              replaceGraph(gt.graph, f.meta.nombre ?? name, { mode: 'guatemala', departments: gt.departments });
+              return { ok: true };
+            }
             graph = datasetToGraph(f as Dataset);
             name = f.meta.nombre ?? name;
           }
@@ -537,6 +696,194 @@ export const useAppStore = create<AppState>()(
           set({ highlightedPath: sel });
         },
 
+        // ── Proyecto II: Transporte Express ──
+        addDepartment({ label, cabecera, lat, lon, at }) {
+          const g = get().graph;
+          const name = label.trim();
+          if (!name) return { ok: false, reason: 'empty-name' };
+          if (g.nodes.some((n) => plain(n.label) === plain(name))) return { ok: false, reason: 'duplicate-name' };
+          if (!validCoords(lat, lon)) return { ok: false, reason: 'invalid-coords' };
+          const id = departmentId(g, name);
+          const c = placeDepartment(g, lat, lon, at);
+          // Sin coordenadas se guardan las del punto donde quedó, para que siga siendo un nodo del mapa.
+          const geo =
+            lat !== undefined && lon !== undefined
+              ? { lat, lon }
+              : gtProjection
+                ? gtProjection.unproject(c.x, c.y)
+                : {};
+          const node: GNode = {
+            id,
+            label: name,
+            x: Math.round(c.x - DATASET_NODE_SIZE.w / 2),
+            y: Math.round(c.y - DATASET_NODE_SIZE.h / 2),
+            ...DATASET_NODE_SIZE,
+            ...geo,
+          };
+          commitGraph(
+            { ...g, nodes: [...g.nodes, node] },
+            { departments: { ...get().departments, [id]: { cabecera: cabecera.trim() || name } } },
+          );
+          return { ok: true, id };
+        },
+        updateDepartment(id, { label, cabecera, lat, lon }) {
+          const g = get().graph;
+          const node = g.nodes.find((n) => n.id === id);
+          if (!node) return { ok: false, reason: 'empty-name' };
+          const name = label === undefined ? node.label : label.trim();
+          if (!name) return { ok: false, reason: 'empty-name' };
+          if (g.nodes.some((n) => n.id !== id && plain(n.label) === plain(name)))
+            return { ok: false, reason: 'duplicate-name' };
+          const moving = lat !== undefined || lon !== undefined;
+          const nlat = lat ?? node.lat;
+          const nlon = lon ?? node.lon;
+          if (moving && !validCoords(nlat, nlon)) return { ok: false, reason: 'invalid-coords' };
+          const c = moving && gtProjection ? gtProjection.project(nlat!, nlon!) : null;
+          commitGraph(
+            {
+              ...g,
+              nodes: g.nodes.map((n) =>
+                n.id === id
+                  ? {
+                      ...n,
+                      label: name,
+                      ...(c
+                        ? { x: Math.round(c.x - n.w / 2), y: Math.round(c.y - n.h / 2), lat: nlat, lon: nlon }
+                        : {}),
+                    }
+                  : n,
+              ),
+            },
+            {
+              departments: {
+                ...get().departments,
+                [id]: { cabecera: cabecera?.trim() || get().departments[id]?.cabecera || name },
+              },
+            },
+          );
+          return { ok: true, id };
+        },
+        addRoad(source, target, km, road) {
+          const g = get().graph;
+          if (source === target) return { ok: false, reason: 'self-loop' };
+          if (!g.nodes.some((n) => n.id === source) || !g.nodes.some((n) => n.id === target))
+            return { ok: false, reason: 'missing-node' };
+          if (!validWeight(km)) return { ok: false, reason: 'invalid-weight' };
+          const dup = g.edges.find((e) => samePair(e, source, target));
+          if (dup) return { ok: false, reason: 'duplicate', existingEdgeId: dup.id };
+          // Convención del dataset: ids en orden alfabético («GUA-SAC»); bidireccional por definición.
+          const [a, b] = source < target ? [source, target] : [target, source];
+          const ids = new Set(g.edges.map((e) => e.id));
+          let id = `${a}-${b}`;
+          for (let i = 2; ids.has(id); i++) id = `${a}-${b}-${i}`;
+          const meta = { carretera: road?.trim() ?? '', fuente: 'Ingresada por el usuario' };
+          commitGraph({
+            ...g,
+            edges: [...g.edges, { id, source: a, target: b, weight: km, shape: 'straight', shapeAuto: true, meta }],
+          });
+          return { ok: true, edgeId: id };
+        },
+        updateRoad(id, { km, road }) {
+          const g = get().graph;
+          if (!g.edges.some((e) => e.id === id)) return false;
+          if (km !== undefined && !validWeight(km)) return false;
+          commitGraph({
+            ...g,
+            edges: g.edges.map((e) =>
+              e.id === id
+                ? {
+                    ...e,
+                    weight: km ?? e.weight,
+                    meta: road === undefined ? e.meta : { ...e.meta, carretera: road.trim() },
+                  }
+                : e,
+            ),
+          });
+          return true;
+        },
+        restoreOriginal() {
+          try {
+            storage?.removeItem(KEY_GUATEMALA);
+          } catch {
+            // Sin acceso a localStorage: igual se recarga el original.
+          }
+          get().loadTemplate('guatemala');
+        },
+        exportGuatemalaDataset() {
+          const { graph, graphName, departments } = get();
+          const str = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
+          return {
+            meta: {
+              nombre: graphName,
+              unidad: 'km',
+              fuentes: guatemalaOriginal?.meta.fuentes ?? ['Ingresado por el usuario'],
+              fecha: new Date().toISOString().slice(0, 10),
+            },
+            nodes: graph.nodes.map((n) => {
+              const geo =
+                n.lat !== undefined && n.lon !== undefined
+                  ? { lat: n.lat, lon: n.lon }
+                  : gtProjection
+                    ? gtProjection.unproject(n.x + n.w / 2, n.y + n.h / 2)
+                    : { lat: 0, lon: 0 };
+              const orig = guatemalaOriginal?.nodes.find((o) => o.id === n.id);
+              return {
+                id: n.id,
+                label: n.label,
+                cabecera: departments[n.id]?.cabecera ?? n.label,
+                ...geo,
+                fuente: orig && orig.lat === geo.lat && orig.lon === geo.lon ? orig.fuente : 'Ingresado por el usuario',
+              };
+            }),
+            edges: graph.edges.map((e) => ({
+              id: e.id,
+              source: e.source,
+              target: e.target,
+              km: e.weight,
+              carretera: str(e.meta?.carretera),
+              fuente: str(e.meta?.fuente, 'Ingresada por el usuario'),
+              verificado_google: e.meta?.verificado_google === true,
+              km_google: typeof e.meta?.km_google === 'number' ? e.meta.km_google : null,
+              nota: str(e.meta?.nota),
+              geometry: str(e.meta?.geometry),
+            })),
+          };
+        },
+        setCoverMode(mode) {
+          set({ coverMode: mode });
+        },
+        setMstStart(id) {
+          mstStart = id;
+          set(derive(get().graph, get().query));
+        },
+        runTour(start) {
+          const { graph } = get();
+          const run = ++tourRun;
+          set({ tour: { status: 'running', start, result: null, error: null } });
+          getWorker()
+            .deliveryTour(graph, start)
+            .then((result) => {
+              if (run === tourRun) set({ tour: { status: 'done', start, result, error: null } });
+            })
+            .catch((e: unknown) => {
+              if (run === tourRun)
+                set({
+                  tour: { status: 'error', start, result: null, error: e instanceof Error ? e.message : String(e) },
+                });
+            });
+        },
+        cancelTour() {
+          if (get().tour.status !== 'running') return;
+          tourRun++;
+          killWorker();
+          set({ tour: { ...get().tour, status: 'cancelled' } });
+        },
+        projectLatLon(lat, lon) {
+          const mode = get().mode;
+          const proj = mode === 'guatemala' ? gtProjection : mode === 'quetzaltenango' ? qtzProjection : null;
+          return proj ? proj.project(lat, lon) : null;
+        },
+
         // ── Preferencias ──
         setActiveTab(tab) {
           set({ activeTab: tab });
@@ -555,8 +902,8 @@ export const useAppStore = create<AppState>()(
     },
     {
       // Solo el grafo entra al historial de deshacer/rehacer.
-      partialize: (s) => ({ graph: s.graph }),
-      equality: (a, b) => a.graph === b.graph,
+      partialize: (s) => ({ graph: s.graph, departments: s.departments }),
+      equality: (a, b) => a.graph === b.graph && a.departments === b.departments,
       limit: 100,
     },
   ),
@@ -566,6 +913,14 @@ export const useAppStore = create<AppState>()(
 useAppStore.subscribe((s, prev) => {
   if (s.mode === 'design' && (s.graph !== prev.graph || s.graphName !== prev.graphName)) {
     writeJson(KEY_DESIGN, s.exportGraphFile());
+  }
+  // Proyecto II: el módulo Guatemala se autoguarda solo cuando el usuario lo modifica (no al abrirlo).
+  if (
+    s.mode === 'guatemala' &&
+    prev.mode === 'guatemala' &&
+    (s.graph !== prev.graph || s.departments !== prev.departments)
+  ) {
+    writeJson(KEY_GUATEMALA, s.exportGuatemalaDataset());
   }
   if (
     s.theme !== prev.theme ||

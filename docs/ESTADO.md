@@ -2,6 +2,27 @@
 
 _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
+## Proyecto II — Transporte Express (en curso; presentación: sábado 31 de octubre de 2026)
+
+Plan: `docs/PLAN_PROYECTO2.md` · ids: `docs/agentes/proyecto2_ids.md` · respaldo del Proyecto I: etiqueta `v1-proyecto-1`.
+
+| Tarea                                                                                                      | Dueño       | Estado                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Respaldo + puerta de regresión (33 unitarias, 112/112 E2E, networkx 648/648)                               | Claude Code | ✅                                                                                                                       |
+| Contrato ampliado (solo adiciones) + stubs                                                                 | Claude Code | ✅                                                                                                                       |
+| Prim / Kruskal / desglose de ruta / recorrido + pruebas (Prim = Kruskal en 500 grafos; networkx 6/6 AEM)   | Codex       | ✅ integrado                                                                                                             |
+| Store del módulo Guatemala (Mercator, formularios, desglose, AEM, recorrido, contorno, exportar/importar)  | Claude Code | ✅ 8 pruebas; probado con datos reales                                                                                   |
+| `npm run anexo-codigo` · `npm run capturas`                                                                | Claude Code | ✅ / espera el spec de capturas                                                                                          |
+| Dataset de 22 departamentos                                                                                | Gemini      | 🔄 ronda 2: criterio de vecindad (la ronda 1 dio 103 aristas que atraviesan el país) y retirar la tabla «DGC» sin fuente |
+| Interfaz del módulo (mapa, asistente, formularios, Prim/Kruskal, presentación, «Acerca de», E2E, capturas) | Antigravity | 🔄                                                                                                                       |
+| Validación Google Maps (20 aristas)                                                                        | Claude Code | ⏳ tras la ronda 2 de datos                                                                                              |
+| Documentación del curso (descripción, guion, solución a mano del AEM)                                      | Gemini      | 🔄 borrador                                                                                                              |
+
+Pendiente de Cris: **curso, catedrático y sección** para la carátula.
+
+Nota técnica: Vitest guarda un caché por contenido en `node_modules/.vitest-cache`; si se agrega un JSON a `src/data/`
+después de haber corrido pruebas, borrar ese caché (el `import.meta.glob` del store quedaría sin el archivo nuevo).
+
 ## Estado: **TERMINADO** — app publicada en https://criss-paz.github.io/rutaq/ (2026-10-14)
 
 | Fase           | Estado | Puerta de salida                                                                              |
