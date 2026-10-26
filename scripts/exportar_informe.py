@@ -196,6 +196,17 @@ pre code {
   padding: 0;
 }
 
+/* Código compacto: una línea de código = una línea impresa (el estilo por defecto de pandoc la espaciaba). */
+pre code, pre code > span, pre.numberSource code > span {
+  font-size: 7.5pt !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 0 !important;
+}
+pre.numberSource code > span, pre code > span { display: inline !important; page-break-inside: auto; break-inside: auto; }
+
 blockquote {
   border-left: 3px solid #3182ce;
   padding-left: 12px;
