@@ -18,6 +18,7 @@ import { type EdgeWeightsMode, useUiStore } from '../uiStore';
 import { CustomEdge } from './CustomEdge';
 import { CustomNode } from './CustomNode';
 import EdgeDialog from './EdgeDialog';
+import GuatemalaOutline from './guatemala/GuatemalaOutline';
 
 const nodeTypes = {
   customNode: CustomNode,
@@ -210,7 +211,7 @@ function MapOrientationAndScale({ nodes }: { nodes: GNode[] }) {
   const factor = useMemo(() => computeProjectionFactor(nodes), [nodes]);
 
   const pxPerKm = factor * zoom;
-  const candidates = [1, 2, 5, 10, 20];
+  const candidates = [1, 2, 5, 10, 20, 50, 100, 200];
   let bestL = 5;
   let minDiff = Infinity;
   for (const c of candidates) {
@@ -505,6 +506,7 @@ function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef, isMapMode, 
           size={1.5}
           color={theme === 'dark' ? '#334155' : '#cbd5e1'}
         />
+        {mode === 'guatemala' && <GuatemalaOutline />}
         <Controls
           showInteractive={false}
           position="bottom-left"
@@ -537,6 +539,9 @@ export default function Canvas() {
   const addNode = useApp((s) => s.addNode);
   const selectedNodeIds = useApp((s) => s.selectedNodeIds);
   const selectedEdgeIds = useApp((s) => s.selectedEdgeIds);
+  const mst = useApp((s) => s.mst);
+  const coverMode = useApp((s) => s.coverMode);
+  const mstEdgesSet = useMemo(() => new Set(mst?.prim.edges ?? []), [mst?.prim.edges]);
 
   const [edgeDialogState, setEdgeDialogState] = useState<{
     isOpen: boolean;
@@ -711,7 +716,8 @@ export default function Canvas() {
       const isDashedPath = dashedPathEdges.has(e.id);
       const isOnPath = isSolidPath || isDashedPath;
       const isTiedDashed = isDashedPath;
-      const isTreeEdge = query?.kind === 'tree' && treeEdgesSet.has(e.id);
+      const isMstEdge = mode === 'guatemala' && coverMode === 'mst' && !query && mstEdgesSet.has(e.id);
+      const isTreeEdge = (query?.kind === 'tree' && treeEdgesSet.has(e.id)) || isMstEdge;
       const isEvaluated = evaluatedEdgesSet.has(e.id);
 
       return {
@@ -744,7 +750,10 @@ export default function Canvas() {
     evaluatedEdgesSet,
     selectedEdgeIds,
     isMapMode,
-    query?.kind,
+    query,
+    mode,
+    coverMode,
+    mstEdgesSet,
   ]);
 
   // Manejador de conexión de nuevas aristas al arrastrar
@@ -827,6 +836,20 @@ export default function Canvas() {
         >
           ✕ Limpiar
         </button>
+
+        {/* Botón visible de ajuste a pantalla (módulo Guatemala G1) */}
+        {mode === 'guatemala' && (
+          <button
+            type="button"
+            data-testid="btn-fit-view"
+            onClick={() => fitView({ padding: 0.15, duration: 400 })}
+            aria-label="Ajustar a pantalla"
+            title="Ajustar zoom para ver todo el mapa"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            ⛶ Ajustar a pantalla
+          </button>
+        )}
 
         {/* Selectores de Nodos */}
         <div className="flex items-center gap-1 pl-1">

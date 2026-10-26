@@ -2224,3 +2224,2825 @@ if (typeof matchMedia !== 'undefined') {
 }
 ```
 
+## Interfaz del módulo Transporte Express
+
+Componentes React del módulo Guatemala.
+
+### `src/ui/components/guatemala/GuatemalaAboutModal.tsx`
+
+107 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Diálogo «Acerca de» del Proyecto II (G5).
+ * Muestra los datos institucionales de la Universidad Mariano Gálvez de Guatemala,
+ * los nombres y carnés exactos de los 3 integrantes del grupo y la fecha de presentación.
+ *
+ * Datos estáticos según docs/PLAN_PROYECTO2.md.
+ */
+import Modal from '../Modal';
+
+interface GuatemalaAboutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function GuatemalaAboutModal({ isOpen, onClose }: GuatemalaAboutModalProps) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Acerca de — Transporte Express (RutaQ)" testId="modal-about">
+      <div className="flex flex-col gap-4 text-xs leading-relaxed" data-testid="about-dialog-content">
+        {/* Encabezado Institucional */}
+        <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5 text-center dark:border-blue-900/50 dark:bg-blue-950/20">
+          <div className="text-base font-extrabold text-blue-900 dark:text-blue-100">
+            Universidad Mariano Gálvez de Guatemala
+          </div>
+          <div className="text-xs font-semibold text-blue-800 dark:text-blue-200 mt-0.5">
+            Facultad de Ingeniería en Sistemas de Información y Ciencias de la Computación
+          </div>
+          <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2">
+            Proyecto II: «Transporte Express» — Optimización de Rutas Departamentales
+          </div>
+        </div>
+
+        {/* Datos académicos */}
+        <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Curso:</span>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">________</div>
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Catedrático:</span>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">________</div>
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Sección:</span>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">________</div>
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Fecha de presentación:</span>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">Sábado 31 de octubre de 2026</div>
+          </div>
+        </div>
+
+        {/* Integrantes del grupo y carnés */}
+        <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+          <div className="font-bold text-slate-800 dark:text-slate-200 mb-2">Integrantes del equipo de desarrollo:</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse" data-testid="table-team-members">
+              <thead>
+                <tr className="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase dark:border-slate-700">
+                  <th className="py-1.5 px-2">Nombre completo</th>
+                  <th className="py-1.5 px-2 font-mono text-right">Carné</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium dark:divide-slate-800">
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="py-2 px-2 text-slate-800 dark:text-slate-200">Cristopher Alexis Castellanos Paz</td>
+                  <td className="py-2 px-2 text-right font-mono font-bold text-blue-600 dark:text-blue-400">
+                    2690-24-5972
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="py-2 px-2 text-slate-800 dark:text-slate-200">Leonel Taracena Marroquín</td>
+                  <td className="py-2 px-2 text-right font-mono font-bold text-blue-600 dark:text-blue-400">
+                    2690-24-4072
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="py-2 px-2 text-slate-800 dark:text-slate-200">Pablo Alexander Vásquez Rivera</td>
+                  <td className="py-2 px-2 text-right font-mono font-bold text-blue-600 dark:text-blue-400">
+                    2690-24-13123
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Descripción del sistema */}
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+          <strong>RutaQ — Transporte Express</strong> resuelve el problema de optimización de entrega de paquetes a
+          través de la red vial de los 22 departamentos de Guatemala, integrando el algoritmo de Dijkstra para rutas más
+          cortas, el árbol de expansión mínima con Prim y Kruskal, y recorridos heurísticos de reparto.
+        </p>
+
+        <div className="flex justify-end pt-1">
+          <button
+            type="button"
+            data-testid="btn-close-about"
+            onClick={onClose}
+            className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2 font-bold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+```
+
+### `src/ui/components/guatemala/GuatemalaAdminModal.tsx`
+
+904 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Panel de administración de la red vial para Transporte Express (G2).
+ * Incluye dos secciones:
+ *   1. Departamentos: agregar, editar, eliminar, buscar; coordenadas opcionales.
+ *   2. Carreteras: agregar, editar, eliminar, buscar; tabla ordenable (por origen, destino, carretera, km).
+ * Operaciones globales:
+ *   - Exportar JSON (dataset Guatemala)
+ *   - Importar JSON
+ *   - Restaurar datos originales con diálogo de confirmación.
+ *
+ * Lee y modifica: `graph`, `departments`, `addDepartment`, `updateDepartment`, `removeNodes`,
+ * `addRoad`, `updateRoad`, `removeEdges`, `restoreOriginal`, `exportGuatemalaDataset`, `importGraphFile` desde `useApp`.
+ */
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { NodeId } from '../../../core/types';
+import { useApp } from '../../useApp';
+import Modal from '../Modal';
+
+interface GuatemalaAdminModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+type RoadSortField = 'source' | 'target' | 'road' | 'km';
+type SortOrder = 'asc' | 'desc';
+
+const getCarretera = (meta?: Record<string, unknown>): string =>
+  typeof meta?.carretera === 'string' ? meta.carretera : '';
+
+export default function GuatemalaAdminModal({ isOpen, onClose }: GuatemalaAdminModalProps) {
+  const graph = useApp((s) => s.graph);
+  const departments = useApp((s) => s.departments);
+  const addDepartment = useApp((s) => s.addDepartment);
+  const updateDepartment = useApp((s) => s.updateDepartment);
+  const removeNodes = useApp((s) => s.removeNodes);
+  const addRoad = useApp((s) => s.addRoad);
+  const updateRoad = useApp((s) => s.updateRoad);
+  const removeEdges = useApp((s) => s.removeEdges);
+  const restoreOriginal = useApp((s) => s.restoreOriginal);
+  const exportGuatemalaDataset = useApp((s) => s.exportGuatemalaDataset);
+  const importGraphFile = useApp((s) => s.importGraphFile);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sección activa: 'departments' | 'roads'
+  const [activeSection, setActiveSection] = useState<'departments' | 'roads'>('departments');
+
+  // Diálogo de confirmación para restaurar originales
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+
+  // Mensajes de error globales o de importación
+  const [globalMessage, setGlobalMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // ── ESTADO: DEPARTAMENTOS ──
+  const [deptSearch, setDeptSearch] = useState('');
+  const [newDeptLabel, setNewDeptLabel] = useState('');
+  const [newDeptCabecera, setNewDeptCabecera] = useState('');
+  const [newDeptLat, setNewDeptLat] = useState('');
+  const [newDeptLon, setNewDeptLon] = useState('');
+  const [deptFormError, setDeptFormError] = useState<string | null>(null);
+
+  const [editingDeptId, setEditingDeptId] = useState<NodeId | null>(null);
+  const [editDeptLabel, setEditDeptLabel] = useState('');
+  const [editDeptCabecera, setEditDeptCabecera] = useState('');
+  const [editDeptLat, setEditDeptLat] = useState('');
+  const [editDeptLon, setEditDeptLon] = useState('');
+
+  // ── ESTADO: CARRETERAS ──
+  const [roadSearch, setRoadSearch] = useState('');
+  const [newRoadSource, setNewRoadSource] = useState<NodeId>(graph.nodes[0]?.id ?? '');
+  const [newRoadTarget, setNewRoadTarget] = useState<NodeId>(graph.nodes[1]?.id ?? '');
+  const [newRoadKm, setNewRoadKm] = useState('');
+  const [newRoadName, setNewRoadName] = useState('');
+  const [roadFormError, setRoadFormError] = useState<{ message: string; existingEdgeId?: string } | null>(null);
+
+  const [editingRoadId, setEditingRoadId] = useState<string | null>(null);
+  const [editRoadKm, setEditRoadKm] = useState('');
+  const [editRoadName, setEditRoadName] = useState('');
+
+  // Ordenamiento de tabla de carreteras
+  const [sortField, setSortField] = useState<RoadSortField>('source');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
+  const getNodeLabel = useCallback(
+    (id: NodeId): string => {
+      return graph.nodes.find((n) => n.id === id)?.label ?? id;
+    },
+    [graph.nodes],
+  );
+
+  // ── ACCIONES: DEPARTAMENTOS ──
+  const handleAddDept = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeptFormError(null);
+    const lat = newDeptLat.trim() ? parseFloat(newDeptLat) : undefined;
+    const lon = newDeptLon.trim() ? parseFloat(newDeptLon) : undefined;
+
+    const res = addDepartment({
+      label: newDeptLabel,
+      cabecera: newDeptCabecera,
+      lat,
+      lon,
+    });
+
+    if (res.ok) {
+      setNewDeptLabel('');
+      setNewDeptCabecera('');
+      setNewDeptLat('');
+      setNewDeptLon('');
+      setGlobalMessage({ text: `Departamento «${newDeptLabel}» agregado con éxito.`, type: 'success' });
+    } else {
+      if (res.reason === 'empty-name') {
+        setDeptFormError('El nombre del departamento no puede estar vacío.');
+      } else if (res.reason === 'duplicate-name') {
+        setDeptFormError('Ya existe un departamento con ese nombre.');
+      } else if (res.reason === 'invalid-coords') {
+        setDeptFormError('Coordenadas inválidas: latitud entre -90 y 90, longitud entre -180 y 180.');
+      }
+    }
+  };
+
+  const handleStartEditDept = (id: NodeId) => {
+    const node = graph.nodes.find((n) => n.id === id);
+    if (!node) return;
+    setEditingDeptId(id);
+    setEditDeptLabel(node.label);
+    setEditDeptCabecera(departments[id]?.cabecera ?? node.label);
+    setEditDeptLat(node.lat !== undefined ? String(node.lat) : '');
+    setEditDeptLon(node.lon !== undefined ? String(node.lon) : '');
+  };
+
+  const handleSaveEditDept = (id: NodeId) => {
+    const lat = editDeptLat.trim() ? parseFloat(editDeptLat) : undefined;
+    const lon = editDeptLon.trim() ? parseFloat(editDeptLon) : undefined;
+
+    const res = updateDepartment(id, {
+      label: editDeptLabel,
+      cabecera: editDeptCabecera,
+      lat,
+      lon,
+    });
+
+    if (res.ok) {
+      setEditingDeptId(null);
+      setGlobalMessage({ text: 'Departamento actualizado correctamente.', type: 'success' });
+    } else {
+      alert(res.reason === 'duplicate-name' ? 'Ya existe un departamento con ese nombre.' : 'Error al actualizar.');
+    }
+  };
+
+  const handleDeleteDept = (id: NodeId) => {
+    const name = getNodeLabel(id);
+    if (confirm(`¿Eliminar el departamento «${name}» y todas sus carreteras conectadas?`)) {
+      removeNodes([id]);
+      setGlobalMessage({ text: `Departamento «${name}» eliminado.`, type: 'success' });
+    }
+  };
+
+  // ── ACCIONES: CARRETERAS ──
+  const handleAddRoad = (e: React.FormEvent) => {
+    e.preventDefault();
+    setRoadFormError(null);
+    const km = parseFloat(newRoadKm);
+
+    if (newRoadSource === newRoadTarget) {
+      setRoadFormError({ message: 'El origen y el destino no pueden ser el mismo departamento.' });
+      return;
+    }
+    if (isNaN(km) || km <= 0) {
+      setRoadFormError({ message: 'El kilometraje debe ser un número positivo mayor a 0.' });
+      return;
+    }
+
+    const res = addRoad(newRoadSource, newRoadTarget, km, newRoadName || undefined);
+    if (res.ok) {
+      setNewRoadKm('');
+      setNewRoadName('');
+      setGlobalMessage({ text: 'Carretera agregada exitosamente.', type: 'success' });
+    } else {
+      if (res.reason === 'duplicate') {
+        setRoadFormError({
+          message: 'Ya existe una carretera directa entre estos dos departamentos.',
+          existingEdgeId: res.existingEdgeId,
+        });
+      } else if (res.reason === 'self-loop') {
+        setRoadFormError({ message: 'No se permiten lazos hacia el mismo departamento.' });
+      } else if (res.reason === 'invalid-weight') {
+        setRoadFormError({ message: 'El kilometraje ingresado no es válido.' });
+      } else {
+        setRoadFormError({ message: 'Error al agregar la carretera.' });
+      }
+    }
+  };
+
+  const handleStartEditRoad = (id: string) => {
+    const edge = graph.edges.find((e) => e.id === id);
+    if (!edge) return;
+    setEditingRoadId(id);
+    setEditRoadKm(String(edge.weight));
+    setEditRoadName(getCarretera(edge.meta));
+  };
+
+  const handleSaveEditRoad = (id: string) => {
+    const km = parseFloat(editRoadKm);
+    if (isNaN(km) || km <= 0) {
+      alert('El kilometraje debe ser mayor a 0.');
+      return;
+    }
+    const ok = updateRoad(id, { km, road: editRoadName });
+    if (ok) {
+      setEditingRoadId(null);
+      setGlobalMessage({ text: 'Carretera actualizada correctamente.', type: 'success' });
+    }
+  };
+
+  const handleDeleteRoad = (id: string) => {
+    if (confirm('¿Eliminar esta carretera?')) {
+      removeEdges([id]);
+      setGlobalMessage({ text: 'Carretera eliminada.', type: 'success' });
+    }
+  };
+
+  // ── EXPORTAR / IMPORTAR / RESTAURAR ──
+  const handleExportJson = () => {
+    const data = exportGuatemalaDataset();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `guatemala_transporte_express_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setGlobalMessage({ text: 'Archivo JSON de Guatemala exportado exitosamente.', type: 'success' });
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const content = evt.target?.result as string;
+      if (content) {
+        const res = importGraphFile(content);
+        if (res.ok) {
+          setGlobalMessage({ text: 'Dataset importado correctamente.', type: 'success' });
+        } else {
+          setGlobalMessage({ text: `Error al importar: ${res.message}`, type: 'error' });
+        }
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleConfirmRestore = () => {
+    restoreOriginal();
+    setShowRestoreConfirm(false);
+    setGlobalMessage({ text: 'Se restauraron los datos originales de Guatemala.', type: 'success' });
+  };
+
+  // ── FILTRADO Y ORDENAMIENTO ──
+  const filteredDepartments = useMemo(() => {
+    const term = deptSearch.trim().toLowerCase();
+    return graph.nodes.filter((n) => {
+      const label = n.label.toLowerCase();
+      const cab = (departments[n.id]?.cabecera ?? '').toLowerCase();
+      return !term || label.includes(term) || cab.includes(term) || n.id.toLowerCase().includes(term);
+    });
+  }, [graph.nodes, departments, deptSearch]);
+
+  const sortedRoads = useMemo(() => {
+    const term = roadSearch.trim().toLowerCase();
+    const list = graph.edges.filter((e) => {
+      const s = getNodeLabel(e.source).toLowerCase();
+      const t = getNodeLabel(e.target).toLowerCase();
+      const r = getCarretera(e.meta).toLowerCase();
+      return !term || s.includes(term) || t.includes(term) || r.includes(term);
+    });
+
+    return list.sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'source') {
+        cmp = getNodeLabel(a.source).localeCompare(getNodeLabel(b.source));
+      } else if (sortField === 'target') {
+        cmp = getNodeLabel(a.target).localeCompare(getNodeLabel(b.target));
+      } else if (sortField === 'road') {
+        cmp = getCarretera(a.meta).localeCompare(getCarretera(b.meta));
+      } else if (sortField === 'km') {
+        cmp = a.weight - b.weight;
+      }
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+  }, [graph.edges, roadSearch, sortField, sortOrder, getNodeLabel]);
+
+  const toggleSort = (field: RoadSortField) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Administrar Red Vial — Transporte Express"
+      testId="modal-admin-network"
+    >
+      <div className="flex flex-col gap-4 text-xs max-h-[78vh] overflow-y-auto pr-1" data-testid="panel-admin-network">
+        {/* Input oculto para importación de JSON */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleImportFile}
+          accept=".json,application/json"
+          className="hidden"
+          data-testid="input-admin-import-file"
+        />
+
+        {/* Barra superior de operaciones de archivo */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 dark:border-slate-800">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              data-testid="btn-admin-export-json"
+              onClick={handleExportJson}
+              className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            >
+              <span>💾</span> Exportar JSON
+            </button>
+            <button
+              type="button"
+              data-testid="btn-admin-import-json"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            >
+              <span>📂</span> Importar JSON
+            </button>
+          </div>
+
+          <button
+            type="button"
+            data-testid="btn-admin-restore-original"
+            onClick={() => setShowRestoreConfirm(true)}
+            className="min-h-[40px] rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+          >
+            🔄 Restaurar datos originales
+          </button>
+        </div>
+
+        {/* Diálogo de confirmación para restaurar */}
+        {showRestoreConfirm && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200 shadow-md">
+            <p className="font-bold text-sm">¿Confirmar restauración de datos originales?</p>
+            <p className="mt-1 leading-relaxed">
+              Esta acción restablecerá los 22 departamentos y carreteras oficiales de Transporte Express. Se descartarán
+              las modificaciones locales no guardadas.
+            </p>
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                type="button"
+                data-testid="btn-cancel-restore"
+                onClick={() => setShowRestoreConfirm(false)}
+                className="min-h-[38px] rounded-lg border border-slate-300 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                data-testid="btn-confirm-restore"
+                onClick={handleConfirmRestore}
+                className="min-h-[38px] rounded-lg bg-amber-600 px-3.5 py-1 font-bold text-white shadow-xs hover:bg-amber-700"
+              >
+                Sí, restaurar datos
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mensaje global temporal */}
+        {globalMessage && (
+          <div
+            className={`rounded-lg p-2.5 font-semibold text-xs ${
+              globalMessage.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
+                : 'bg-rose-50 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300'
+            }`}
+          >
+            {globalMessage.text}
+          </div>
+        )}
+
+        {/* Selector de pestañas de administración */}
+        <div className="flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            data-testid="tab-admin-departments"
+            aria-selected={activeSection === 'departments'}
+            onClick={() => setActiveSection('departments')}
+            className={`flex-1 min-h-[40px] rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
+              activeSection === 'departments'
+                ? 'bg-white text-blue-700 shadow-xs dark:bg-slate-900 dark:text-blue-300'
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            🏛️ Departamentos ({graph.nodes.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            data-testid="tab-admin-roads"
+            aria-selected={activeSection === 'roads'}
+            onClick={() => setActiveSection('roads')}
+            className={`flex-1 min-h-[40px] rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
+              activeSection === 'roads'
+                ? 'bg-white text-blue-700 shadow-xs dark:bg-slate-900 dark:text-blue-300'
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            🛣️ Carreteras ({graph.edges.length})
+          </button>
+        </div>
+
+        {/* SECCIÓN 1: DEPARTAMENTOS */}
+        {activeSection === 'departments' && (
+          <div className="flex flex-col gap-4" data-testid="section-admin-departments">
+            {/* Formulario para agregar departamento */}
+            <form
+              onSubmit={handleAddDept}
+              className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-900/60"
+            >
+              <h2 className="mb-2 font-bold text-slate-900 dark:text-slate-100">+ Agregar nuevo departamento</h2>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <div>
+                  <label className="block mb-1 font-semibold text-slate-700 dark:text-slate-300">
+                    Nombre del departamento *
+                  </label>
+                  <input
+                    type="text"
+                    data-testid="input-dept-label"
+                    value={newDeptLabel}
+                    onChange={(e) => setNewDeptLabel(e.target.value)}
+                    placeholder="Ej. Petén"
+                    required
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-slate-700 dark:text-slate-300">
+                    Cabecera departamental
+                  </label>
+                  <input
+                    type="text"
+                    data-testid="input-dept-cabecera"
+                    value={newDeptCabecera}
+                    onChange={(e) => setNewDeptCabecera(e.target.value)}
+                    placeholder="Ej. Flores"
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-slate-600 dark:text-slate-400">Latitud (opcional)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    data-testid="input-dept-lat"
+                    value={newDeptLat}
+                    onChange={(e) => setNewDeptLat(e.target.value)}
+                    placeholder="Ej. 16.9248"
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-slate-600 dark:text-slate-400">Longitud (opcional)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    data-testid="input-dept-lon"
+                    value={newDeptLon}
+                    onChange={(e) => setNewDeptLon(e.target.value)}
+                    placeholder="Ej. -89.8974"
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              {deptFormError && (
+                <div data-testid="dept-form-error" className="mt-2 text-rose-600 font-bold dark:text-rose-400">
+                  {deptFormError}
+                </div>
+              )}
+
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="submit"
+                  data-testid="btn-save-department"
+                  className="min-h-[42px] rounded-lg bg-emerald-600 px-4 py-1.5 font-bold text-white shadow-xs hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500"
+                >
+                  Agregar departamento
+                </button>
+              </div>
+            </form>
+
+            {/* Listado de departamentos con buscador */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-slate-800 dark:text-slate-200">
+                  Departamentos registrados ({filteredDepartments.length}):
+                </h3>
+                <input
+                  type="text"
+                  data-testid="input-dept-search"
+                  value={deptSearch}
+                  onChange={(e) => setDeptSearch(e.target.value)}
+                  placeholder="Buscar departamento o cabecera…"
+                  className="min-h-[38px] w-56 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800 max-h-72">
+                <table className="w-full text-left border-collapse" data-testid="table-departments">
+                  <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                    <tr className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      <th className="py-2 px-3 w-12">ID</th>
+                      <th className="py-2 px-3">Departamento</th>
+                      <th className="py-2 px-3">Cabecera</th>
+                      <th className="py-2 px-3">Ubicación (lat, lon)</th>
+                      <th className="py-2 px-3 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-[11px]">
+                    {filteredDepartments.map((n) => {
+                      const isEditing = editingDeptId === n.id;
+                      const cabecera = departments[n.id]?.cabecera ?? n.label;
+                      return (
+                        <tr
+                          key={n.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                          data-testid={`dept-row-${n.id}`}
+                        >
+                          <td className="py-2 px-3 font-mono font-bold text-slate-500">{n.id}</td>
+                          <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-100">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                data-testid={`input-edit-dept-name-${n.id}`}
+                                value={editDeptLabel}
+                                onChange={(e) => setEditDeptLabel(e.target.value)}
+                                className="w-full rounded border px-1.5 py-0.5 text-xs font-semibold"
+                              />
+                            ) : (
+                              n.label
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-slate-600 dark:text-slate-300">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                data-testid={`input-edit-dept-cabecera-${n.id}`}
+                                value={editDeptCabecera}
+                                onChange={(e) => setEditDeptCabecera(e.target.value)}
+                                className="w-full rounded border px-1.5 py-0.5 text-xs"
+                              />
+                            ) : (
+                              cabecera
+                            )}
+                          </td>
+                          <td className="py-2 px-3 font-mono text-slate-500">
+                            {isEditing ? (
+                              <div className="flex gap-1">
+                                <input
+                                  type="number"
+                                  step="any"
+                                  value={editDeptLat}
+                                  onChange={(e) => setEditDeptLat(e.target.value)}
+                                  placeholder="Lat"
+                                  className="w-16 rounded border px-1 py-0.5 text-[10px]"
+                                />
+                                <input
+                                  type="number"
+                                  step="any"
+                                  value={editDeptLon}
+                                  onChange={(e) => setEditDeptLon(e.target.value)}
+                                  placeholder="Lon"
+                                  className="w-16 rounded border px-1 py-0.5 text-[10px]"
+                                />
+                              </div>
+                            ) : n.lat !== undefined && n.lon !== undefined ? (
+                              `${n.lat.toFixed(4)}, ${n.lon.toFixed(4)}`
+                            ) : (
+                              'Posición lienzo'
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {isEditing ? (
+                              <div className="flex justify-end gap-1">
+                                <button
+                                  type="button"
+                                  data-testid={`btn-save-dept-${n.id}`}
+                                  onClick={() => handleSaveEditDept(n.id)}
+                                  className="min-h-[34px] rounded bg-emerald-600 px-2 py-0.5 font-bold text-white hover:bg-emerald-700"
+                                >
+                                  Guardar
+                                </button>
+                                <button
+                                  type="button"
+                                  data-testid={`btn-cancel-edit-dept-${n.id}`}
+                                  onClick={() => setEditingDeptId(null)}
+                                  className="min-h-[34px] rounded border border-slate-300 bg-white px-2 py-0.5 font-semibold text-slate-700 hover:bg-slate-100"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex justify-end gap-1">
+                                <button
+                                  type="button"
+                                  data-testid={`btn-edit-dept-${n.id}`}
+                                  onClick={() => handleStartEditDept(n.id)}
+                                  className="min-h-[34px] rounded px-2 py-0.5 font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  type="button"
+                                  data-testid={`btn-delete-dept-${n.id}`}
+                                  onClick={() => handleDeleteDept(n.id)}
+                                  className="min-h-[34px] rounded px-2 py-0.5 font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SECCIÓN 2: CARRETERAS */}
+        {activeSection === 'roads' && (
+          <div className="flex flex-col gap-4" data-testid="section-admin-roads">
+            {/* Formulario para agregar carretera */}
+            <form
+              onSubmit={handleAddRoad}
+              className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-900/60"
+            >
+              <h2 className="mb-2 font-bold text-slate-900 dark:text-slate-100">
+                + Conectar departamentos (nueva carretera)
+              </h2>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className="block mb-1 font-semibold text-slate-700 dark:text-slate-300">
+                    Departamento Origen *
+                  </label>
+                  <select
+                    data-testid="select-road-source"
+                    value={newRoadSource}
+                    onChange={(e) => setNewRoadSource(e.target.value)}
+                    required
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    {graph.nodes.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.label} ({departments[n.id]?.cabecera || n.label})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-slate-700 dark:text-slate-300">
+                    Departamento Destino *
+                  </label>
+                  <select
+                    data-testid="select-road-target"
+                    value={newRoadTarget}
+                    onChange={(e) => setNewRoadTarget(e.target.value)}
+                    required
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    {graph.nodes.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.label} ({departments[n.id]?.cabecera || n.label})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-slate-700 dark:text-slate-300">
+                    Kilometraje (km) *
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0.1"
+                    data-testid="input-road-km"
+                    value={newRoadKm}
+                    onChange={(e) => setNewRoadKm(e.target.value)}
+                    placeholder="Ej. 42.5"
+                    required
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-slate-600 dark:text-slate-400">
+                    Nombre carretera (ej. CA-1, CA-9)
+                  </label>
+                  <input
+                    type="text"
+                    data-testid="input-road-name"
+                    value={newRoadName}
+                    onChange={(e) => setNewRoadName(e.target.value)}
+                    placeholder="Ej. CA-9 Norte"
+                    className="min-h-[40px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              {roadFormError && (
+                <div
+                  data-testid="road-form-error"
+                  className="mt-2 text-rose-600 font-bold dark:text-rose-400 flex items-center gap-2"
+                >
+                  <span>{roadFormError.message}</span>
+                  {roadFormError.existingEdgeId && (
+                    <button
+                      type="button"
+                      data-testid="btn-edit-existing-road"
+                      onClick={() => handleStartEditRoad(roadFormError.existingEdgeId!)}
+                      className="underline text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                    >
+                      Editar la existente
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="submit"
+                  data-testid="btn-save-road"
+                  className="min-h-[42px] rounded-lg bg-blue-600 px-4 py-1.5 font-bold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500"
+                >
+                  Agregar carretera
+                </button>
+              </div>
+            </form>
+
+            {/* Listado ordenable de carreteras con buscador */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-slate-800 dark:text-slate-200">
+                  Carreteras registradas ({sortedRoads.length}):
+                </h3>
+                <input
+                  type="text"
+                  data-testid="input-road-search"
+                  value={roadSearch}
+                  onChange={(e) => setRoadSearch(e.target.value)}
+                  placeholder="Buscar por departamento o carretera…"
+                  className="min-h-[38px] w-64 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800 max-h-72">
+                <table className="w-full text-left border-collapse" data-testid="table-roads">
+                  <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                    <tr className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">
+                      <th
+                        onClick={() => toggleSort('source')}
+                        data-testid="sort-road-source"
+                        className="py-2 px-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
+                      >
+                        Origen {sortField === 'source' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                      </th>
+                      <th
+                        onClick={() => toggleSort('target')}
+                        data-testid="sort-road-target"
+                        className="py-2 px-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
+                      >
+                        Destino {sortField === 'target' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                      </th>
+                      <th
+                        onClick={() => toggleSort('road')}
+                        data-testid="sort-road-name"
+                        className="py-2 px-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
+                      >
+                        Carretera {sortField === 'road' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                      </th>
+                      <th
+                        onClick={() => toggleSort('km')}
+                        data-testid="sort-road-km"
+                        className="py-2 px-3 text-right cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
+                      >
+                        Kilometraje {sortField === 'km' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                      </th>
+                      <th className="py-2 px-3 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-[11px]">
+                    {sortedRoads.map((e) => {
+                      const isEditing = editingRoadId === e.id;
+                      const srcName = getNodeLabel(e.source);
+                      const tgtName = getNodeLabel(e.target);
+                      const roadName = getCarretera(e.meta) || '—';
+
+                      return (
+                        <tr
+                          key={e.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                          data-testid={`road-row-${e.id}`}
+                        >
+                          <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-100">{srcName}</td>
+                          <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-100">{tgtName}</td>
+                          <td className="py-2 px-3 text-slate-600 dark:text-slate-300">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                data-testid={`input-edit-road-name-${e.id}`}
+                                value={editRoadName}
+                                onChange={(evt) => setEditRoadName(evt.target.value)}
+                                className="w-full rounded border px-1.5 py-0.5 text-xs"
+                              />
+                            ) : (
+                              roadName
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 dark:text-slate-100">
+                            {isEditing ? (
+                              <input
+                                type="number"
+                                step="any"
+                                min="0.1"
+                                data-testid={`input-edit-road-km-${e.id}`}
+                                value={editRoadKm}
+                                onChange={(evt) => setEditRoadKm(evt.target.value)}
+                                className="w-20 rounded border px-1.5 py-0.5 text-xs text-right font-mono font-bold"
+                              />
+                            ) : (
+                              `${e.weight.toFixed(1)} km`
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            {isEditing ? (
+                              <div className="flex justify-end gap-1">
+                                <button
+                                  type="button"
+                                  data-testid={`btn-save-road-${e.id}`}
+                                  onClick={() => handleSaveEditRoad(e.id)}
+                                  className="min-h-[34px] rounded bg-emerald-600 px-2 py-0.5 font-bold text-white hover:bg-emerald-700"
+                                >
+                                  Guardar
+                                </button>
+                                <button
+                                  type="button"
+                                  data-testid={`btn-cancel-edit-road-${e.id}`}
+                                  onClick={() => setEditingRoadId(null)}
+                                  className="min-h-[34px] rounded border border-slate-300 bg-white px-2 py-0.5 font-semibold text-slate-700 hover:bg-slate-100"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex justify-end gap-1">
+                                <button
+                                  type="button"
+                                  data-testid={`btn-edit-road-${e.id}`}
+                                  onClick={() => handleStartEditRoad(e.id)}
+                                  className="min-h-[34px] rounded px-2 py-0.5 font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  type="button"
+                                  data-testid={`btn-delete-road-${e.id}`}
+                                  onClick={() => handleDeleteRoad(e.id)}
+                                  className="min-h-[34px] rounded px-2 py-0.5 font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+```
+
+### `src/ui/components/guatemala/GuatemalaAssistantModal.tsx`
+
+256 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Diálogo asistente de dos pasos para el cálculo de la mejor ruta (G3).
+ * Pregunta:
+ *   Paso 1: «¿Dónde se encuentra el paquete?» (origen)
+ *   Paso 2: «¿A qué departamento debe llegar?» (destino)
+ * Incluye filtro de búsqueda reactivo por nombre de departamento o cabecera departamental.
+ *
+ * Lee y modifica: `graph.nodes`, `departments`, `setPathQuery` desde `useApp`.
+ */
+import { useMemo, useState } from 'react';
+import type { NodeId } from '../../../core/types';
+import { useApp } from '../../useApp';
+import Modal from '../Modal';
+
+interface GuatemalaAssistantModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCalculated?: () => void;
+}
+
+export default function GuatemalaAssistantModal({ isOpen, onClose, onCalculated }: GuatemalaAssistantModalProps) {
+  const graph = useApp((s) => s.graph);
+  const departments = useApp((s) => s.departments);
+  const setPathQuery = useApp((s) => s.setPathQuery);
+
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedSource, setSelectedSource] = useState<NodeId | null>(null);
+  const [sourceSearch, setSourceSearch] = useState('');
+  const [targetSearch, setTargetSearch] = useState('');
+
+  const resetState = () => {
+    setStep(1);
+    setSelectedSource(null);
+    setSourceSearch('');
+    setTargetSearch('');
+  };
+
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
+
+  // Departamentos para el paso 1 filtrados por búsqueda
+  const filteredSources = useMemo(() => {
+    const term = sourceSearch.trim().toLowerCase();
+    return graph.nodes.filter((n) => {
+      const label = n.label.toLowerCase();
+      const cabecera = (departments[n.id]?.cabecera ?? '').toLowerCase();
+      return !term || label.includes(term) || cabecera.includes(term);
+    });
+  }, [graph.nodes, departments, sourceSearch]);
+
+  // Departamentos para el paso 2 (excluyendo el origen) filtrados por búsqueda
+  const filteredTargets = useMemo(() => {
+    const term = targetSearch.trim().toLowerCase();
+    return graph.nodes.filter((n) => {
+      if (n.id === selectedSource) return false;
+      const label = n.label.toLowerCase();
+      const cabecera = (departments[n.id]?.cabecera ?? '').toLowerCase();
+      return !term || label.includes(term) || cabecera.includes(term);
+    });
+  }, [graph.nodes, departments, selectedSource, targetSearch]);
+
+  const handleSelectSource = (id: NodeId) => {
+    setSelectedSource(id);
+    setStep(2);
+  };
+
+  const handleSelectTarget = (id: NodeId) => {
+    if (!selectedSource) return;
+    setPathQuery(selectedSource, id);
+    handleClose();
+    if (onCalculated) onCalculated();
+  };
+
+  const sourceNode = graph.nodes.find((n) => n.id === selectedSource);
+  const sourceCabecera = selectedSource ? departments[selectedSource]?.cabecera : '';
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Asistente de Envíos — Transporte Express"
+      testId="modal-assistant"
+    >
+      <div className="flex flex-col gap-4 text-xs" data-testid="assistant-wizard">
+        {/* Barra de progreso de pasos */}
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <span
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                step === 1 ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+              }`}
+            >
+              {step === 1 ? '1' : '✓'}
+            </span>
+            <span
+              className={`font-semibold ${step === 1 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}
+            >
+              ¿Dónde está el paquete?
+            </span>
+          </div>
+
+          <span className="text-slate-300 dark:text-slate-700">→</span>
+
+          <div className="flex items-center gap-2">
+            <span
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                step === 2
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+              }`}
+            >
+              2
+            </span>
+            <span
+              className={`font-semibold ${step === 2 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-600'}`}
+            >
+              ¿A dónde debe llegar?
+            </span>
+          </div>
+        </div>
+
+        {/* PASO 1: ORIGEN */}
+        {step === 1 && (
+          <div className="flex flex-col gap-3" data-testid="assistant-step-1">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                1. ¿Dónde se encuentra el paquete?
+              </h2>
+              <span className="text-slate-500">{filteredSources.length} departamentos</span>
+            </div>
+
+            {/* Buscador de origen */}
+            <input
+              type="text"
+              data-testid="input-assistant-source-search"
+              value={sourceSearch}
+              onChange={(e) => setSourceSearch(e.target.value)}
+              placeholder="Buscar departamento o cabecera…"
+              autoFocus
+              className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
+
+            {/* Listado interactivo de departamentos origen */}
+            <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-200 p-1 divide-y divide-slate-100 dark:border-slate-800 dark:divide-slate-800/60">
+              {filteredSources.map((n) => {
+                const cab = departments[n.id]?.cabecera ?? n.label;
+                return (
+                  <button
+                    key={n.id}
+                    type="button"
+                    data-testid={`btn-select-source-${n.id}`}
+                    onClick={() => handleSelectSource(n.id)}
+                    className="flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-left rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-800 dark:text-slate-200">{n.label}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Cabecera: {cab}</div>
+                    </div>
+                    <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {n.id}
+                    </span>
+                  </button>
+                );
+              })}
+              {filteredSources.length === 0 && (
+                <div className="p-4 text-center text-slate-500">No se encontraron departamentos coincidentes.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PASO 2: DESTINO */}
+        {step === 2 && (
+          <div className="flex flex-col gap-3" data-testid="assistant-step-2">
+            {/* Origen fijado con opción de cambiar */}
+            <div className="flex items-center justify-between rounded-lg bg-emerald-50 p-2.5 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50">
+              <div>
+                <span className="text-[11px] font-medium text-emerald-800 dark:text-emerald-300">Origen fijado:</span>
+                <div className="font-bold text-emerald-950 dark:text-emerald-100">
+                  {sourceNode?.label} ({sourceCabecera})
+                </div>
+              </div>
+              <button
+                type="button"
+                data-testid="btn-change-source"
+                onClick={() => setStep(1)}
+                className="min-h-[36px] rounded-md px-2.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+              >
+                Cambiar origen
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                2. ¿A qué departamento debe llegar?
+              </h2>
+              <span className="text-slate-500">{filteredTargets.length} disponibles</span>
+            </div>
+
+            {/* Buscador de destino */}
+            <input
+              type="text"
+              data-testid="input-assistant-target-search"
+              value={targetSearch}
+              onChange={(e) => setTargetSearch(e.target.value)}
+              placeholder="Buscar departamento o cabecera destino…"
+              autoFocus
+              className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
+
+            {/* Listado interactivo de departamentos destino */}
+            <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-200 p-1 divide-y divide-slate-100 dark:border-slate-800 dark:divide-slate-800/60">
+              {filteredTargets.map((n) => {
+                const cab = departments[n.id]?.cabecera ?? n.label;
+                return (
+                  <button
+                    key={n.id}
+                    type="button"
+                    data-testid={`btn-select-target-${n.id}`}
+                    onClick={() => handleSelectTarget(n.id)}
+                    className="flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-left rounded-md hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-800 dark:text-slate-200">{n.label}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">Cabecera: {cab}</div>
+                    </div>
+                    <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {n.id}
+                    </span>
+                  </button>
+                );
+              })}
+              {filteredTargets.length === 0 && (
+                <div className="p-4 text-center text-slate-500">No se encontraron departamentos coincidentes.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Botones inferiores */}
+        <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <button
+            type="button"
+            data-testid="btn-cancel-assistant"
+            onClick={handleClose}
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+```
+
+### `src/ui/components/guatemala/GuatemalaOutline.tsx`
+
+43 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Contorno de la República de Guatemala para el módulo Transporte Express.
+ * Muestra los polígonos del contorno del país proyectados en coordenadas del lienzo (Web Mercator),
+ * como una capa SVG de fondo tenue que se desplaza y escala en sincronía con el viewport de React Flow.
+ * Lee: `outline` y `mode` desde el store global (`useApp`).
+ */
+import { useViewport } from '@xyflow/react';
+import { useApp } from '../../useApp';
+
+export default function GuatemalaOutline() {
+  const mode = useApp((s) => s.mode);
+  const outline = useApp((s) => s.outline);
+  const { x, y, zoom } = useViewport();
+
+  if (mode !== 'guatemala' || !outline || outline.length === 0) {
+    return null;
+  }
+
+  const pathData = outline
+    .map((ring) => {
+      if (!ring || ring.length === 0) return '';
+      return 'M ' + ring.map((pt) => `${pt.x},${pt.y}`).join(' L ') + ' Z';
+    })
+    .filter(Boolean)
+    .join(' ');
+
+  if (!pathData) return null;
+
+  return (
+    <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible z-0" aria-hidden="true">
+      <g transform={`translate(${x}, ${y}) scale(${zoom})`}>
+        <path
+          d={pathData}
+          data-testid="guatemala-outline"
+          className="fill-emerald-500/8 dark:fill-emerald-400/8 stroke-emerald-600/30 dark:stroke-emerald-400/25"
+          style={{ vectorEffect: 'non-scaling-stroke' }}
+          strokeWidth={1.5}
+          strokeDasharray="4 3"
+        />
+      </g>
+    </svg>
+  );
+}
+```
+
+### `src/ui/components/guatemala/GuatemalaPresentation.tsx`
+
+204 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Modo Presentación a pantalla completa para el módulo Guatemala (G5).
+ * Oculta los paneles secundarios (barra superior estándar, panel de pestañas),
+ * maximiza el mapa a pantalla completa y muestra una tarjeta flotante de alta legibilidad
+ * con el resultado activo (ruta óptima o red mínima) en tipografía grande (1280×720 y 1920×1080).
+ * Permite cambiar entre los ejemplos rápidos y salir presionando la tecla Escape o el botón de salida.
+ *
+ * Lee: `mode`, `query`, `shortest`, `breakdown`, `mst`, `coverMode`, `setPathQuery`, `setCoverMode`, `clearQuery` desde `useApp`.
+ */
+import { useEffect } from 'react';
+import type { NodeId } from '../../../core/types';
+import { useApp } from '../../useApp';
+
+interface GuatemalaPresentationProps {
+  isOpen: boolean;
+  onExit: () => void;
+}
+
+export default function GuatemalaPresentation({ isOpen, onExit }: GuatemalaPresentationProps) {
+  const query = useApp((s) => s.query);
+  const shortest = useApp((s) => s.shortest);
+  const breakdown = useApp((s) => s.breakdown);
+  const mst = useApp((s) => s.mst);
+  const coverMode = useApp((s) => s.coverMode);
+  const graph = useApp((s) => s.graph);
+  const setPathQuery = useApp((s) => s.setPathQuery);
+  const setCoverMode = useApp((s) => s.setCoverMode);
+  const clearQuery = useApp((s) => s.clearQuery);
+
+  // Escuchar tecla Escape para salir de presentación
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onExit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onExit]);
+
+  if (!isOpen) return null;
+
+  const getNodeLabel = (id: NodeId): string => {
+    return graph.nodes.find((n) => n.id === id)?.label ?? id;
+  };
+
+  const currentBreakdown = breakdown?.[0];
+  const isPathActive = query?.kind === 'path' && query.target && shortest && shortest.length > 0;
+  const isMstActive = coverMode === 'mst' || !isPathActive;
+
+  return (
+    <div
+      data-testid="guatemala-presentation-overlay"
+      className="fixed inset-0 z-50 pointer-events-none flex flex-col justify-between p-4 sm:p-6 select-none"
+    >
+      {/* Barra superior flotante de la presentación */}
+      <header className="pointer-events-auto flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-700/80 bg-slate-900/90 px-5 py-3 shadow-2xl backdrop-blur-md text-white">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-black text-lg text-white shadow-md">
+            TE
+          </div>
+          <div>
+            <h1 className="text-lg font-black tracking-tight text-white sm:text-xl">Transporte Express — Guatemala</h1>
+            <p className="text-xs text-slate-400">Modo Presentación · Red Vial Nacional de 22 Departamentos</p>
+          </div>
+        </div>
+
+        {/* Ejemplos rápidos en presentación */}
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ejemplos rápidos">
+          <button
+            type="button"
+            data-testid="btn-pres-que-iza"
+            onClick={() => setPathQuery('QUE', 'IZA')}
+            className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              query?.kind === 'path' && query.source === 'QUE' && query.target === 'IZA'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+          >
+            QUE → IZA
+          </button>
+          <button
+            type="button"
+            data-testid="btn-pres-gua-pet"
+            onClick={() => setPathQuery('GUA', 'PET')}
+            className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              query?.kind === 'path' && query.source === 'GUA' && query.target === 'PET'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+          >
+            GUA → PET
+          </button>
+          <button
+            type="button"
+            data-testid="btn-pres-sma-jut"
+            onClick={() => setPathQuery('SMA', 'JUT')}
+            className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              query?.kind === 'path' && query.source === 'SMA' && query.target === 'JUT'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+          >
+            SMA → JUT
+          </button>
+          <button
+            type="button"
+            data-testid="btn-pres-mst"
+            onClick={() => {
+              setCoverMode('mst');
+              clearQuery();
+            }}
+            className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              coverMode === 'mst' && !query
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+          >
+            🌳 Red Mínima
+          </button>
+        </div>
+
+        {/* Botón salir de presentación */}
+        <button
+          type="button"
+          data-testid="btn-exit-presentation"
+          onClick={onExit}
+          className="min-h-[44px] rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-rose-700 transition-colors focus-visible:ring-2 focus-visible:ring-rose-400"
+        >
+          ✕ Salir de presentación (Esc)
+        </button>
+      </header>
+
+      {/* Tarjeta flotante inferior de resultados en gran tamaño */}
+      <div className="pointer-events-auto max-w-xl self-start rounded-2xl border border-slate-700/80 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-md text-white">
+        {isPathActive && currentBreakdown ? (
+          <div className="space-y-3" data-testid="pres-route-card">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
+                Mejor ruta calculada (Dijkstra)
+              </span>
+              <span className="text-xs text-slate-400 font-mono">{currentBreakdown.legs.length} tramos</span>
+            </div>
+
+            <div className="flex items-baseline justify-between gap-4">
+              <div className="text-2xl sm:text-3xl font-black text-white">
+                {getNodeLabel(currentBreakdown.nodes[0]!)} →{' '}
+                {getNodeLabel(currentBreakdown.nodes[currentBreakdown.nodes.length - 1]!)}
+              </div>
+              <div
+                data-testid="pres-total-distance"
+                className="text-3xl sm:text-4xl font-black text-blue-400 font-mono"
+              >
+                {currentBreakdown.total.toFixed(1)} km
+              </div>
+            </div>
+
+            <div className="text-sm font-mono text-slate-300 bg-slate-800/80 rounded-lg p-2.5 break-all">
+              {currentBreakdown.formula}
+            </div>
+
+            {/* Secuencia resumida de departamentos */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-200 pt-1">
+              {currentBreakdown.nodes.map((nodeId, i) => (
+                <span key={`${nodeId}-${i}`} className="inline-flex items-center gap-1.5">
+                  <span className="rounded-md bg-slate-800 px-2 py-1 border border-slate-700">
+                    {getNodeLabel(nodeId)}
+                  </span>
+                  {i < currentBreakdown.nodes.length - 1 && <span className="text-slate-500">→</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : isMstActive && mst ? (
+          <div className="space-y-3" data-testid="pres-mst-card">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                Red Mínima Departamental (Prim / Kruskal)
+              </span>
+              <span className="text-xs text-emerald-300 font-mono">21 carreteras</span>
+            </div>
+
+            <div className="flex items-baseline justify-between gap-4">
+              <div className="text-xl sm:text-2xl font-black text-white">Conexión completa de los 22 departamentos</div>
+              <div data-testid="pres-mst-total" className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
+                {mst.prim.total.toFixed(1)} km
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              ✓ Algoritmos de Prim y Kruskal verificados: ambos conectan todos los departamentos con un coste total
+              idéntico de <strong>{mst.prim.total.toFixed(1)} km</strong> sin formar ciclos.
+            </p>
+          </div>
+        ) : (
+          <div className="text-sm text-slate-300">
+            Selecciona un ejemplo rápido arriba para proyectar los resultados.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### `src/ui/components/guatemala/GuatemalaRouteBreakdown.tsx`
+
+283 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Desglose de la mejor ruta para Transporte Express (G3).
+ * Muestra:
+ *   - Listado de departamentos en orden (A → B → … → Destino)
+ *   - Total en grande (km)
+ *   - Fórmula de distancias de los tramos (ej. 28.4 + 18.2 = 46.6 km)
+ *   - Tabla de tramos (# | Desde | Hasta | Carretera | km del tramo | km acumulado)
+ *   - Gestión de empates (todas las rutas mínimas empatadas seleccionables)
+ *   - Mensaje claro si los departamentos no están conectados.
+ *
+ * Lee: `query`, `shortest`, `breakdown`, `highlightedPath`, `highlightPath`, `graph`, `departments` desde `useApp`.
+ */
+import type { NodeId } from '../../../core/types';
+import { useApp } from '../../useApp';
+
+interface GuatemalaRouteBreakdownProps {
+  onOpenAssistant?: () => void;
+}
+
+export default function GuatemalaRouteBreakdown({ onOpenAssistant }: GuatemalaRouteBreakdownProps) {
+  const query = useApp((s) => s.query);
+  const shortest = useApp((s) => s.shortest);
+  const breakdown = useApp((s) => s.breakdown);
+  const highlightedPath = useApp((s) => s.highlightedPath);
+  const highlightPath = useApp((s) => s.highlightPath);
+  const graph = useApp((s) => s.graph);
+  const departments = useApp((s) => s.departments);
+  const clearQuery = useApp((s) => s.clearQuery);
+
+  const getNodeName = (id: NodeId): string => {
+    const d = departments[id];
+    const n = graph.nodes.find((node) => node.id === id);
+    if (d?.cabecera && n?.label && d.cabecera !== n.label) {
+      return `${n.label} (${d.cabecera})`;
+    }
+    return n?.label ?? id;
+  };
+
+  const getDeptShortName = (id: NodeId): string => {
+    return graph.nodes.find((n) => n.id === id)?.label ?? id;
+  };
+
+  // Sin consulta o consulta incompleta
+  if (!query || query.kind !== 'path' || !query.target) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center p-6 text-center gap-3 text-xs"
+        data-testid="route-empty-state"
+      >
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl text-blue-600 dark:bg-blue-950 dark:text-blue-300">
+          🚚
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
+            Asistente de Rutas «Transporte Express»
+          </h2>
+          <p className="mt-1 text-slate-500 max-w-sm leading-relaxed dark:text-slate-400">
+            Seleccione el departamento de origen y destino para calcular la ruta más corta y ver su desglose en tramos.
+          </p>
+        </div>
+        {onOpenAssistant && (
+          <button
+            type="button"
+            data-testid="btn-open-assistant-breakdown"
+            onClick={onOpenAssistant}
+            className="min-h-[44px] rounded-lg bg-blue-600 px-4 py-2 font-bold text-white shadow-xs hover:bg-blue-700 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            📦 Calcular mejor ruta
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // Grafo desconectado para este par
+  if (shortest && shortest.length === 0) {
+    return (
+      <div className="p-4 text-xs" data-testid="no-route-alert">
+        <div className="rounded-xl border border-rose-200 bg-rose-50/90 p-4 text-rose-900 shadow-xs dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">⚠️</span>
+            <div className="space-y-1">
+              <h2 className="font-bold text-sm">Sin conexión por carretera</h2>
+              <p className="leading-relaxed">
+                No existe conexión vial entre <strong>{getNodeName(query.source)}</strong> y{' '}
+                <strong>{getNodeName(query.target)}</strong>. La red vial se encuentra desconectada para este par de
+                destinos.
+              </p>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  data-testid="btn-clear-disconnected-query"
+                  onClick={clearQuery}
+                  className="min-h-[38px] rounded-lg border border-rose-300 bg-white px-3 py-1 font-semibold text-rose-700 hover:bg-rose-50 dark:border-rose-800 dark:bg-slate-900 dark:text-rose-300"
+                >
+                  Limpiar consulta
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Ruta(s) encontrada(s)
+  const activeIndex = highlightedPath?.from === 'shortest' ? highlightedPath.index : 0;
+  const currentBreakdown = breakdown?.[activeIndex] ?? breakdown?.[0];
+
+  if (!currentBreakdown) {
+    return null;
+  }
+
+  const isTied = (shortest?.length ?? 0) > 1;
+
+  return (
+    <div className="flex flex-col gap-4 p-4 text-xs" data-testid="route-breakdown-container">
+      {/* Banner de empates si hay múltiples rutas mínimas con la misma distancia */}
+      {isTied && shortest && (
+        <div
+          className="rounded-xl border border-purple-200 bg-purple-50/80 p-3 shadow-xs dark:border-purple-900/50 dark:bg-purple-950/30"
+          data-testid="ties-banner"
+        >
+          <div className="font-bold text-purple-900 dark:text-purple-200 mb-2">
+            ⭐ Se encontraron {shortest.length} rutas mínimas empatadas ({shortest[0]?.distance.toFixed(1)} km):
+          </div>
+          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Rutas empatadas">
+            {shortest.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                role="tab"
+                data-testid={`btn-tie-route-${idx}`}
+                aria-selected={activeIndex === idx}
+                onClick={() => highlightPath({ from: 'shortest', index: idx })}
+                className={`min-h-[38px] rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                  activeIndex === idx
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'border border-purple-200 bg-white text-purple-700 hover:bg-purple-100 dark:border-purple-800 dark:bg-slate-900 dark:text-purple-300'
+                }`}
+              >
+                Ruta {idx + 1} {activeIndex === idx ? '(activa)' : ''}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Resumen principal: Total grande y Fórmula */}
+      <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4 shadow-xs dark:border-blue-900/40 dark:bg-blue-950/20">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="text-[11px] font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">
+              Distancia total óptima
+            </div>
+            <div data-testid="route-total-distance" className="text-3xl font-black text-blue-800 dark:text-blue-200">
+              {currentBreakdown.total.toFixed(1)} km
+            </div>
+          </div>
+
+          <div className="text-right">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              Tramos: {currentBreakdown.legs.length} · Paradas: {currentBreakdown.nodes.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Fórmula matemática de la suma de tramos */}
+        <div className="mt-2.5 pt-2.5 border-t border-blue-200/60 dark:border-blue-900/40">
+          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Fórmula:</div>
+          <div
+            data-testid="route-formula"
+            className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200 break-all"
+          >
+            {currentBreakdown.formula}
+          </div>
+        </div>
+      </div>
+
+      {/* Listado de nodos en orden */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="mb-2 font-bold text-slate-700 dark:text-slate-300">Secuencia de departamentos en la ruta:</div>
+        <div data-testid="route-nodes-sequence" className="flex flex-wrap items-center gap-1.5 leading-relaxed">
+          {currentBreakdown.nodes.map((nodeId, idx) => {
+            const isFirst = idx === 0;
+            const isLast = idx === currentBreakdown.nodes.length - 1;
+            return (
+              <span key={`${nodeId}-${idx}`} className="inline-flex items-center gap-1.5">
+                <span
+                  data-testid={`route-node-pill-${nodeId}`}
+                  className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold shadow-2xs ${
+                    isFirst
+                      ? 'bg-emerald-600 text-white'
+                      : isLast
+                        ? 'bg-rose-600 text-white'
+                        : 'bg-white text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700'
+                  }`}
+                >
+                  <span className="font-mono text-[10px] opacity-80">{nodeId}</span>
+                  <span>{getDeptShortName(nodeId)}</span>
+                  {departments[nodeId]?.cabecera && (
+                    <span className="text-[10px] opacity-80 font-normal">({departments[nodeId].cabecera})</span>
+                  )}
+                </span>
+                {!isLast && <span className="font-bold text-slate-400">→</span>}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tabla detallada de tramos */}
+      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800">
+        <table className="w-full min-w-[560px] text-left border-collapse" data-testid="table-route-legs">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-700 uppercase dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <th className="py-2.5 px-3 w-10 text-center">#</th>
+              <th className="py-2.5 px-3">Desde</th>
+              <th className="py-2.5 px-3">Hasta</th>
+              <th className="py-2.5 px-3">Carretera</th>
+              <th className="py-2.5 px-3 text-right">km del tramo</th>
+              <th className="py-2.5 px-3 text-right">km acumulado</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 font-mono text-[11px] dark:divide-slate-800">
+            {currentBreakdown.legs.map((leg, idx) => (
+              <tr
+                key={`${leg.edgeId}-${idx}`}
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                data-testid={`leg-row-${idx}`}
+              >
+                <td className="py-2.5 px-3 text-center font-bold text-slate-500">{idx + 1}</td>
+                <td className="py-2.5 px-3 font-sans font-medium text-slate-800 dark:text-slate-200">
+                  {getNodeName(leg.from)}
+                </td>
+                <td className="py-2.5 px-3 font-sans font-medium text-slate-800 dark:text-slate-200">
+                  {getNodeName(leg.to)}
+                </td>
+                <td className="py-2.5 px-3 font-sans">
+                  {leg.road ? (
+                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                      {leg.road}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400 italic">Red local</span>
+                  )}
+                </td>
+                <td className="py-2.5 px-3 text-right font-semibold text-slate-800 dark:text-slate-200">
+                  {leg.km.toFixed(1)} km
+                </td>
+                <td className="py-2.5 px-3 text-right font-bold text-blue-700 dark:text-blue-300">
+                  {leg.cumulative.toFixed(1)} km
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Botones de acción inferior */}
+      <div className="flex items-center justify-between pt-1">
+        {onOpenAssistant && (
+          <button
+            type="button"
+            data-testid="btn-recalculate-route"
+            onClick={onOpenAssistant}
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            🔄 Nueva consulta de ruta
+          </button>
+        )}
+        <button
+          type="button"
+          data-testid="btn-clear-route-query"
+          onClick={clearQuery}
+          className="min-h-[44px] rounded-lg px-3 py-1.5 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          ✕ Limpiar ruta
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### `src/ui/components/guatemala/GuatemalaToolbar.tsx`
+
+152 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Barra de herramientas complementaria para el módulo Guatemala — Transporte Express (G1–G5).
+ * Proporciona acceso directo a:
+ *   - Botón destacado «Calcular mejor ruta» (asistente de dos pasos G3)
+ *   - Ejemplos rápidos (QUE→IZA, GUA→PET, SMA→JUT, Red mínima)
+ *   - Botón «Administrar red» (G2)
+ *   - Botón «Modo presentación» (G5)
+ *   - Botón «Acerca de» (G5)
+ *
+ * Lee y modifica: `query`, `setPathQuery`, `coverMode`, `setCoverMode`, `clearQuery` desde `useApp`.
+ */
+import { useApp } from '../../useApp';
+
+interface GuatemalaToolbarProps {
+  onOpenAssistant: () => void;
+  onOpenAdmin: () => void;
+  onOpenAbout: () => void;
+  onStartPresentation: () => void;
+}
+
+export default function GuatemalaToolbar({
+  onOpenAssistant,
+  onOpenAdmin,
+  onOpenAbout,
+  onStartPresentation,
+}: GuatemalaToolbarProps) {
+  const query = useApp((s) => s.query);
+  const setPathQuery = useApp((s) => s.setPathQuery);
+  const coverMode = useApp((s) => s.coverMode);
+  const setCoverMode = useApp((s) => s.setCoverMode);
+  const clearQuery = useApp((s) => s.clearQuery);
+
+  return (
+    <div
+      data-testid="guatemala-toolbar"
+      className="shrink-0 flex flex-wrap items-center justify-between gap-2 border-b border-blue-100 bg-blue-50/70 px-3 py-1.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900/80"
+    >
+      {/* Botón principal del Asistente y Ejemplos rápidos */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          data-testid="btn-calculate-route"
+          onClick={onOpenAssistant}
+          className="flex min-h-[40px] items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          <span>📦</span>
+          <span>Calcular mejor ruta</span>
+        </button>
+
+        {/* Separador sutil */}
+        <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+
+        {/* Ejemplos rápidos */}
+        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Ejemplos rápidos">
+          <span className="hidden lg:inline text-[11px] font-semibold text-slate-500 dark:text-slate-400 mr-0.5">
+            Ejemplos:
+          </span>
+          <button
+            type="button"
+            data-testid="btn-example-que-iza"
+            onClick={() => setPathQuery('QUE', 'IZA')}
+            title="Quetzaltenango a Puerto Barrios (QUE → IZA)"
+            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+              query?.kind === 'path' && query.source === 'QUE' && query.target === 'IZA'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            QUE → IZA
+          </button>
+          <button
+            type="button"
+            data-testid="btn-example-gua-pet"
+            onClick={() => setPathQuery('GUA', 'PET')}
+            title="Ciudad de Guatemala a Flores (GUA → PET)"
+            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+              query?.kind === 'path' && query.source === 'GUA' && query.target === 'PET'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            GUA → PET
+          </button>
+          <button
+            type="button"
+            data-testid="btn-example-sma-jut"
+            onClick={() => setPathQuery('SMA', 'JUT')}
+            title="San Marcos a Jutiapa (SMA → JUT)"
+            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+              query?.kind === 'path' && query.source === 'SMA' && query.target === 'JUT'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            SMA → JUT
+          </button>
+          <button
+            type="button"
+            data-testid="btn-example-mst"
+            onClick={() => {
+              setCoverMode('mst');
+              clearQuery();
+            }}
+            title="Red mínima completa con Prim y Kruskal"
+            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+              coverMode === 'mst' && !query
+                ? 'bg-emerald-600 text-white shadow-2xs'
+                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            🌳 Red Mínima
+          </button>
+        </div>
+      </div>
+
+      {/* Acciones de gestión, presentación e información */}
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          data-testid="btn-admin-network"
+          onClick={onOpenAdmin}
+          className="flex min-h-[38px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          title="Administrar departamentos y carreteras"
+        >
+          <span>⚙️</span>
+          <span className="hidden sm:inline">Administrar red</span>
+        </button>
+
+        <button
+          type="button"
+          data-testid="btn-presentation-mode"
+          onClick={onStartPresentation}
+          className="flex min-h-[38px] items-center gap-1 rounded-lg border border-purple-300 bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 shadow-2xs hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300"
+          title="Modo pantalla completa para exposición"
+        >
+          <span>📽️</span>
+          <span className="hidden sm:inline">Presentación</span>
+        </button>
+
+        <button
+          type="button"
+          data-testid="btn-about"
+          onClick={onOpenAbout}
+          className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          title="Acerca de los desarrolladores e institución"
+        >
+          ℹ️
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### `src/ui/components/tabs/MstTab.tsx`
+
+407 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Pestaña principal de cobertura y optimización de red (G4).
+ * Permite seleccionar entre tres modos de conexión departamental:
+ * (a) «Red mínima que conecta todos los departamentos (Prim / Kruskal)» — predeterminada
+ * (b) «Rutas más cortas desde la bodega»
+ * (c) «Recorrido de reparto (aproximación heurística)»
+ *
+ * Lee: `coverMode`, `setCoverMode`, `mst`, `dijkstra`, `setTreeQuery`, `tour`, `runTour`, `cancelTour`,
+ * `graph`, `departments` desde `useApp`.
+ */
+import { useMemo, useState } from 'react';
+import type { NodeId } from '../../../core/types';
+import type { CoverMode } from '../../../store/types';
+import { useApp } from '../../useApp';
+import KruskalTab from './KruskalTab';
+import PrimTab from './PrimTab';
+
+export default function MstTab() {
+  const coverMode = useApp((s) => s.coverMode);
+  const setCoverMode = useApp((s) => s.setCoverMode);
+  const mst = useApp((s) => s.mst);
+  const graph = useApp((s) => s.graph);
+  const departments = useApp((s) => s.departments);
+  const dijkstra = useApp((s) => s.dijkstra);
+  const query = useApp((s) => s.query);
+  const setTreeQuery = useApp((s) => s.setTreeQuery);
+  const tour = useApp((s) => s.tour);
+  const runTour = useApp((s) => s.runTour);
+  const cancelTour = useApp((s) => s.cancelTour);
+
+  // Sub-pestaña activa dentro de la Red Mínima (AEM): 'prim' | 'kruskal' | 'aristas'
+  const [mstAlgorithmTab, setMstAlgorithmTab] = useState<'prim' | 'kruskal' | 'aristas'>('prim');
+
+  // Estado para la bodega (F2) y para el inicio del recorrido de reparto
+  const [selectedBodega, setSelectedBodega] = useState<NodeId>(
+    query?.kind === 'tree' ? query.source : (graph.nodes[0]?.id ?? 'GUA'),
+  );
+  const [selectedTourStart, setSelectedTourStart] = useState<NodeId>(graph.nodes[0]?.id ?? 'GUA');
+
+  const getNodeName = (id: NodeId): string => {
+    const d = departments[id];
+    const n = graph.nodes.find((node) => node.id === id);
+    if (d?.cabecera && n?.label && d.cabecera !== n.label) {
+      return `${n.label} (${d.cabecera})`;
+    }
+    return n?.label ?? id;
+  };
+
+  // Distancias desde la bodega ordenadas de menor a mayor
+  const bodegaDistances = useMemo(() => {
+    if (!dijkstra || query?.kind !== 'tree') return [];
+    return graph.nodes
+      .filter((n) => n.id !== dijkstra.source)
+      .map((n) => {
+        const dist = dijkstra.labels[n.id]?.dist ?? Infinity;
+        return {
+          id: n.id,
+          label: n.label,
+          cabecera: departments[n.id]?.cabecera ?? n.label,
+          dist,
+        };
+      })
+      .sort((a, b) => a.dist - b.dist);
+  }, [dijkstra, query, graph.nodes, departments]);
+
+  const primTotal = mst?.prim.total ?? 0;
+  const kruskalTotal = mst?.kruskal.total ?? 0;
+  const totalsMatch = Math.abs(primTotal - kruskalTotal) < 1e-4;
+
+  return (
+    <div className="flex flex-col gap-4 p-4 text-xs" data-testid="mst-tab-container">
+      {/* Selector superior de modo de cobertura G4 */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+        <label htmlFor="cover-mode-select" className="block mb-1.5 font-bold text-slate-800 dark:text-slate-200">
+          Tipo de cobertura de red (G4):
+        </label>
+        <select
+          id="cover-mode-select"
+          data-testid="select-cover-mode"
+          value={coverMode}
+          onChange={(e) => setCoverMode(e.target.value as CoverMode)}
+          aria-label="Tipo de cobertura de red"
+          className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        >
+          <option value="mst">
+            (a) Red mínima que conecta todos los departamentos (Prim / Kruskal) — Predeterminada
+          </option>
+          <option value="spt">(b) Rutas más cortas desde la bodega</option>
+          <option value="tour">(c) Recorrido de reparto (aproximación heurística)</option>
+        </select>
+      </div>
+
+      {/* CASO A: RED MÍNIMA (AEM) CON PRIM Y KRUSKAL */}
+      {coverMode === 'mst' && (
+        <div className="flex flex-col gap-3">
+          {/* Tarjeta de verificación cruzada y total */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3.5 shadow-xs dark:border-emerald-900/60 dark:bg-emerald-950/30">
+            <div>
+              <div className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+                Árbol de Expansión Mínima (AEM)
+              </div>
+              <div
+                data-testid="mst-total-distance"
+                className="text-2xl font-black text-emerald-900 dark:text-emerald-100"
+              >
+                {primTotal.toFixed(1)} km
+              </div>
+            </div>
+
+            <div
+              data-testid="mst-same-total-notice"
+              className="rounded-lg border border-emerald-300 bg-white/80 px-3 py-1.5 text-xs font-semibold text-emerald-900 dark:border-emerald-700 dark:bg-slate-900/80 dark:text-emerald-200"
+            >
+              {totalsMatch ? (
+                <span>
+                  ✓ Verificación cruzada: Prim ({primTotal.toFixed(1)} km) y Kruskal ({kruskalTotal.toFixed(1)} km)
+                  coinciden exactamente.
+                </span>
+              ) : (
+                <span className="text-amber-700 dark:text-amber-300">
+                  ⚠️ Atención: Los totales de Prim y Kruskal difieren.
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Selector de sub-pestañas: Prim, Kruskal, Lista de aristas */}
+          <div className="flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              data-testid="tab-mst-prim"
+              aria-selected={mstAlgorithmTab === 'prim'}
+              onClick={() => setMstAlgorithmTab('prim')}
+              className={`flex-1 min-h-[38px] rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+                mstAlgorithmTab === 'prim'
+                  ? 'bg-white text-emerald-700 shadow-xs dark:bg-slate-900 dark:text-emerald-400'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+            >
+              Prim (Paso a paso)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-testid="tab-mst-kruskal"
+              aria-selected={mstAlgorithmTab === 'kruskal'}
+              onClick={() => setMstAlgorithmTab('kruskal')}
+              className={`flex-1 min-h-[38px] rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+                mstAlgorithmTab === 'kruskal'
+                  ? 'bg-white text-emerald-700 shadow-xs dark:bg-slate-900 dark:text-emerald-400'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+            >
+              Kruskal (Aristas ordenadas)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-testid="tab-mst-edges"
+              aria-selected={mstAlgorithmTab === 'aristas'}
+              onClick={() => setMstAlgorithmTab('aristas')}
+              className={`flex-1 min-h-[38px] rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+                mstAlgorithmTab === 'aristas'
+                  ? 'bg-white text-emerald-700 shadow-xs dark:bg-slate-900 dark:text-emerald-400'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
+            >
+              Carreteras del árbol ({mst?.prim.edges.length ?? 0})
+            </button>
+          </div>
+
+          {/* Contenido de la sub-pestaña activa */}
+          {mstAlgorithmTab === 'prim' && <PrimTab />}
+          {mstAlgorithmTab === 'kruskal' && <KruskalTab />}
+          {mstAlgorithmTab === 'aristas' && (
+            <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800">
+              <table className="w-full text-left border-collapse" data-testid="table-mst-edges">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-700 uppercase dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    <th className="py-2 px-3 w-10">#</th>
+                    <th className="py-2 px-3">Conexión departamental</th>
+                    <th className="py-2 px-3">Carretera</th>
+                    <th className="py-2 px-3 text-right">km</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 font-mono text-[11px] dark:divide-slate-800">
+                  {mst?.prim.edges.map((edgeId, i) => {
+                    const edge = graph.edges.find((e) => e.id === edgeId);
+                    if (!edge) return null;
+                    const src = graph.nodes.find((n) => n.id === edge.source);
+                    const tgt = graph.nodes.find((n) => n.id === edge.target);
+                    return (
+                      <tr key={edgeId} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td className="py-2 px-3 text-slate-500">{i + 1}</td>
+                        <td className="py-2 px-3 font-sans font-medium text-slate-800 dark:text-slate-200">
+                          {src?.label ?? edge.source} ↔ {tgt?.label ?? edge.target}
+                        </td>
+                        <td className="py-2 px-3 font-sans text-slate-600 dark:text-slate-400">
+                          {(typeof edge.meta?.carretera === 'string' ? edge.meta.carretera : '') || '—'}
+                        </td>
+                        <td className="py-2 px-3 text-right font-bold text-slate-900 dark:text-slate-100">
+                          {edge.weight.toFixed(1)} km
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CASO B: RUTAS MÁS CORTAS DESDE LA BODEGA (SPT) */}
+      {coverMode === 'spt' && (
+        <div className="flex flex-col gap-3" data-testid="spt-section">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-200 bg-blue-50/70 p-3 dark:border-blue-900/40 dark:bg-blue-950/20">
+            <div className="flex items-center gap-2">
+              <label htmlFor="select-spt-bodega" className="font-bold text-blue-950 dark:text-blue-200">
+                Bodega central (Origen):
+              </label>
+              <select
+                id="select-spt-bodega"
+                data-testid="select-spt-bodega"
+                value={selectedBodega}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedBodega(id);
+                  setTreeQuery(id);
+                }}
+                className="min-h-[44px] rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                {graph.nodes.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {n.label} ({departments[n.id]?.cabecera || n.label})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              data-testid="btn-apply-spt"
+              onClick={() => setTreeQuery(selectedBodega)}
+              className="min-h-[44px] rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              Calcular árbol de rutas
+            </button>
+          </div>
+
+          {/* Tabla de distancias a los otros 21 departamentos */}
+          <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800">
+            <table className="w-full text-left border-collapse" data-testid="table-spt-distances">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-700 uppercase dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <th className="py-2 px-3 w-10">#</th>
+                  <th className="py-2 px-3">Departamento destino</th>
+                  <th className="py-2 px-3">Cabecera</th>
+                  <th className="py-2 px-3 text-right">Distancia más corta</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 font-mono text-[11px] dark:divide-slate-800">
+                {bodegaDistances.map((item, idx) => (
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="py-2 px-3 text-slate-500">{idx + 1}</td>
+                    <td className="py-2 px-3 font-sans font-medium text-slate-800 dark:text-slate-200">{item.label}</td>
+                    <td className="py-2 px-3 font-sans text-slate-600 dark:text-slate-400">{item.cabecera}</td>
+                    <td className="py-2 px-3 text-right font-bold text-blue-700 dark:text-blue-300">
+                      {item.dist === Infinity ? 'Inalcanzable' : `${item.dist.toFixed(1)} km`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* CASO C: RECORRIDO DE REPARTO (APROXIMACIÓN HEURÍSTICA) */}
+      {coverMode === 'tour' && (
+        <div className="flex flex-col gap-3" data-testid="tour-section">
+          {/* Aviso informativo de heurística */}
+          <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+            <div className="flex items-start gap-2">
+              <span className="text-base">💡</span>
+              <div>
+                <p className="font-bold">Aproximación heurística (Problema del Repartidor / TSP)</p>
+                <p className="mt-0.5 leading-relaxed text-slate-600 dark:text-slate-300">
+                  Visita todos los departamentos alcanzables y regresa al punto de partida. Utiliza el método del
+                  <strong> vecino más cercano</strong> seguido de refinamiento local <strong>2-opt</strong> sobre las
+                  distancias mínimas de Dijkstra. No garantiza el óptimo global absoluto pero ofrece una ruta eficiente
+                  en tiempo polinomial.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Selector de inicio del recorrido */}
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+            <div className="flex items-center gap-2">
+              <label htmlFor="select-tour-start" className="font-bold text-slate-800 dark:text-slate-200">
+                Punto de partida:
+              </label>
+              <select
+                id="select-tour-start"
+                data-testid="select-tour-start"
+                value={selectedTourStart}
+                onChange={(e) => setSelectedTourStart(e.target.value)}
+                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                {graph.nodes.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {n.label} ({departments[n.id]?.cabecera || n.label})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {tour.status === 'running' ? (
+                <button
+                  type="button"
+                  data-testid="btn-cancel-tour"
+                  onClick={cancelTour}
+                  className="min-h-[44px] rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700"
+                >
+                  Cancelar cálculo
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="btn-run-tour"
+                  onClick={() => runTour(selectedTourStart)}
+                  className="min-h-[44px] rounded-lg bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-purple-700 focus-visible:ring-2 focus-visible:ring-purple-500"
+                >
+                  🚚 Calcular recorrido de reparto
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Estado del cálculo */}
+          {tour.status === 'running' && (
+            <div
+              className="flex items-center justify-center gap-2 py-6 text-sm text-slate-500"
+              data-testid="tour-running"
+            >
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-purple-600 border-t-transparent" />
+              <span>Optimizando recorrido con vecino más cercano y 2-opt…</span>
+            </div>
+          )}
+
+          {tour.status === 'error' && (
+            <div
+              className="rounded-lg bg-rose-50 p-3 text-xs text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+              data-testid="tour-error"
+            >
+              Error al calcular el recorrido: {tour.error}
+            </div>
+          )}
+
+          {tour.status === 'done' && tour.result && (
+            <div
+              className="flex flex-col gap-3 rounded-xl border border-purple-200 bg-purple-50/60 p-3.5 dark:border-purple-900/50 dark:bg-purple-950/20"
+              data-testid="tour-result-container"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-purple-900 dark:text-purple-200">
+                  Recorrido completo calculado ({tour.result.order.length} paradas):
+                </span>
+                <span data-testid="tour-total-km" className="text-xl font-black text-purple-700 dark:text-purple-300">
+                  {tour.result.total.toFixed(1)} km
+                </span>
+              </div>
+
+              {/* Lista numerada de paradas del recorrido */}
+              <div className="overflow-x-auto rounded-lg border border-purple-200 bg-white p-2.5 dark:border-purple-900/60 dark:bg-slate-900">
+                <ol className="divide-y divide-slate-100 text-xs dark:divide-slate-800" data-testid="tour-stops-list">
+                  {tour.result.order.map((nodeId, idx) => (
+                    <li key={`${nodeId}-${idx}`} className="flex items-center justify-between py-1 px-1">
+                      <span className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-100 text-[10px] font-bold text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                          {idx + 1}
+                        </span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">{getNodeName(nodeId)}</span>
+                      </span>
+                      {idx === 0 && (
+                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                          Salida
+                        </span>
+                      )}
+                      {tour.result && idx === tour.result.order.length - 1 && (
+                        <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                          Retorno
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### `src/ui/components/tabs/PrimTab.tsx`
+
+253 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Pestaña de solución tabulada paso a paso del Algoritmo de Prim (AEM).
+ * Muestra el proceso de corte iterativo: la arista mínima que cruza el corte hacia un nodo no visitado,
+ * el nuevo nodo incorporado, las columnas tachadas y el total acumulado en kilómetros.
+ *
+ * Lee: `mst.prim`, `graph`, `departments`, `mstStart`, `setMstStart` desde `useApp`.
+ */
+import { useEffect, useState } from 'react';
+import type { NodeId } from '../../../core/types';
+import { useApp } from '../../useApp';
+
+export default function PrimTab() {
+  const mst = useApp((s) => s.mst);
+  const graph = useApp((s) => s.graph);
+  const departments = useApp((s) => s.departments);
+  const mstStart = useApp((s) => s.mstStart);
+  const setMstStart = useApp((s) => s.setMstStart);
+
+  const prim = mst?.prim;
+  const steps = prim?.steps ?? [];
+  const totalSteps = steps.length;
+  const lastStepIndex = Math.max(0, totalSteps - 1);
+
+  const [stepOverride, setStepOverride] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [speedMs] = useState<number>(800);
+
+  const currentStepIndex = stepOverride !== null ? Math.min(stepOverride, lastStepIndex) : lastStepIndex;
+
+  // Reproducción paso a paso
+  useEffect(() => {
+    if (!isPlaying) return;
+    const timer = setInterval(() => {
+      setStepOverride((prev) => {
+        const current = prev !== null ? prev : lastStepIndex;
+        if (current >= lastStepIndex) {
+          setIsPlaying(false);
+          return current;
+        }
+        return current + 1;
+      });
+    }, speedMs);
+    return () => clearInterval(timer);
+  }, [isPlaying, lastStepIndex, speedMs]);
+
+  if (!prim || steps.length === 0) {
+    return (
+      <div className="flex h-48 items-center justify-center p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        <p>No hay cálculo de árbol de expansión mínima disponible.</p>
+      </div>
+    );
+  }
+
+  const getNodeName = (id: NodeId): string => {
+    const d = departments[id];
+    const n = graph.nodes.find((node) => node.id === id);
+    if (d?.cabecera && n?.label && d.cabecera !== n.label) {
+      return `${n.label} (${d.cabecera})`;
+    }
+    return n?.label ?? id;
+  };
+
+  const getEdgeInfo = (edgeId: string | null) => {
+    if (!edgeId) return null;
+    const edge = graph.edges.find((e) => e.id === edgeId);
+    if (!edge) return { id: edgeId, source: '', target: '', weight: 0, road: '' };
+    const srcName = graph.nodes.find((n) => n.id === edge.source)?.label ?? edge.source;
+    const tgtName = graph.nodes.find((n) => n.id === edge.target)?.label ?? edge.target;
+    const road = edge.meta?.carretera ? ` (${edge.meta.carretera})` : '';
+    return {
+      id: edge.id,
+      source: srcName,
+      target: tgtName,
+      weight: edge.weight,
+      road,
+    };
+  };
+
+  const currentStep = steps[currentStepIndex] ?? steps[0]!;
+
+  return (
+    <div className="flex flex-col gap-3 p-3 text-xs" data-testid="prim-tab-container">
+      {/* Controles superiores: selector de inicio y reproducción */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-900/60">
+        {/* Selector de nodo inicial de Prim */}
+        <div className="flex items-center gap-1.5">
+          <label htmlFor="prim-start-select" className="font-semibold text-slate-700 dark:text-slate-300">
+            Nodo inicial:
+          </label>
+          <select
+            id="prim-start-select"
+            data-testid="select-prim-start"
+            value={mstStart ?? graph.nodes[0]?.id ?? ''}
+            onChange={(e) => setMstStart(e.target.value)}
+            className="min-h-[40px] rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            {graph.nodes.map((n) => (
+              <option key={n.id} value={n.id}>
+                {n.label} {departments[n.id]?.cabecera ? `(${departments[n.id]?.cabecera})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Controles de reproducción */}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            data-testid="btn-prim-prev"
+            onClick={() => setStepOverride(Math.max(0, currentStepIndex - 1))}
+            disabled={currentStepIndex <= 0}
+            aria-label="Paso anterior de Prim"
+            className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white font-bold text-slate-700 shadow-xs hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            title="Paso anterior"
+          >
+            ◀
+          </button>
+          <button
+            type="button"
+            data-testid="btn-prim-play"
+            onClick={() => {
+              if (isPlaying) {
+                setIsPlaying(false);
+              } else {
+                if (currentStepIndex >= totalSteps - 1) setStepOverride(0);
+                setIsPlaying(true);
+              }
+            }}
+            aria-label={isPlaying ? 'Pausa' : 'Reproducir'}
+            className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg bg-emerald-600 font-bold text-white shadow-xs hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500"
+            title={isPlaying ? 'Pausar' : 'Reproducir'}
+          >
+            {isPlaying ? '⏸' : '▶'}
+          </button>
+          <button
+            type="button"
+            data-testid="btn-prim-next"
+            onClick={() => setStepOverride(Math.min(totalSteps - 1, currentStepIndex + 1))}
+            disabled={currentStepIndex >= totalSteps - 1}
+            aria-label="Paso siguiente de Prim"
+            className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white font-bold text-slate-700 shadow-xs hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            title="Paso siguiente"
+          >
+            ▶
+          </button>
+          <button
+            type="button"
+            data-testid="btn-prim-end"
+            onClick={() => {
+              setIsPlaying(false);
+              setStepOverride(totalSteps - 1);
+            }}
+            aria-label="Ir al final de Prim"
+            className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white font-bold text-slate-700 shadow-xs hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            title="Solución final"
+          >
+            ⏭
+          </button>
+          <span className="ml-2 font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">
+            Paso {currentStepIndex} de {totalSteps - 1}
+          </span>
+        </div>
+      </div>
+
+      {/* Resumen del paso activo */}
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5 text-xs text-emerald-950 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span className="font-bold">Iteración {currentStep.iter}: </span>
+            {currentStep.chosenEdge ? (
+              <span>
+                Arista elegida:{' '}
+                <strong className="underline">
+                  {getEdgeInfo(currentStep.chosenEdge)?.source} ↔ {getEdgeInfo(currentStep.chosenEdge)?.target}
+                </strong>{' '}
+                ({getEdgeInfo(currentStep.chosenEdge)?.weight} km{getEdgeInfo(currentStep.chosenEdge)?.road})
+              </span>
+            ) : (
+              <span>
+                Nodo inicial: <strong>{getNodeName(currentStep.inTree[0] ?? '')}</strong>
+              </span>
+            )}
+          </div>
+          <div className="font-bold">
+            Total hasta aquí: <span className="font-mono text-sm">{currentStep.totalSoFar.toFixed(1)} km</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabla de pasos completa con fila actual resaltada */}
+      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800">
+        <table className="w-full min-w-[620px] text-left border-collapse" data-testid="table-prim-steps">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-700 uppercase tracking-wider dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <th className="py-2 px-2.5 w-10 text-center">#</th>
+              <th className="py-2 px-2.5">Arista mínima (Corte)</th>
+              <th className="py-2 px-2.5">Nodo incorporado</th>
+              <th className="py-2 px-2.5">Columnas tachadas</th>
+              <th className="py-2 px-2.5 text-right">km tramo</th>
+              <th className="py-2 px-2.5 text-right">Total acumulado</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 font-mono text-[11px] dark:divide-slate-800">
+            {steps.map((st, idx) => {
+              const isSelected = idx === currentStepIndex;
+              const edgeInfo = getEdgeInfo(st.chosenEdge);
+              const newlyAddedNode = st.inTree[st.inTree.length - 1];
+
+              return (
+                <tr
+                  key={st.iter}
+                  onClick={() => setStepOverride(idx)}
+                  className={`cursor-pointer transition-colors ${
+                    isSelected
+                      ? 'bg-emerald-100 font-semibold text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-100'
+                      : idx % 2 === 0
+                        ? 'bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/60'
+                        : 'bg-slate-50/60 hover:bg-slate-100 dark:bg-slate-800/30 dark:hover:bg-slate-800/60'
+                  }`}
+                  data-testid={`prim-row-${st.iter}`}
+                >
+                  <td className="py-2 px-2.5 text-center font-bold text-slate-600 dark:text-slate-400">{st.iter}</td>
+                  <td className="py-2 px-2.5 font-sans">
+                    {edgeInfo ? (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 font-semibold text-emerald-800 dark:text-emerald-300">
+                        {edgeInfo.source} ↔ {edgeInfo.target}
+                        {edgeInfo.road && <span className="text-[10px] text-slate-500">{edgeInfo.road}</span>}
+                      </span>
+                    ) : (
+                      <span className="italic text-slate-400">Inicio (árbol vacío)</span>
+                    )}
+                  </td>
+                  <td className="py-2 px-2.5 font-sans font-medium">
+                    {newlyAddedNode ? getNodeName(newlyAddedNode) : '—'}
+                  </td>
+                  <td className="py-2 px-2.5 text-slate-600 dark:text-slate-400">
+                    <span className="line-through">{st.crossedOut.join(', ')}</span>
+                  </td>
+                  <td className="py-2 px-2.5 text-right font-medium">
+                    {edgeInfo ? `${edgeInfo.weight.toFixed(1)} km` : '0.0 km'}
+                  </td>
+                  <td className="py-2 px-2.5 text-right font-bold text-slate-900 dark:text-slate-100">
+                    {st.totalSoFar.toFixed(1)} km
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+```
+
+### `src/ui/components/tabs/KruskalTab.tsx`
+
+139 líneas.
+
+```{.tsx .numberLines}
+/**
+ * Pestaña de solución tabulada del Algoritmo de Kruskal (AEM).
+ * Muestra las aristas ordenadas de menor a mayor peso y la decisión de aceptación o rechazo
+ * (por formación de ciclo con Union-Find), junto con el total acumulado en kilómetros.
+ *
+ * Lee: `mst.kruskal`, `graph`, `departments` desde `useApp`.
+ */
+import { useApp } from '../../useApp';
+
+export default function KruskalTab() {
+  const mst = useApp((s) => s.mst);
+  const graph = useApp((s) => s.graph);
+  const departments = useApp((s) => s.departments);
+
+  const kruskal = mst?.kruskal;
+  const steps = kruskal?.steps ?? [];
+
+  if (!kruskal || steps.length === 0) {
+    return (
+      <div className="flex h-48 items-center justify-center p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        <p>No hay cálculo de Kruskal disponible.</p>
+      </div>
+    );
+  }
+
+  // Descartamos el paso inicial (iter 0) para mostrar directamente la evaluación de cada arista
+  const evalSteps = steps.filter((s) => s.iter > 0);
+
+  const getEdgeDetails = (edgeId: string) => {
+    const edge = graph.edges.find((e) => e.id === edgeId);
+    if (!edge) return { id: edgeId, source: '', target: '', weight: 0, road: '' };
+    const src = graph.nodes.find((n) => n.id === edge.source);
+    const tgt = graph.nodes.find((n) => n.id === edge.target);
+    const srcName = src
+      ? `${src.label}${departments[src.id]?.cabecera ? ` (${departments[src.id]?.cabecera})` : ''}`
+      : edge.source;
+    const tgtName = tgt
+      ? `${tgt.label}${departments[tgt.id]?.cabecera ? ` (${departments[tgt.id]?.cabecera})` : ''}`
+      : edge.target;
+    return {
+      id: edge.id,
+      source: srcName,
+      target: tgtName,
+      weight: edge.weight,
+      road: (typeof edge.meta?.carretera === 'string' ? edge.meta.carretera : '') || '—',
+    };
+  };
+
+  const totalAccepted = kruskal.edges.length;
+  const totalRejected = evalSteps.length - totalAccepted;
+
+  return (
+    <div className="flex flex-col gap-3 p-3 text-xs" data-testid="kruskal-tab-container">
+      {/* Resumen estadístico de Kruskal */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-900/60">
+          <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Aristas evaluadas</div>
+          <div className="text-lg font-bold text-slate-800 dark:text-slate-200">{evalSteps.length}</div>
+        </div>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-2.5 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+          <div className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">Aceptadas (árbol)</div>
+          <div className="text-lg font-bold text-emerald-800 dark:text-emerald-200">{totalAccepted}</div>
+        </div>
+        <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-2.5 dark:border-rose-900/40 dark:bg-rose-950/30">
+          <div className="text-[11px] font-medium text-rose-700 dark:text-rose-300">Rechazadas (ciclo)</div>
+          <div className="text-lg font-bold text-rose-800 dark:text-rose-200">{totalRejected}</div>
+        </div>
+        <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-2.5 dark:border-blue-900/40 dark:bg-blue-950/30">
+          <div className="text-[11px] font-medium text-blue-700 dark:text-blue-300">Total del árbol</div>
+          <div className="text-lg font-extrabold text-blue-800 dark:text-blue-200">{kruskal.total.toFixed(1)} km</div>
+        </div>
+      </div>
+
+      {/* Tabla ordenada de aristas examinadas */}
+      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs dark:border-slate-800">
+        <table className="w-full min-w-[620px] text-left border-collapse" data-testid="table-kruskal-steps">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-700 uppercase tracking-wider dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <th className="py-2 px-2.5 w-10 text-center">#</th>
+              <th className="py-2 px-2.5">Arista (Origen ↔ Destino)</th>
+              <th className="py-2 px-2.5">Carretera</th>
+              <th className="py-2 px-2.5 text-right">km</th>
+              <th className="py-2 px-2.5 text-center">Decisión Union-Find</th>
+              <th className="py-2 px-2.5 text-right">Total acumulado</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 font-mono text-[11px] dark:divide-slate-800">
+            {evalSteps.map((st) => {
+              const edgeId = st.chosenEdge ?? st.rejectedEdge ?? '';
+              const details = getEdgeDetails(edgeId);
+              const isAccepted = Boolean(st.chosenEdge);
+
+              return (
+                <tr
+                  key={st.iter}
+                  className={`transition-colors ${
+                    isAccepted
+                      ? 'bg-emerald-50/50 hover:bg-emerald-100/70 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40'
+                      : 'bg-rose-50/30 hover:bg-rose-100/40 dark:bg-rose-950/15 dark:hover:bg-rose-950/30 opacity-75'
+                  }`}
+                  data-testid={`kruskal-row-${st.iter}`}
+                >
+                  <td className="py-2 px-2.5 text-center font-bold text-slate-600 dark:text-slate-400">{st.iter}</td>
+                  <td className="py-2 px-2.5 font-sans font-medium">
+                    <span
+                      className={
+                        isAccepted
+                          ? 'text-slate-900 dark:text-slate-100'
+                          : 'line-through text-slate-500 dark:text-slate-400'
+                      }
+                    >
+                      {details.source} ↔ {details.target}
+                    </span>
+                  </td>
+                  <td className="py-2 px-2.5 font-sans text-slate-600 dark:text-slate-400">{details.road}</td>
+                  <td className="py-2 px-2.5 text-right font-medium">{details.weight.toFixed(1)} km</td>
+                  <td className="py-2 px-2.5 text-center font-sans">
+                    {isAccepted ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                        ✓ Aceptada
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800 dark:bg-rose-950/80 dark:text-rose-300">
+                        ✗ Ciclo (rechazada)
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-2 px-2.5 text-right font-bold text-slate-900 dark:text-slate-100">
+                    {st.totalSoFar.toFixed(1)} km
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+```
+

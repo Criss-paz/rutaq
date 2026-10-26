@@ -81,7 +81,7 @@ export default function Modal({ isOpen, onClose, title, description, children, r
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
       data-testid={testId}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -93,7 +93,7 @@ export default function Modal({ isOpen, onClose, title, description, children, r
         aria-modal="true"
         aria-labelledby="modal-title"
         aria-describedby={description ? 'modal-description' : undefined}
-        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+        className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
       >
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>

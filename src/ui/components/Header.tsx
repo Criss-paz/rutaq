@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Theme } from '../../store/types';
 import { useApp } from '../useApp';
+import { useUiStore } from '../uiStore';
 import Modal from './Modal';
 
 export default function Header() {
@@ -8,6 +9,7 @@ export default function Header() {
   const setMode = useApp((s) => s.setMode);
   const loadTemplate = useApp((s) => s.loadTemplate);
   const exportGraphFile = useApp((s) => s.exportGraphFile);
+  const exportGuatemalaDataset = useApp((s) => s.exportGuatemalaDataset);
   const importGraphFile = useApp((s) => s.importGraphFile);
   const theme = useApp((s) => s.theme);
   const setTheme = useApp((s) => s.setTheme);
@@ -17,6 +19,11 @@ export default function Header() {
   const redo = useApp((s) => s.redo);
   const graph = useApp((s) => s.graph);
   const graphName = useApp((s) => s.graphName);
+
+  const setIsAssistantOpen = useUiStore((s) => s.setIsAssistantOpen);
+  const setIsAdminOpen = useUiStore((s) => s.setIsAdminOpen);
+  const setIsAboutOpen = useUiStore((s) => s.setIsAboutOpen);
+  const setIsPresentationMode = useUiStore((s) => s.setIsPresentationMode);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -50,6 +57,17 @@ export default function Header() {
   }, [showMobileMenu]);
 
   const handleExportJson = () => {
+    if (mode === 'guatemala') {
+      const data = exportGuatemalaDataset();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `guatemala_transporte_express_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
     const data = exportGraphFile();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -180,13 +198,18 @@ export default function Header() {
     setTheme(next);
   };
 
-  const currentTemplate = graphName.toLowerCase().includes('quetzaltenango')
-    ? 'quetzaltenango'
-    : graphName.toLowerCase().includes('ejemplo')
-      ? 'ejemplo6'
-      : graph.nodes.length === 0
-        ? 'vacio'
-        : '';
+  const currentTemplate =
+    mode === 'guatemala' || graphName.toLowerCase().includes('guatemala')
+      ? 'guatemala'
+      : graphName.toLowerCase().includes('quetzaltenango')
+        ? 'quetzaltenango'
+        : graphName.toLowerCase().includes('mst')
+          ? 'ejemplo_mst'
+          : graphName.toLowerCase().includes('ejemplo')
+            ? 'ejemplo6'
+            : graph.nodes.length === 0
+              ? 'vacio'
+              : '';
 
   return (
     <header className="shrink-0 flex flex-col gap-1.5 border-b border-slate-200 bg-white px-3 py-1.5 text-slate-800 shadow-xs sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:px-4 sm:py-2 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
@@ -203,20 +226,38 @@ export default function Header() {
 
       {/* Fila 1 en móvil: Logo, Modos y Menú "⋯" | Integrado en escritorio */}
       <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
-        {/* Logotipo y título */}
+        {/* Logotipo y título según modo */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-xs sm:h-10 sm:w-10">
-            Q
-          </div>
-          <div>
-            <h1 className="text-base font-bold leading-tight tracking-tight sm:text-lg">RutaQ</h1>
-            <p className="hidden text-xs text-slate-500 md:block dark:text-slate-400">
-              Red vial de Quetzaltenango · Dijkstra &amp; Floyd-Warshall
-            </p>
-          </div>
+          {mode === 'guatemala' ? (
+            <>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 font-black text-white shadow-xs sm:h-10 sm:w-10">
+                TE
+              </div>
+              <div>
+                <h1 className="text-base font-bold leading-tight tracking-tight sm:text-lg text-emerald-950 dark:text-emerald-100">
+                  Transporte Express
+                </h1>
+                <p className="hidden text-xs text-slate-500 md:block dark:text-slate-400">
+                  RutaQ · Red vial de Guatemala (22 departamentos)
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-xs sm:h-10 sm:w-10">
+                Q
+              </div>
+              <div>
+                <h1 className="text-base font-bold leading-tight tracking-tight sm:text-lg">RutaQ</h1>
+                <p className="hidden text-xs text-slate-500 md:block dark:text-slate-400">
+                  Red vial de Quetzaltenango · Dijkstra &amp; Floyd-Warshall
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Modos Quetzaltenango / Diseño y botón "⋯" en móvil */}
+        {/* Selector de Modos: Quetzaltenango | Guatemala (Transporte Express) | Diseño y botón "⋯" en móvil */}
         <div className="flex items-center gap-1.5">
           <div
             className="flex rounded-lg bg-slate-100 p-0.5 sm:p-1 dark:bg-slate-800"
@@ -238,6 +279,25 @@ export default function Header() {
               aria-pressed={mode === 'quetzaltenango'}
             >
               Quetzaltenango
+            </button>
+            <button
+              type="button"
+              data-testid="mode-guatemala"
+              onClick={() => {
+                setMode('guatemala');
+                loadTemplate('guatemala');
+              }}
+              className={`min-h-[44px] rounded-md px-2.5 py-1 text-xs font-medium transition-colors sm:px-3 sm:py-1.5 ${
+                mode === 'guatemala'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+              }`}
+              aria-pressed={mode === 'guatemala'}
+              aria-label="Guatemala (Transporte Express)"
+              title="Guatemala (Transporte Express)"
+            >
+              <span className="hidden sm:inline">Guatemala (Transporte Express)</span>
+              <span className="sm:hidden">Guatemala</span>
             </button>
             <button
               type="button"
@@ -264,7 +324,7 @@ export default function Header() {
               aria-label="Más acciones secundarias"
               aria-expanded={showMobileMenu}
               className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white text-base font-bold text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-              title="Más opciones (Cargar, Guardar, PNG, tema)"
+              title="Más opciones"
             >
               ⋯
             </button>
@@ -273,13 +333,70 @@ export default function Header() {
             {showMobileMenu && (
               <div
                 ref={mobileMenuRef}
-                className="fixed right-3 top-14 z-50 w-52 rounded-xl border border-slate-200 bg-white/98 p-1.5 shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
+                className="fixed right-3 top-14 z-50 w-56 rounded-xl border border-slate-200 bg-white/98 p-1.5 shadow-2xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-800/98"
                 role="menu"
               >
+                {mode === 'guatemala' && (
+                  <>
+                    <div className="px-3 py-1 text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">
+                      Transporte Express
+                    </div>
+                    <button
+                      type="button"
+                      data-testid="btn-assistant-mobile"
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        setIsAssistantOpen(true);
+                      }}
+                      className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      <span className="text-base">📦</span>
+                      <span>Calcular mejor ruta</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="btn-admin-mobile"
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        setIsAdminOpen(true);
+                      }}
+                      className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      <span className="text-base">⚙️</span>
+                      <span>Administrar red</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="btn-pres-mobile"
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        setIsPresentationMode(true);
+                      }}
+                      className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      <span className="text-base">📽️</span>
+                      <span>Modo presentación</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="btn-about-mobile"
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        setIsAboutOpen(true);
+                      }}
+                      className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      <span className="text-base">ℹ️</span>
+                      <span>Acerca de</span>
+                    </button>
+                    <hr className="my-1 border-slate-200 dark:border-slate-700" />
+                  </>
+                )}
+
                 <div className="px-3 py-1 text-xs font-bold tracking-wider text-slate-400 uppercase">Acciones</div>
                 <button
                   type="button"
-                  data-testid="btn-import-json-mobile"
+                  data-testid="btn-import-json"
                   onClick={() => {
                     setShowMobileMenu(false);
                     fileInputRef.current?.click();
@@ -303,7 +420,7 @@ export default function Header() {
                 </button>
                 <button
                   type="button"
-                  data-testid="btn-export-png-mobile"
+                  data-testid="btn-export-png"
                   onClick={() => {
                     setShowMobileMenu(false);
                     handleExportPng();
@@ -315,7 +432,7 @@ export default function Header() {
                 </button>
                 <button
                   type="button"
-                  data-testid="theme-toggle-mobile"
+                  data-testid="theme-toggle"
                   onClick={() => {
                     cycleTheme();
                   }}
@@ -339,7 +456,7 @@ export default function Header() {
             aria-label="Cargar plantilla"
             value={currentTemplate}
             onChange={(e) => {
-              const val = e.target.value as 'quetzaltenango' | 'ejemplo6' | 'vacio';
+              const val = e.target.value as 'quetzaltenango' | 'guatemala' | 'ejemplo_mst' | 'ejemplo6' | 'vacio';
               if (val) loadTemplate(val);
             }}
             className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden sm:w-auto dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
@@ -350,6 +467,8 @@ export default function Header() {
               </option>
             )}
             <option value="quetzaltenango">Plantilla: Quetzaltenango (24 muns)</option>
+            <option value="guatemala">Plantilla: Guatemala (22 departamentos)</option>
+            <option value="ejemplo_mst">Plantilla: Ejemplo AEM (MST)</option>
             <option value="ejemplo6">Plantilla: Ejemplo 6 nodos</option>
             <option value="vacio">Plantilla: Grafo vacío</option>
           </select>

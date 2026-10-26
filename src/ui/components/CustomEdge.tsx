@@ -202,13 +202,13 @@ function CustomEdgeComponent({
   let strokeColor = '#94a3b8'; // slate-400
   let strokeWidth = 2;
   let strokeDasharray: string | undefined;
+  let animation: string | undefined;
 
   if (isOnPath) {
     strokeColor = '#9333ea'; // purple-600
     strokeWidth = 4.5;
-    if (isTiedDashed) {
-      strokeDasharray = '6 4';
-    }
+    strokeDasharray = isTiedDashed ? '6 4' : '8 6';
+    animation = 'flowDash 1.2s linear infinite';
   } else if (isTreeEdge) {
     strokeColor = '#2563eb'; // blue-600
     strokeWidth = 3.5;
@@ -268,6 +268,7 @@ function CustomEdgeComponent({
 
   return (
     <>
+      <style>{`@keyframes flowDash { from { strokeDashoffset: 28; } to { strokeDashoffset: 0; } }`}</style>
       <BaseEdge
         path={edgePath}
         markerEnd={markerEnd}
@@ -276,6 +277,7 @@ function CustomEdgeComponent({
           stroke: strokeColor,
           strokeWidth,
           strokeDasharray,
+          animation,
           transition: 'stroke 0.2s, stroke-width 0.2s',
           cursor: 'pointer',
           pointerEvents: 'all',
