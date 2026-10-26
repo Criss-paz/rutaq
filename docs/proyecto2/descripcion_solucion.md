@@ -5,12 +5,12 @@
 **Universidad Mariano Gálvez de Guatemala**  
 **Facultad de Ingeniería en Sistemas de Información y Ciencias de la Computación**
 
-| Campo                     | Información Oficial          |
-| :------------------------ | :--------------------------- |
-| **Curso**                 | ________                     |
-| **Catedrático**           | ________                     |
-| **Sección**               | ________                     |
-| **Fecha de Presentación** | Sábado 31 de octubre de 2026 |
+| Campo                     | Información Oficial                  |
+| :------------------------ | :----------------------------------- |
+| **Curso**                 | Investigación de Operaciones         |
+| **Catedrático**           | Ing. Samuel Isaac Gómez Moreno       |
+| **Semestre y Carrera**    | 6.º semestre, Ingeniería en Sistemas |
+| **Fecha de Presentación** | Sábado 31 de octubre de 2026         |
 
 ### Integrantes del Proyecto
 

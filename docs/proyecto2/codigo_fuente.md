@@ -2268,15 +2268,15 @@ export default function GuatemalaAboutModal({ isOpen, onClose }: GuatemalaAboutM
         <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
           <div>
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Curso:</span>
-            <div className="font-semibold text-slate-800 dark:text-slate-200">________</div>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">Investigación de Operaciones</div>
           </div>
           <div>
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Catedrático:</span>
-            <div className="font-semibold text-slate-800 dark:text-slate-200">________</div>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">Ing. Samuel Isaac Gómez Moreno</div>
           </div>
           <div>
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Sección:</span>
-            <div className="font-semibold text-slate-800 dark:text-slate-200">________</div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Semestre y Carrera:</span>
+            <div className="font-semibold text-slate-800 dark:text-slate-200">6.º semestre, Ingeniería en Sistemas</div>
           </div>
           <div>
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Fecha de presentación:</span>

@@ -11,12 +11,12 @@ _Modelado Matemático, Implementación Algorítmica (Dijkstra, Floyd-Warshall, Y
 
 ---
 
-**Curso:** `________________________________________`  
-**Catedrático:** `________________________________________`
+**Curso:** Investigación de Operaciones  
+**Catedrático:** Ing. Samuel Isaac Gómez Moreno  
+**Semestre y Carrera:** 6.º semestre, Ingeniería en Sistemas
 
 **Estudiante:** Cristopher Alexis Castellanos Paz  
-**Carné:** 2690245972  
-**Carrera:** Ingeniería en Sistemas de Información y Ciencias de la Computación  
+**Carné:** 2690-24-5972  
 **Fecha:** 15 de octubre de 2026  
 **Lugar:** Quetzaltenango, Guatemala  
 **Aplicación Desplegada:** https://criss-paz.github.io/rutaq/  
