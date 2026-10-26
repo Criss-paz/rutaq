@@ -664,4 +664,8 @@ def build():
     print(f"  [EXITO] Dataset JSON generado en: {OUTPUT_DATASET}")
 
 if __name__ == '__main__':
-    build()
+    if len(sys.argv) > 1 and sys.argv[1].lower() in ('--guatemala', 'guatemala', '-g'):
+        import build_guatemala
+        build_guatemala.build()
+    else:
+        build()

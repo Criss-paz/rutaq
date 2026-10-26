@@ -1,0 +1,83 @@
+{
+  "format": "rutaq-graph",
+  "version": 1,
+  "name": "Ejemplo académico de 6 nodos para AEM (Prim y Kruskal)",
+  "graph": {
+    "nodes": [
+      { "id": "A", "label": "A", "x": 80, "y": 220, "w": 132, "h": 44 },
+      { "id": "B", "label": "B", "x": 280, "y": 80, "w": 132, "h": 44 },
+      { "id": "C", "label": "C", "x": 280, "y": 360, "w": 132, "h": 44 },
+      { "id": "D", "label": "D", "x": 540, "y": 80, "w": 132, "h": 44 },
+      { "id": "E", "label": "E", "x": 540, "y": 360, "w": 132, "h": 44 },
+      { "id": "F", "label": "F", "x": 740, "y": 220, "w": 132, "h": 44 }
+    ],
+    "edges": [
+      {
+        "id": "A-B",
+        "source": "A",
+        "target": "B",
+        "weight": 3,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "A-C",
+        "source": "A",
+        "target": "C",
+        "weight": 3,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "B-C",
+        "source": "B",
+        "target": "C",
+        "weight": 2,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "B-D",
+        "source": "B",
+        "target": "D",
+        "weight": 5,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "C-E",
+        "source": "C",
+        "target": "E",
+        "weight": 4,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "D-E",
+        "source": "D",
+        "target": "E",
+        "weight": 2,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "D-F",
+        "source": "D",
+        "target": "F",
+        "weight": 4,
+        "shape": "straight",
+        "shapeAuto": true
+      },
+      {
+        "id": "E-F",
+        "source": "E",
+        "target": "F",
+        "weight": 4,
+        "shape": "straight",
+        "shapeAuto": true
+      }
+    ],
+    "directed": false,
+    "unit": "km"
+  }
+}

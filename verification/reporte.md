@@ -1,7 +1,7 @@
 # Reporte de verificación
 
-Caminos mínimos: 648/648 pares coinciden con NetworkX.
+Caminos mínimos: 1168/1168 pares coinciden con NetworkX.
 
-Árbol de expansión mínima: 6/6 totales coinciden con NetworkX.
+Árbol de expansión mínima: 10/10 totales coinciden con NetworkX.
 
-Datasets opcionales no disponibles: src/data/ejemplo_mst.json, src/data/guatemala.json.
+Todos los datasets opcionales disponibles fueron procesados.
