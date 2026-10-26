@@ -18,6 +18,7 @@ import { type EdgeWeightsMode, useUiStore } from '../uiStore';
 import { CustomEdge } from './CustomEdge';
 import { CustomNode } from './CustomNode';
 import EdgeDialog from './EdgeDialog';
+import GuatemalaOutline from './guatemala/GuatemalaOutline';
 
 const nodeTypes = {
   customNode: CustomNode,
@@ -89,6 +90,10 @@ function computeMapLabelLayout(
   weightEdges: Set<string>,
   unit: string,
   viewportWidth: number,
+  nodesWithCabecera?: Map<string, string>,
+  isGuatemala = false,
+  /** Nombres que se muestran aunque choquen (origen, destino, actual, seleccionados). Por defecto, toda `priority`. */
+  forced?: Set<string>,
 ): MapLabelLayout {
   const layout: MapLabelLayout = { placements: {}, hiddenLabels: new Set(), hiddenWeights: new Set() };
   const mapNodes = nodes.filter((n) => n.lat != null && n.lon != null);
@@ -96,7 +101,9 @@ function computeMapLabelLayout(
 
   const s = 1 / Math.min(zoom, 1);
   const gap = 4 * s;
-  const lh = 16 * s;
+  const dotPad = isGuatemala ? 8 * s : 2 * s;
+  const placedPad = isGuatemala ? 4 * s : 2 * s;
+  const labelPad = isGuatemala ? 10 : 6;
 
   const dots: (Box & { id: string })[] = mapNodes.map((n) => ({
     id: n.id,
@@ -116,8 +123,8 @@ function computeMapLabelLayout(
   const free = (box: Box, ownId?: string) =>
     box.l >= minL - margin &&
     box.r <= maxR + margin &&
-    !dots.some((d) => d.id !== ownId && overlaps(box, d, 2 * s)) &&
-    !placed.some((p) => overlaps(box, p, 2 * s));
+    !dots.some((d) => d.id !== ownId && overlaps(box, d, dotPad)) &&
+    !placed.some((p) => overlaps(box, p, placedPad));
 
   const degree = new Map<string, number>();
   for (const e of edges) {
@@ -135,14 +142,19 @@ function computeMapLabelLayout(
   );
 
   for (const n of order) {
-    const lw = (textWidth(n.label, '700 12px', 7.6) + 6) * s;
+    const hasCabecera = Boolean(nodesWithCabecera?.has(n.id));
+    const cabeceraText = nodesWithCabecera?.get(n.id);
+    const labelW = (textWidth(n.label, '700 12px', 7.6) + labelPad) * s;
+    const cabeceraW = cabeceraText ? (textWidth(cabeceraText, '500 10px', 6.0) + labelPad) * s : 0;
+    const lw = Math.max(labelW, cabeceraW);
+    const nodeLh = (hasCabecera ? 32 : 16) * s;
     const cx = n.x + n.w / 2;
     const cy = n.y + n.h / 2;
     const boxes: Record<LabelDir, Box> = {
-      right: { l: n.x + n.w + gap, t: cy - lh / 2, r: n.x + n.w + gap + lw, b: cy + lh / 2 },
-      left: { l: n.x - gap - lw, t: cy - lh / 2, r: n.x - gap, b: cy + lh / 2 },
-      top: { l: cx - lw / 2, t: n.y - gap - lh, r: cx + lw / 2, b: n.y - gap },
-      bottom: { l: cx - lw / 2, t: n.y + n.h + gap, r: cx + lw / 2, b: n.y + n.h + gap + lh },
+      right: { l: n.x + n.w + gap, t: cy - nodeLh / 2, r: n.x + n.w + gap + lw, b: cy + nodeLh / 2 },
+      left: { l: n.x - gap - lw, t: cy - nodeLh / 2, r: n.x - gap, b: cy + nodeLh / 2 },
+      top: { l: cx - lw / 2, t: n.y - gap - nodeLh, r: cx + lw / 2, b: n.y - gap },
+      bottom: { l: cx - lw / 2, t: n.y + n.h + gap, r: cx + lw / 2, b: n.y + n.h + gap + nodeLh },
     };
     // En la mitad derecha del mapa el nombre prefiere ir a la izquierda (y viceversa) para no salirse del lienzo.
     const dirs: LabelDir[] = cx > midX ? ['left', 'right', 'top', 'bottom'] : ['right', 'left', 'top', 'bottom'];
@@ -150,7 +162,7 @@ function computeMapLabelLayout(
     if (dir) {
       layout.placements[n.id] = dir;
       placed.push(boxes[dir]);
-    } else if (prio.has(n.id)) {
+    } else if (forced ? forced.has(n.id) : prio.has(n.id)) {
       // Prioritario sin hueco libre: la dirección que menos se encima.
       const best = dirs.reduce((m, d) => (overlapArea(boxes[d], placed) < overlapArea(boxes[m], placed) ? d : m));
       layout.placements[n.id] = best;
@@ -168,7 +180,7 @@ function computeMapLabelLayout(
     if (!a || !b) continue;
     const mx = (a.x + a.w / 2 + b.x + b.w / 2) / 2;
     const my = (a.y + a.h / 2 + b.y + b.h / 2) / 2;
-    const w = (textWidth(`${e.weight} ${unit}`, '600 11px', 6.6) + 6) * s;
+    const w = (textWidth(`${e.weight.toFixed(1)} ${unit}`, '600 11px', 6.6) + 6) * s;
     const h = 14 * s;
     const box = { l: mx - w / 2, t: my - h / 2, r: mx + w / 2, b: my + h / 2 };
     if (free(box)) placed.push(box);
@@ -210,7 +222,7 @@ function MapOrientationAndScale({ nodes }: { nodes: GNode[] }) {
   const factor = useMemo(() => computeProjectionFactor(nodes), [nodes]);
 
   const pxPerKm = factor * zoom;
-  const candidates = [1, 2, 5, 10, 20];
+  const candidates = [1, 2, 5, 10, 20, 50, 100, 200];
   let bestL = 5;
   let minDiff = Infinity;
   for (const c of candidates) {
@@ -266,9 +278,20 @@ interface CanvasFlowProps {
   canvasWrapperRef: React.RefObject<HTMLDivElement | null>;
   isMapMode: boolean;
   graphNodes: GNode[];
+  onNodeMouseEnter?: (event: React.MouseEvent, node: Node) => void;
+  onNodeMouseLeave?: (event: React.MouseEvent, node: Node) => void;
 }
 
-function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef, isMapMode, graphNodes }: CanvasFlowProps) {
+function CanvasFlow({
+  rfNodes,
+  rfEdges,
+  onConnect,
+  canvasWrapperRef,
+  isMapMode,
+  graphNodes,
+  onNodeMouseEnter,
+  onNodeMouseLeave,
+}: CanvasFlowProps) {
   const mode = useApp((s) => s.mode);
   const graph = useApp((s) => s.graph);
   const theme = useApp((s) => s.theme);
@@ -492,6 +515,8 @@ function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef, isMapMode, 
         edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onNodeDragStop={onNodeDragStop}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
         onConnect={onConnect}
         fitView
         fitViewOptions={{ padding: 0.15 }}
@@ -505,6 +530,7 @@ function CanvasFlow({ rfNodes, rfEdges, onConnect, canvasWrapperRef, isMapMode, 
           size={1.5}
           color={theme === 'dark' ? '#334155' : '#cbd5e1'}
         />
+        {mode === 'guatemala' && <GuatemalaOutline />}
         <Controls
           showInteractive={false}
           position="bottom-left"
@@ -537,6 +563,9 @@ export default function Canvas() {
   const addNode = useApp((s) => s.addNode);
   const selectedNodeIds = useApp((s) => s.selectedNodeIds);
   const selectedEdgeIds = useApp((s) => s.selectedEdgeIds);
+  const mst = useApp((s) => s.mst);
+  const coverMode = useApp((s) => s.coverMode);
+  const mstEdgesSet = useMemo(() => new Set(mst?.prim.edges ?? []), [mst?.prim.edges]);
 
   const [edgeDialogState, setEdgeDialogState] = useState<{
     isOpen: boolean;
@@ -560,6 +589,9 @@ export default function Canvas() {
   const isMapMode = useMemo(() => graph.nodes.some((n) => n.lat != null && n.lon != null), [graph.nodes]);
   const edgeWeightsMode = useUiStore((s) => s.edgeWeightsMode);
   const setEdgeWeightsMode = useUiStore((s) => s.setEdgeWeightsMode);
+  const isPresentationMode = useUiStore((s) => s.isPresentationMode);
+  const departments = useApp((s) => s.departments);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
   // Determinar aristas y nodos en la ruta activa resaltada
   // Si no hay selección explícita y hay empates en shortest (shortest.length > 1),
@@ -617,8 +649,31 @@ export default function Canvas() {
   const evaluatedEdgesSet = useMemo(() => new Set(currentStepEvaluated ?? []), [currentStepEvaluated]);
   const permanentNodesSet = useMemo(() => new Set(currentStepPermanent ?? []), [currentStepPermanent]);
 
-  // Colocación de nombres y pesos del mapa según el zoom (cuantizado a pasos de 0.05).
+  // Nivel de zoom cuantizado a pasos de 0.05
   const zoomStep = Math.round(zoom * 20) / 20;
+
+  // Nodos con cabecera activa en Guatemala: origen, destino, nodo actual, seleccionados o con zoom >= 1.
+  // (Los departamentos intermedios de la ruta muestran solo su nombre: la cabecera los encimaría.)
+  const nodesWithCabecera = useMemo(() => {
+    const map = new Map<string, string>();
+    if (mode !== 'guatemala') return map;
+    const prioSet = new Set<string>([
+      ...(query?.source ? [query.source] : []),
+      ...(query?.kind === 'path' && query.target ? [query.target] : []),
+      ...(currentStepCurrent ? [currentStepCurrent] : []),
+      ...selectedNodeIds,
+      ...(hoveredNodeId ? [hoveredNodeId] : []),
+    ]);
+    for (const n of graph.nodes) {
+      const cab = departments[n.id]?.cabecera;
+      if (cab && (zoomStep >= 1 || prioSet.has(n.id))) {
+        map.set(n.id, cab);
+      }
+    }
+    return map;
+  }, [mode, departments, graph.nodes, query, currentStepCurrent, selectedNodeIds, hoveredNodeId, zoomStep]);
+
+  // Colocación de nombres y pesos del mapa según el zoom
   const mapLayout = useMemo(() => {
     const priority = [
       ...(query?.source ? [query.source] : []),
@@ -626,11 +681,13 @@ export default function Canvas() {
       ...activePathNodes,
       ...(currentStepCurrent ? [currentStepCurrent] : []),
       ...selectedNodeIds,
+      ...(hoveredNodeId ? [hoveredNodeId] : []),
     ];
     const weightEdges = new Set<string>([
       ...activePathEdges,
       ...dashedPathEdges,
       ...(query?.kind === 'tree' ? treeEdgesSet : []),
+      ...(mode === 'guatemala' && coverMode === 'mst' && !query ? mstEdgesSet : []),
       ...evaluatedEdgesSet,
       ...selectedEdgeIds,
     ]);
@@ -642,6 +699,16 @@ export default function Canvas() {
       weightEdges,
       graph.unit || 'km',
       viewportWidth,
+      nodesWithCabecera,
+      mode === 'guatemala',
+      // Las paradas intermedias de la ruta van primero, pero se ocultan si chocan (aparecen al acercar).
+      new Set([
+        ...(query?.source ? [query.source] : []),
+        ...(query?.kind === 'path' && query.target ? [query.target] : []),
+        ...(currentStepCurrent ? [currentStepCurrent] : []),
+        ...selectedNodeIds,
+        ...(hoveredNodeId ? [hoveredNodeId] : []),
+      ]),
     );
   }, [
     graph.nodes,
@@ -658,6 +725,11 @@ export default function Canvas() {
     currentStepCurrent,
     selectedNodeIds,
     selectedEdgeIds,
+    hoveredNodeId,
+    mode,
+    coverMode,
+    mstEdgesSet,
+    nodesWithCabecera,
   ]);
   const labelPlacements = mapLayout.placements;
 
@@ -689,6 +761,7 @@ export default function Canvas() {
           isMapMode: isNodeMap,
           labelPosition: labelPlacements[n.id] || 'right',
           labelHidden: mapLayout.hiddenLabels.has(n.id),
+          showCabecera: nodesWithCabecera.has(n.id),
         },
       };
     });
@@ -702,6 +775,7 @@ export default function Canvas() {
     selectedNodeIds,
     labelPlacements,
     mapLayout,
+    nodesWithCabecera,
   ]);
 
   // Mapear aristas de Graph a ReactFlow Edges
@@ -711,7 +785,8 @@ export default function Canvas() {
       const isDashedPath = dashedPathEdges.has(e.id);
       const isOnPath = isSolidPath || isDashedPath;
       const isTiedDashed = isDashedPath;
-      const isTreeEdge = query?.kind === 'tree' && treeEdgesSet.has(e.id);
+      const isMstEdge = mode === 'guatemala' && coverMode === 'mst' && !query && mstEdgesSet.has(e.id);
+      const isTreeEdge = (query?.kind === 'tree' && treeEdgesSet.has(e.id)) || isMstEdge;
       const isEvaluated = evaluatedEdgesSet.has(e.id);
 
       return {
@@ -744,7 +819,10 @@ export default function Canvas() {
     evaluatedEdgesSet,
     selectedEdgeIds,
     isMapMode,
-    query?.kind,
+    query,
+    mode,
+    coverMode,
+    mstEdgesSet,
   ]);
 
   // Manejador de conexión de nuevas aristas al arrastrar
@@ -770,231 +848,260 @@ export default function Canvas() {
     addNode({ x, y });
   };
 
+  // Ajuste automático al entrar en modo presentación
+  useEffect(() => {
+    if (isPresentationMode) {
+      const timer = setTimeout(() => {
+        fitView({ padding: 0.1, duration: 300 });
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [isPresentationMode, fitView]);
+
   return (
     <div
       ref={canvasWrapperRef}
       className="relative flex flex-col h-full w-full bg-slate-50 dark:bg-slate-950"
       data-testid="graph-canvas"
     >
-      {/* Barra Superior de Herramientas y Consulta del Lienzo */}
-      <div
-        data-testid="canvas-toolbar"
-        className="shrink-0 z-10 flex flex-wrap items-center gap-1.5 border-b border-slate-200 bg-white/95 px-3 py-1.5 shadow-xs backdrop-blur-xs dark:border-slate-800 dark:bg-slate-900/95"
-      >
-        {/* Modos de Consulta */}
-        <button
-          type="button"
-          data-testid="query-mode-tree"
-          onClick={() => {
-            const src = query?.source ?? graph.nodes[0]?.id ?? 'A';
-            setTreeQuery(src);
-          }}
-          aria-label="Consulta F2: Árbol de caminos más cortos"
-          className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden ${
-            query?.kind === 'tree'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
-          }`}
+      {/* Barra Superior de Herramientas y Consulta del Lienzo (oculta en modo presentación) */}
+      {!isPresentationMode && (
+        <div
+          data-testid="canvas-toolbar"
+          className="shrink-0 z-10 flex items-center gap-1 overflow-x-auto no-scrollbar border-b border-slate-200 bg-white/95 px-2 py-1 shadow-xs backdrop-blur-xs sm:flex-wrap sm:gap-1.5 sm:px-3 sm:py-1.5 dark:border-slate-800 dark:bg-slate-900/95"
         >
-          🌳 Árbol (F2)
-        </button>
-
-        <button
-          type="button"
-          data-testid="query-mode-path"
-          onClick={() => {
-            const src = query?.source ?? graph.nodes[0]?.id ?? 'A';
-            const tgt = graph.nodes.length > 1 ? (graph.nodes[graph.nodes.length - 1]?.id ?? null) : null;
-            setPathQuery(src, tgt);
-          }}
-          aria-label="Consulta F3: Ruta entre dos nodos"
-          className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden ${
-            query?.kind === 'path'
-              ? 'bg-purple-600 text-white shadow-xs'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
-          }`}
-        >
-          📍 Ruta (F3)
-        </button>
-
-        <button
-          type="button"
-          data-testid="query-clear"
-          onClick={clearQuery}
-          aria-label="Limpiar consulta de caminos"
-          className="min-h-[44px] rounded-lg px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-          title="Limpiar consulta"
-        >
-          ✕ Limpiar
-        </button>
-
-        {/* Selectores de Nodos */}
-        <div className="flex items-center gap-1 pl-1">
-          <label htmlFor="select-source-node" className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            De:
-          </label>
-          <select
-            id="select-source-node"
-            data-testid="select-source-node"
-            value={query?.source ?? ''}
-            onChange={(e) => {
-              const s = e.target.value;
-              if (query?.kind === 'path') {
-                setPathQuery(s, query.target);
-              } else {
-                setTreeQuery(s);
-              }
+          {/* Modos de Consulta */}
+          <button
+            type="button"
+            data-testid="query-mode-tree"
+            onClick={() => {
+              const src = query?.source ?? graph.nodes[0]?.id ?? 'A';
+              setTreeQuery(src);
             }}
-            aria-label="Nodo origen"
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            aria-label="Consulta F2: Árbol de caminos más cortos"
+            className={`shrink-0 min-h-[38px] sm:min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden ${
+              query?.kind === 'tree'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+            }`}
           >
-            {graph.nodes.map((n) => (
-              <option key={n.id} value={n.id}>
-                {n.label}
-              </option>
-            ))}
-          </select>
+            🌳 Árbol (F2)
+          </button>
 
-          {query?.kind === 'path' && (
+          <button
+            type="button"
+            data-testid="query-mode-path"
+            onClick={() => {
+              const src = query?.source ?? graph.nodes[0]?.id ?? 'A';
+              const tgt = graph.nodes.length > 1 ? (graph.nodes[graph.nodes.length - 1]?.id ?? null) : null;
+              setPathQuery(src, tgt);
+            }}
+            aria-label="Consulta F3: Ruta entre dos nodos"
+            className={`shrink-0 min-h-[38px] sm:min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden ${
+              query?.kind === 'path'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+            }`}
+          >
+            📍 Ruta (F3)
+          </button>
+
+          <button
+            type="button"
+            data-testid="query-clear"
+            onClick={clearQuery}
+            aria-label="Limpiar consulta de caminos"
+            className="shrink-0 min-h-[38px] sm:min-h-[44px] rounded-lg px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            title="Limpiar consulta"
+          >
+            ✕ Limpiar
+          </button>
+
+          {/* Botón visible de ajuste a pantalla (módulo Guatemala G1) */}
+          {mode === 'guatemala' && (
+            <button
+              type="button"
+              data-testid="btn-fit-view"
+              onClick={() => fitView({ padding: 0.15, duration: 400 })}
+              aria-label="Ajustar a pantalla"
+              title="Ajustar zoom para ver todo el mapa"
+              className="shrink-0 min-h-[38px] sm:min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              ⛶ Ajustar a pantalla
+            </button>
+          )}
+
+          {/* Selectores de Nodos */}
+          <div className="shrink-0 flex items-center gap-1 pl-1">
+            <label htmlFor="select-source-node" className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              De:
+            </label>
+            <select
+              id="select-source-node"
+              data-testid="select-source-node"
+              value={query?.source ?? ''}
+              onChange={(e) => {
+                const s = e.target.value;
+                if (query?.kind === 'path') {
+                  setPathQuery(s, query.target);
+                } else {
+                  setTreeQuery(s);
+                }
+              }}
+              aria-label="Nodo origen"
+              className="min-h-[38px] sm:min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            >
+              {graph.nodes.map((n) => (
+                <option key={n.id} value={n.id}>
+                  {n.label}
+                </option>
+              ))}
+            </select>
+
+            {query?.kind === 'path' && (
+              <>
+                <label htmlFor="select-target-node" className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  A:
+                </label>
+                <select
+                  id="select-target-node"
+                  data-testid="select-target-node"
+                  value={query.target ?? ''}
+                  onChange={(e) => {
+                    const t = e.target.value || null;
+                    setPathQuery(query.source, t);
+                  }}
+                  aria-label="Nodo destino"
+                  className="min-h-[38px] sm:min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                >
+                  <option value="">(Seleccione destino)</option>
+                  {graph.nodes.map((n) => (
+                    <option key={n.id} value={n.id}>
+                      {n.label}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+          </div>
+
+          {/* Chip de resumen de distancia con 1 decimal */}
+          {query?.kind === 'path' && query.target && shortest && shortest.length > 0 && shortest[0] && (
+            <div
+              data-testid="path-distance-badge"
+              className="shrink-0 rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700 shadow-xs dark:bg-purple-950 dark:text-purple-300"
+            >
+              {highlightedPath?.from === 'shortest' && shortest[highlightedPath.index]
+                ? `${shortest[highlightedPath.index]!.distance.toFixed(1)} ${graph.unit || 'km'}${shortest.length > 1 ? ` · Ruta ${highlightedPath.index + 1} de ${shortest.length}` : ''}`
+                : !highlightedPath && shortest.length > 1
+                  ? `${shortest[0].distance.toFixed(1)} ${graph.unit || 'km'} · ${shortest.length} rutas empatadas`
+                  : `${shortest[0].distance.toFixed(1)} ${graph.unit || 'km'}`}
+            </div>
+          )}
+
+          {/* Controles de Diseño */}
+          {mode === 'design' && (
             <>
-              <label htmlFor="select-target-node" className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                A:
-              </label>
-              <select
-                id="select-target-node"
-                data-testid="select-target-node"
-                value={query.target ?? ''}
-                onChange={(e) => {
-                  const t = e.target.value || null;
-                  setPathQuery(query.source, t);
-                }}
-                aria-label="Nodo destino"
-                className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              <button
+                type="button"
+                data-testid="btn-add-node"
+                onClick={handleAddNodeClick}
+                aria-label="Agregar un nuevo nodo al lienzo"
+                className="shrink-0 flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-hidden"
               >
-                <option value="">(Seleccione destino)</option>
-                {graph.nodes.map((n) => (
-                  <option key={n.id} value={n.id}>
-                    {n.label}
-                  </option>
-                ))}
-              </select>
+                <span>+</span> Nodo
+              </button>
+
+              <button
+                type="button"
+                data-testid="btn-add-edge"
+                onClick={() => {
+                  if (graph.nodes.length < 2) return;
+                  const src = selectedNodeIds[0] ?? graph.nodes[0]!.id;
+                  const tgt = selectedNodeIds[1] ?? graph.nodes.find((n) => n.id !== src)?.id ?? graph.nodes[1]!.id;
+                  setEdgeDialogState({
+                    isOpen: true,
+                    sourceId: src,
+                    targetId: tgt,
+                    isSelfLoop: false,
+                    canSelectEndpoints: true,
+                  });
+                }}
+                aria-label="Agregar una nueva carretera entre nodos"
+                className="shrink-0 flex min-h-[44px] items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden"
+              >
+                <span>+</span> Carretera
+              </button>
+
+              <button
+                type="button"
+                data-testid="btn-suggest-layout"
+                onClick={async () => {
+                  await applySuggestedLayout();
+                  fitView({ duration: 400 });
+                }}
+                aria-label="Aplicar distribución sugerida en el lienzo"
+                className="shrink-0 min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                title="Alinear nodos automáticamente según caminos más cortos"
+              >
+                🔄 Distribuir
+              </button>
+
+              {/* Toggle Mantener Proporción */}
+              <label className="shrink-0 flex min-h-[44px] cursor-pointer items-center gap-1.5 px-2 text-xs font-medium text-slate-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  data-testid="toggle-keep-proportion"
+                  aria-label="Mantener proporción"
+                  checked={keepProportion}
+                  onChange={(e) => setKeepProportion(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="whitespace-nowrap">Mantener proporción</span>
+              </label>
             </>
           )}
-        </div>
 
-        {/* Chip de resumen de distancia */}
-        {query?.kind === 'path' && query.target && shortest && shortest.length > 0 && shortest[0] && (
-          <div
-            data-testid="path-distance-badge"
-            className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700 shadow-xs dark:bg-purple-950 dark:text-purple-300"
-          >
-            {highlightedPath?.from === 'shortest' && shortest[highlightedPath.index]
-              ? `${shortest[highlightedPath.index]!.distance} ${graph.unit || 'km'}${shortest.length > 1 ? ` · Ruta ${highlightedPath.index + 1} de ${shortest.length}` : ''}`
-              : !highlightedPath && shortest.length > 1
-                ? `${shortest[0].distance} ${graph.unit || 'km'} · ${shortest.length} rutas empatadas`
-                : `${shortest[0].distance} ${graph.unit || 'km'}`}
-          </div>
-        )}
-
-        {/* Controles de Diseño */}
-        {mode === 'design' && (
-          <>
-            <button
-              type="button"
-              data-testid="btn-add-node"
-              onClick={handleAddNodeClick}
-              aria-label="Agregar un nuevo nodo al lienzo"
-              className="flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-hidden"
+          {/* Selector de visibilidad de pesos de aristas */}
+          <div className="shrink-0 flex items-center gap-1 pl-1">
+            <label
+              htmlFor="select-edge-weights-mode"
+              className="text-xs font-medium text-slate-500 dark:text-slate-400"
             >
-              <span>+</span> Nodo
-            </button>
-
-            <button
-              type="button"
-              data-testid="btn-add-edge"
-              onClick={() => {
-                if (graph.nodes.length < 2) return;
-                const src = selectedNodeIds[0] ?? graph.nodes[0]!.id;
-                const tgt = selectedNodeIds[1] ?? graph.nodes.find((n) => n.id !== src)?.id ?? graph.nodes[1]!.id;
-                setEdgeDialogState({
-                  isOpen: true,
-                  sourceId: src,
-                  targetId: tgt,
-                  isSelfLoop: false,
-                  canSelectEndpoints: true,
-                });
-              }}
-              aria-label="Agregar una nueva carretera entre nodos"
-              className="flex min-h-[44px] items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden"
-            >
-              <span>+</span> Carretera
-            </button>
-
-            <button
-              type="button"
-              data-testid="btn-suggest-layout"
-              onClick={async () => {
-                await applySuggestedLayout();
-                fitView({ duration: 400 });
-              }}
-              aria-label="Aplicar distribución sugerida en el lienzo"
-              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-              title="Alinear nodos automáticamente según caminos más cortos"
-            >
-              🔄 Distribuir
-            </button>
-
-            {/* Toggle Mantener Proporción */}
-            <label className="flex min-h-[44px] cursor-pointer items-center gap-1.5 px-2 text-xs font-medium text-slate-700 dark:text-slate-200">
-              <input
-                type="checkbox"
-                data-testid="toggle-keep-proportion"
-                aria-label="Mantener proporción"
-                checked={keepProportion}
-                onChange={(e) => setKeepProportion(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="whitespace-nowrap">Mantener proporción</span>
+              Pesos:
             </label>
-          </>
-        )}
+            <select
+              id="select-edge-weights-mode"
+              data-testid="select-edge-weights-mode"
+              value={edgeWeightsMode}
+              onChange={(e) => setEdgeWeightsMode(e.target.value as EdgeWeightsMode)}
+              aria-label="Visibilidad de pesos de aristas"
+              className="min-h-[38px] sm:min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            >
+              <option value="auto">Pesos: automático</option>
+              <option value="all">Pesos: todos</option>
+              <option value="hidden">Pesos: ocultos</option>
+            </select>
+          </div>
 
-        {/* Selector de visibilidad de pesos de aristas */}
-        <div className="flex items-center gap-1 pl-1">
-          <label htmlFor="select-edge-weights-mode" className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Pesos:
-          </label>
-          <select
-            id="select-edge-weights-mode"
-            data-testid="select-edge-weights-mode"
-            value={edgeWeightsMode}
-            onChange={(e) => setEdgeWeightsMode(e.target.value as EdgeWeightsMode)}
-            aria-label="Visibilidad de pesos de aristas"
-            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          {/* Badges de Escala y Error de Ajuste (F6) */}
+          <div
+            data-testid="scale-badge"
+            className="shrink-0 hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+            title={`Magnitud: ${scale.magnitude} · Mediana: ${(160 / scale.pxPerUnit).toFixed(1)} ${graph.unit || 'km'}`}
           >
-            <option value="auto">Pesos: automático</option>
-            <option value="all">Pesos: todos</option>
-            <option value="hidden">Pesos: ocultos</option>
-          </select>
-        </div>
+            Escala: {scale.range}
+          </div>
 
-        {/* Badges de Escala y Error de Ajuste (F6) */}
-        <div
-          data-testid="scale-badge"
-          className="hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-          title={`Magnitud: ${scale.magnitude} · Mediana: ${(160 / scale.pxPerUnit).toFixed(1)} ${graph.unit || 'km'}`}
-        >
-          Escala: {scale.range}
+          <div
+            data-testid="stress-error-badge"
+            className="shrink-0 hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+            title="Error de proyección stress majorization: no todos los pesos son representables en un plano 2D"
+          >
+            Ajuste 2D: {layoutSuggestion?.stressError ?? 0}%
+          </div>
         </div>
-
-        <div
-          data-testid="stress-error-badge"
-          className="hidden md:flex min-h-[44px] items-center rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-          title="Error de proyección stress majorization: no todos los pesos son representables en un plano 2D"
-        >
-          Ajuste 2D: {layoutSuggestion?.stressError ?? 0}%
-        </div>
-      </div>
+      )}
 
       {/* Contenedor del Lienzo ReactFlow - remontado por identidad de grafo (mode + graphName) */}
       <CanvasFlow
@@ -1005,6 +1112,8 @@ export default function Canvas() {
         canvasWrapperRef={canvasWrapperRef}
         isMapMode={isMapMode}
         graphNodes={graph.nodes}
+        onNodeMouseEnter={(_, node) => setHoveredNodeId(node.id)}
+        onNodeMouseLeave={() => setHoveredNodeId(null)}
       />
 
       <EdgeDialog

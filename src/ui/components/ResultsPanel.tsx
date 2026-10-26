@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import type { ResultTab } from '../../store/types';
 import { useUiStore } from '../uiStore';
 import { useApp } from '../useApp';
+import GuatemalaRouteBreakdown from './guatemala/GuatemalaRouteBreakdown';
 import AllPathsTab from './tabs/AllPathsTab';
 import FloydTab from './tabs/FloydTab';
 import GraphicTab from './tabs/GraphicTab';
+import MstTab from './tabs/MstTab';
 import TabularTab from './tabs/TabularTab';
 
+type GuatemalaTab = 'ruta' | 'mst' | 'tabla' | 'grafica' | 'rutas' | 'floyd';
+
 export default function ResultsPanel() {
+  const mode = useApp((s) => s.mode);
   const activeTab = useApp((s) => s.activeTab);
   const setActiveTab = useApp((s) => s.setActiveTab);
 
@@ -19,6 +24,9 @@ export default function ResultsPanel() {
   const setPanelWidth = useUiStore((s) => s.setPanelWidth);
   const panelState = useUiStore((s) => s.panelState);
   const setPanelState = useUiStore((s) => s.setPanelState);
+  const guatemalaTab = useUiStore((s) => s.guatemalaTab);
+  const setGuatemalaTab = useUiStore((s) => s.setGuatemalaTab);
+  const setIsAssistantOpen = useUiStore((s) => s.setIsAssistantOpen);
 
   // Arrastre móvil
   const [isDraggingMobile, setIsDraggingMobile] = useState(false);
@@ -149,12 +157,23 @@ export default function ResultsPanel() {
     return () => clearTimeout(timer);
   }, [panelState, panelWidth]);
 
-  const tabs: { key: ResultTab; label: string; shortLabel: string; icon: string; testId: string }[] = [
+  const p1Tabs: { key: ResultTab; label: string; shortLabel: string; icon: string; testId: string }[] = [
     { key: 'tabla', label: 'Tabla (S1)', shortLabel: 'Tabla', icon: '📋', testId: 'tab-tabla' },
     { key: 'grafica', label: 'Gráfica (S2)', shortLabel: 'Gráfica', icon: '🗺️', testId: 'tab-grafica' },
     { key: 'rutas', label: 'Rutas (S3)', shortLabel: 'Rutas', icon: '⭐', testId: 'tab-rutas' },
     { key: 'floyd', label: 'Floyd', shortLabel: 'Floyd', icon: '🔢', testId: 'tab-floyd' },
   ];
+
+  const guatemalaTabs = [
+    { key: 'mst', label: 'Red mínima (AEM)', shortLabel: 'AEM', icon: '🌳', testId: 'tab-mst' },
+    { key: 'ruta', label: 'Ruta Express', shortLabel: 'Ruta', icon: '📦', testId: 'tab-breakdown' },
+    { key: 'tabla', label: 'Tabla (S1)', shortLabel: 'Tabla', icon: '📋', testId: 'tab-tabla' },
+    { key: 'grafica', label: 'Gráfica (S2)', shortLabel: 'Gráfica', icon: '🗺️', testId: 'tab-grafica' },
+    { key: 'rutas', label: 'Rutas (S3)', shortLabel: 'Rutas', icon: '⭐', testId: 'tab-rutas' },
+    { key: 'floyd', label: 'Floyd', shortLabel: 'Floyd', icon: '🔢', testId: 'tab-floyd' },
+  ];
+
+  const displayTabs = mode === 'guatemala' ? guatemalaTabs : p1Tabs;
 
   const mobileHeightClass =
     mobileSheetPos === 'maximized'
@@ -247,8 +266,8 @@ export default function ResultsPanel() {
       >
         {!isDesktopMinimized && (
           <div role="tablist" aria-label="Pestañas de solución" className="flex items-center gap-1 overflow-x-auto">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key;
+            {displayTabs.map((tab) => {
+              const isActive = mode === 'guatemala' ? guatemalaTab === tab.key : activeTab === tab.key;
               return (
                 <button
                   key={tab.key}
@@ -259,7 +278,14 @@ export default function ResultsPanel() {
                   aria-controls={`panel-${tab.key}`}
                   data-testid={tab.testId}
                   onClick={() => {
-                    setActiveTab(tab.key);
+                    if (mode === 'guatemala') {
+                      setGuatemalaTab(tab.key as GuatemalaTab);
+                      if (['tabla', 'grafica', 'rutas', 'floyd'].includes(tab.key)) {
+                        setActiveTab(tab.key as ResultTab);
+                      }
+                    } else {
+                      setActiveTab(tab.key as ResultTab);
+                    }
                     if (mobileSheetPos === 'collapsed') {
                       setMobileSheetPos('mid');
                     }
@@ -397,41 +423,64 @@ export default function ResultsPanel() {
             ◀
           </button>
 
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              data-testid={`${tab.testId}-mini`}
-              onClick={() => {
-                setActiveTab(tab.key);
-                setPanelState('normal');
-                setIsDesktopCollapsed(false);
-              }}
-              aria-label={tab.label}
-              title={tab.label}
-              className={`flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-base transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
-              }`}
-            >
-              {tab.icon}
-            </button>
-          ))}
+          {displayTabs.map((tab) => {
+            const isActive = mode === 'guatemala' ? guatemalaTab === tab.key : activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                data-testid={`${tab.testId}-mini`}
+                onClick={() => {
+                  if (mode === 'guatemala') {
+                    setGuatemalaTab(tab.key as GuatemalaTab);
+                    if (['tabla', 'grafica', 'rutas', 'floyd'].includes(tab.key)) {
+                      setActiveTab(tab.key as ResultTab);
+                    }
+                  } else {
+                    setActiveTab(tab.key as ResultTab);
+                  }
+                  setPanelState('normal');
+                  setIsDesktopCollapsed(false);
+                }}
+                aria-label={tab.label}
+                title={tab.label}
+                className={`flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-base transition-colors ${
+                  isActive
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                }`}
+              >
+                {tab.icon}
+              </button>
+            );
+          })}
         </div>
       )}
 
       {/* Contenido de la pestaña activa */}
       <div
-        id={`panel-${activeTab}`}
+        id={`panel-${mode === 'guatemala' ? guatemalaTab : activeTab}`}
         role="tabpanel"
-        aria-labelledby={`tab-${activeTab}`}
+        aria-labelledby={`tab-${mode === 'guatemala' ? guatemalaTab : activeTab}`}
         className={`flex-1 overflow-y-auto ${isDesktopMinimized ? 'hidden lg:hidden' : ''}`}
       >
-        {activeTab === 'tabla' && <TabularTab />}
-        {activeTab === 'grafica' && <GraphicTab />}
-        {activeTab === 'rutas' && <AllPathsTab />}
-        {activeTab === 'floyd' && <FloydTab />}
+        {mode === 'guatemala' ? (
+          <>
+            {guatemalaTab === 'mst' && <MstTab />}
+            {guatemalaTab === 'ruta' && <GuatemalaRouteBreakdown onOpenAssistant={() => setIsAssistantOpen(true)} />}
+            {guatemalaTab === 'tabla' && <TabularTab />}
+            {guatemalaTab === 'grafica' && <GraphicTab />}
+            {guatemalaTab === 'rutas' && <AllPathsTab />}
+            {guatemalaTab === 'floyd' && <FloydTab />}
+          </>
+        ) : (
+          <>
+            {activeTab === 'tabla' && <TabularTab />}
+            {activeTab === 'grafica' && <GraphicTab />}
+            {activeTab === 'rutas' && <AllPathsTab />}
+            {activeTab === 'floyd' && <FloydTab />}
+          </>
+        )}
       </div>
     </section>
   );

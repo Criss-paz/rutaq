@@ -4,6 +4,11 @@ import Canvas from './components/Canvas';
 import Header from './components/Header';
 import ResultsPanel from './components/ResultsPanel';
 import ValidationAlert from './components/ValidationAlert';
+import GuatemalaAboutModal from './components/guatemala/GuatemalaAboutModal';
+import GuatemalaAdminModal from './components/guatemala/GuatemalaAdminModal';
+import GuatemalaAssistantModal from './components/guatemala/GuatemalaAssistantModal';
+import GuatemalaPresentation from './components/guatemala/GuatemalaPresentation';
+import GuatemalaToolbar from './components/guatemala/GuatemalaToolbar';
 import { useApp } from './useApp';
 import { useUiStore } from './uiStore';
 
@@ -14,6 +19,16 @@ export default function App() {
   const canRedo = useApp((s) => s.canRedo());
   const mode = useApp((s) => s.mode);
   const mobileSheetPos = useUiStore((s) => s.mobileSheetPos);
+
+  const isAssistantOpen = useUiStore((s) => s.isAssistantOpen);
+  const setIsAssistantOpen = useUiStore((s) => s.setIsAssistantOpen);
+  const isAdminOpen = useUiStore((s) => s.isAdminOpen);
+  const setIsAdminOpen = useUiStore((s) => s.setIsAdminOpen);
+  const isAboutOpen = useUiStore((s) => s.isAboutOpen);
+  const setIsAboutOpen = useUiStore((s) => s.setIsAboutOpen);
+  const isPresentationMode = useUiStore((s) => s.isPresentationMode);
+  const setIsPresentationMode = useUiStore((s) => s.setIsPresentationMode);
+  const setGuatemalaTab = useUiStore((s) => s.setGuatemalaTab);
 
   // Atajos de teclado globales (Ctrl+Z para deshacer, Ctrl+Y para rehacer)
   useEffect(() => {
@@ -49,17 +64,27 @@ export default function App() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-50 font-sans text-slate-900 select-none dark:bg-slate-950 dark:text-slate-100">
       {/* Barra superior */}
-      <Header />
+      {!isPresentationMode && <Header />}
+
+      {/* Barra de herramientas específica de Guatemala (Transporte Express) */}
+      {!isPresentationMode && mode === 'guatemala' && (
+        <GuatemalaToolbar
+          onOpenAssistant={() => setIsAssistantOpen(true)}
+          onOpenAdmin={() => setIsAdminOpen(true)}
+          onOpenAbout={() => setIsAboutOpen(true)}
+          onStartPresentation={() => setIsPresentationMode(true)}
+        />
+      )}
 
       {/* Alerta de validación en caso de advertencia o error en el grafo */}
-      <ValidationAlert />
+      {!isPresentationMode && <ValidationAlert />}
 
       {/* Contenedor principal: en pantallas >= 1024px divide en lienzo a la izquierda y panel a la derecha */}
       <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden lg:flex-row">
         {/* Área central del lienzo con React Flow */}
         <main
           className={`relative flex flex-1 min-h-0 flex-col overflow-hidden lg:!mb-0 ${
-            mobileSheetPos === 'maximized'
+            isPresentationMode || mobileSheetPos === 'maximized'
               ? 'mb-0'
               : mobileSheetPos === 'expanded'
                 ? 'mb-[85vh]'
@@ -75,8 +100,22 @@ export default function App() {
         </main>
 
         {/* Panel de resultados con pestañas (hoja inferior en móvil/tablet, lateral derecho en escritorio) */}
-        <ResultsPanel />
+        {!isPresentationMode && <ResultsPanel />}
       </div>
+
+      {/* Modales y vistas del Módulo Guatemala */}
+      {mode === 'guatemala' && (
+        <>
+          <GuatemalaAssistantModal
+            isOpen={isAssistantOpen}
+            onClose={() => setIsAssistantOpen(false)}
+            onCalculated={() => setGuatemalaTab('ruta')}
+          />
+          <GuatemalaAdminModal isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+          <GuatemalaAboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+          <GuatemalaPresentation isOpen={isPresentationMode} onExit={() => setIsPresentationMode(false)} />
+        </>
+      )}
     </div>
   );
 }

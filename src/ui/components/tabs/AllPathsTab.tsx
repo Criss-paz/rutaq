@@ -47,7 +47,7 @@ export default function AllPathsTab() {
       const dest = p.nodes[p.nodes.length - 1] ? getNodeLabel(p.nodes[p.nodes.length - 1]!) : '';
       const seq = p.nodes.map((n) => getNodeLabel(n)).join(' -> ');
       const diff = Math.max(0, p.distance - minDistance).toFixed(1);
-      return [idx + 1, `"${orig}"`, `"${dest}"`, `"${seq}"`, p.nodes.length - 1, p.distance, diff];
+      return [idx + 1, `"${orig}"`, `"${dest}"`, `"${seq}"`, p.nodes.length - 1, p.distance.toFixed(1), diff];
     });
 
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -229,7 +229,7 @@ export default function AllPathsTab() {
                     </div>
 
                     <div className="col-span-2 text-right font-mono font-bold text-blue-600 dark:text-blue-400">
-                      {path.distance} {unit}
+                      {path.distance.toFixed(1)} {unit}
                     </div>
 
                     <div className="col-span-2 text-right font-mono text-slate-600 dark:text-slate-400">

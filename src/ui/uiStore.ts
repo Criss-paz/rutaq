@@ -46,6 +46,18 @@ export interface UiStore {
 
   edgeWeightsMode: EdgeWeightsMode;
   setEdgeWeightsMode: (mode: EdgeWeightsMode) => void;
+
+  // Proyecto II — Estados UI Guatemala
+  guatemalaTab: 'ruta' | 'mst' | 'tabla' | 'grafica' | 'rutas' | 'floyd';
+  setGuatemalaTab: (tab: 'ruta' | 'mst' | 'tabla' | 'grafica' | 'rutas' | 'floyd') => void;
+  isAssistantOpen: boolean;
+  setIsAssistantOpen: (open: boolean) => void;
+  isAdminOpen: boolean;
+  setIsAdminOpen: (open: boolean) => void;
+  isAboutOpen: boolean;
+  setIsAboutOpen: (open: boolean) => void;
+  isPresentationMode: boolean;
+  setIsPresentationMode: (open: boolean) => void;
 }
 
 const initialPanelState = getInitialState();
@@ -138,4 +150,15 @@ export const useUiStore = create<UiStore>((set) => ({
 
   edgeWeightsMode: 'auto',
   setEdgeWeightsMode: (mode) => set({ edgeWeightsMode: mode }),
+
+  guatemalaTab: 'mst',
+  setGuatemalaTab: (tab) => set({ guatemalaTab: tab }),
+  isAssistantOpen: false,
+  setIsAssistantOpen: (open) => set({ isAssistantOpen: open }),
+  isAdminOpen: false,
+  setIsAdminOpen: (open) => set({ isAdminOpen: open }),
+  isAboutOpen: false,
+  setIsAboutOpen: (open) => set({ isAboutOpen: open }),
+  isPresentationMode: false,
+  setIsPresentationMode: (open) => set({ isPresentationMode: open }),
 }));

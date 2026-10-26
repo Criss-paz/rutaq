@@ -15,6 +15,7 @@ export interface CustomNodeData {
   labelPosition?: 'right' | 'left' | 'top' | 'bottom';
   /** El nombre no cabe con este zoom (se muestra al acercar, al pasar el cursor o al seleccionarlo). */
   labelHidden?: boolean;
+  showCabecera?: boolean;
   [key: string]: unknown;
 }
 
@@ -40,10 +41,12 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   const setTreeQuery = useApp((s) => s.setTreeQuery);
   const setPathQuery = useApp((s) => s.setPathQuery);
   const query = useApp((s) => s.query);
+  const departments = useApp((s) => s.departments);
   const unit = useApp((s) => s.graph.unit || 'km');
 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(label);
+  const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -234,16 +237,37 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
       labelPosClass = 'top-full mt-1.5 left-1/2 -translate-x-1/2 text-center';
     }
 
+    const cabecera = departments[id]?.cabecera;
+    const showCabecera =
+      mode === 'guatemala' &&
+      Boolean(cabecera) &&
+      (nodeData.showCabecera || isOrigin || isTarget || selected || isHovered || zoom >= 1);
+    const nodeTitle =
+      mode === 'guatemala' && cabecera && cabecera !== label ? `${label} (Cabecera: ${cabecera})` : label;
+
     return (
       <div
         data-testid={`node-${id}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
           openNodeMenu(e.clientX, e.clientY);
         }}
-        title={label}
-        aria-label={label}
+        onClick={(e) => {
+          if (mode === 'guatemala') {
+            e.stopPropagation();
+            if (!query || query.kind !== 'path' || !query.source || query.target) {
+              setPathQuery(id, null);
+            } else if (query.source !== id) {
+              setPathQuery(query.source, id);
+            }
+          }
+        }}
+        title={nodeTitle}
+        aria-label={nodeTitle}
+        data-cabecera={cabecera ?? label}
         className={`group relative flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 transition-all cursor-pointer ${pointBgClass} ${
           selected ? 'ring-2 ring-blue-600' : ''
         }`}
@@ -276,6 +300,15 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           >
             {label}
           </span>
+          {showCabecera && (
+            <span
+              data-testid={`node-cabecera-${id}`}
+              style={{ ...haloStyle, fontSize: `${10 / Math.min(zoom, 1)}px` }}
+              className="block opacity-85 font-medium leading-tight mt-0.5"
+            >
+              {cabecera}
+            </span>
+          )}
         </div>
 
         {showContextMenu &&
@@ -315,7 +348,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   } else if (isPermanent) {
     borderClasses = 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-950 dark:text-blue-100';
     badgeColor = 'bg-blue-500 text-white';
-    badgeText = typeof dist === 'number' && dist < Infinity ? `${dist} ${unit}` : 'Perm.';
+    badgeText = typeof dist === 'number' && dist < Infinity ? `${dist.toFixed(1)} ${unit}` : 'Perm.';
   }
 
   return (
