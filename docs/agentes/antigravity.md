@@ -194,9 +194,61 @@ UI completa funcionando con el mock; `npm run lint && npm run typecheck && npm r
    - **Ejecución 1:** 112/112 pruebas pasadas (53.0s) en los 4 perfiles (`desktop-chrome`, `iphone-13`, `pixel-7`, `ipad`), 12 omitidas (condicionales de solo escritorio).
    - **Ejecución 2:** 112/112 pruebas pasadas (53.2s) en los 4 perfiles. Cero fallos, cero flakiness.
 
+### Resolución de la Revisión del Orquestador (Ronda Final — Ensayo de la Presentación en URL Publicada)
+
+1. **Ensayo automatizado contra URL en producción (`https://criss-paz.github.io/rutaq/`)**:
+   - Se implementó `tests/e2e/ensayo.spec.ts` reproduciendo con rigor cronológico cada sección y paso del guion de presentación oficial (`docs/proyecto2/guion_presentacion.md`).
+   - El test se ejecutó en primer plano mediante:
+     `BASE_URL=https://criss-paz.github.io/rutaq/ npx playwright test tests/e2e/ensayo.spec.ts --project=desktop-chrome`
+   - **Resultado:** 1 de 1 prueba aprobada en verde (tiempo de ejecución: 4.2 s). Cero fallos.
+
+2. **Capturas de pantalla generadas a 1280×720 (`docs/capturas/proyecto2/ensayo/`)**:
+   - `01-pantalla-inicio-guatemala.png` (1280×720): Pantalla inicial de Transporte Express con el mapa de los 22 departamentos orientado al norte, rosa de los vientos y barra de escala.
+   - `02-asistente-paso1.png` (1280×720): Asistente de envíos interactivo, paso 1 («¿Dónde se encuentra el paquete?»).
+   - `03-asistente-paso2.png` (1280×720): Asistente de envíos interactivo, paso 2 («¿A qué departamento debe llegar?»).
+   - `04-ejemplo-que-iza.png` (1280×720): Demostración en vivo del envío transversal QUE → IZA (494.0 km, fórmula matemática, secuencia y tramos).
+   - `05-ejemplo-gua-pet.png` (1280×720): Ejemplo norte GUA → PET (415.3 km, tramos por Salamá, Cobán y Franja Transversal).
+   - `06-ejemplo-sma-jut.png` (1280×720): Ejemplo transversal sur SMA → JUT (368.3 km, tramos por costa sur hasta Jutiapa).
+   - `07-red-minima-prim.png` (1280×720): Red Mínima Departamental (AEM / MST) con tabla tabulada paso a paso de Prim (21 pasos).
+   - `08-red-minima-kruskal.png` (1280×720): Red Mínima Departamental con tabla de aristas examinadas y descartadas de Kruskal.
+   - `09-modo-presentacion.png` (1280×720): Modo Presentación a pantalla completa con tarjeta flotante de alta legibilidad para el expositor.
+   - `10-acerca-de.png` (1280×720): Diálogo institucional UMG con nombres y carnés de los 3 integrantes.
+   - Todas las capturas fueron inspeccionadas y verificadas visualmente: tipografía nítida, sin recortes y completamente legibles a 1280×720.
+
+3. **Registro exhaustivo de discrepancias entre el Guion y la Aplicación en Producción**:
+   - **Discrepancia 1 (Paso 2 — Asistente de Transporte Express, Pregunta 2):**
+     - *Texto en guion (línea 44):* `2. ¿A qué departamento debe entregarse?`
+     - *Texto en pantalla (modal):* `2. ¿A qué departamento debe llegar?` (e indicador superior: `¿A dónde debe llegar?`).
+     - *Diagnóstico:* Equivalente funcionalmente; leve variación en el verbo utilizado («entregarse» vs. «llegar»).
+   - **Discrepancia 2 (Paso 3, Ejemplo 1 — Carretera CA-9):**
+     - *Texto en guion (línea 59):* `conectando con la CA-9 Norte hasta Puerto Barrios (172.1 km)`
+     - *Texto en pantalla (tabla de tramos):* `CA-9 Nor` (nomenclatura abreviada del dataset oficial).
+     - *Diagnóstico:* Distancia (172.1 km), total (494.0 km) y secuencia de departamentos coinciden exactamente.
+   - **Discrepancia 3 (Paso 3, Ejemplo 2 — Nomenclatura vial tramos 1 y 2):**
+     - *Texto en guion (línea 70):* `conectando con Baja Verapaz (Salamá, 89.0 km), asciende hacia Alta Verapaz por la CA-14 (69.0 km) y empalma directamente con Petén a través de la Franja Transversal del Norte (RD PET-11 / RD AV-09, 257.3 km)`.
+     - *Texto en pantalla (tabla de tramos):*
+       - Tramo 1 (GUA → BVE): carretera figura como `RD BV-12 / RD GUA-12` (89.0 km).
+       - Tramo 2 (BVE → AVE): carretera figura como `CA-14 / RN-5` (69.0 km; el guion menciona solo `CA-14`).
+       - Tramo 3 (AVE → PET): carretera figura como `RD PET-11 / RD AV-09` (257.3 km; idéntico al guion).
+     - *Diagnóstico:* Kilometrajes individuales (89.0, 69.0, 257.3 km), total (415.3 km) y departamentos coinciden al 100 %.
+   - **Discrepancia 4 (Paso 3, Ejemplo 3 — Nomenclatura vial tramos 2, 3 y 5):**
+     - *Texto en guion (línea 81):* `Suchitepéquez (60.2 km por CITO-180), conectando por Escuintla (102.5 km por CA-02 Occidente) y Santa Rosa (100.0 km) hasta la CA-1 Oriente en Jutiapa (56.0 km)`.
+     - *Texto en pantalla (tabla de tramos):*
+       - Tramo 2 (QUE → SUC): `CITO-180 / SCH-02` (el guion menciona únicamente `CITO-180`).
+       - Tramo 3 (SUC → ESC): `CA-02 OCC` (el guion dice `CA-02 Occidente`).
+       - Tramo 5 (SRO → JUT): `CA-1 Or` (el guion dice `CA-1 Oriente`).
+     - *Diagnóstico:* Kilometrajes individuales (49.6, 60.2, 102.5, 100.0, 56.0 km), total (368.3 km) y departamentos coinciden al 100 %.
+   - **Discrepancia 5 (Paso 4 — Formato de millares en Red Mínima MST):**
+     - *Texto en guion (línea 97):* `un kilometraje total de 1 425.3 km` (con espacio separador de miles).
+     - *Texto en pantalla:* `1425.3 km` (cifra numérica sin separador de millar).
+     - *Diagnóstico:* Valor numérico exacto de 1425.3 km y 21 carreteras coincide idéntico en Prim y Kruskal.
+   - **Discrepancia 6 (Paso 6 — Expositores vs. Créditos):**
+     - *Texto en guion (línea 6):* `Expositor (por definir): Cristopher Alexis Castellanos Paz / Leonel Taracena Marroquín / Pablo Alexander Vásquez Rivera`.
+     - *Texto en pantalla (modal Acerca de):* Enumera formalmente a los 3 integrantes con sus carnés universitarios (`2690-24-5972`, `2690-24-4072`, `2690-24-13123`) y fecha fijada (`Sábado 31 de octubre de 2026`).
+
 ### Pendiente
 
-- Ninguno. Todos los requerimientos de la Ronda 7 han sido completamente implementados y verificados.
+- Ninguno. Ensayo de presentación completo, capturas de evidencia a 1280×720 generadas y verificadas contra la URL en vivo.
 
 ### Decisiones
 
