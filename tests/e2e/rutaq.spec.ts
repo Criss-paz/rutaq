@@ -18,6 +18,9 @@ function getNetworkxDistance(graphFile: string, origin: string, destination: str
   throw new Error(`Distancia no encontrada en resultados.csv para ${graphFile} ${origin}->${destination}`);
 }
 
+/** La interfaz muestra los km con 1 decimal (los datos tienen precisión de 0.1 km). */
+const km1 = (d: number) => d.toFixed(1);
+
 test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
   test.beforeEach(async ({ page }) => {
     // Escuchar errores en consola
@@ -118,17 +121,17 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
 
     // Cambiar a pestaña gráfica para verificar resumen de ruta
     await page.getByTestId('tab-grafica').click();
-    await expect(page.getByText(`Distancia Total: ${dist1} km`)).toBeVisible();
+    await expect(page.getByText(`Distancia Total: ${km1(dist1)} km`)).toBeVisible();
 
     // Par 2: Quetzaltenango (QTZ) -> Olintepeque (OLI)
     const dist2 = getNetworkxDistance('src/data/quetzaltenango.json', 'QTZ', 'OLI');
     await page.getByTestId('select-target-node').selectOption('OLI');
-    await expect(page.getByText(`Distancia Total: ${dist2} km`)).toBeVisible();
+    await expect(page.getByText(`Distancia Total: ${km1(dist2)} km`)).toBeVisible();
 
     // Par 3: Quetzaltenango (QTZ) -> Coatepeque (COA)
     const dist3 = getNetworkxDistance('src/data/quetzaltenango.json', 'QTZ', 'COA');
     await page.getByTestId('select-target-node').selectOption('COA');
-    await expect(page.getByText(`Distancia Total: ${dist3} km`)).toBeVisible();
+    await expect(page.getByText(`Distancia Total: ${km1(dist3)} km`)).toBeVisible();
 
     await page.screenshot({
       path: `docs/informe/capturas/${testInfo.project.name}-04-f3-ruta.png`,
@@ -191,7 +194,7 @@ test.describe('RutaQ — Interfaz y Experiencia de Usuario E2E', () => {
     const firstRow = page.getByTestId('path-row-0');
     await expect(firstRow).toBeVisible({ timeout: 10000 });
     await expect(firstRow).toContainText('⭐');
-    await expect(firstRow).toContainText(`${expectedDijkstraDist}`);
+    await expect(firstRow).toContainText(km1(expectedDijkstraDist));
     await expect(firstRow).toContainText('+0.0');
 
     // Clic en la fila para resaltar
