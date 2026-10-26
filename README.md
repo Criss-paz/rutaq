@@ -72,6 +72,39 @@ BASE_URL=https://criss-paz.github.io/rutaq/ npm run e2e   # E2E contra la versi�
 | `tests/`        | Pruebas unitarias (Vitest + fast-check) y E2E (Playwright) |
 | `docs/`         | Plan, estado, datos e informe                              |
 
+## Proyecto II — Transporte Express (módulo Guatemala)
+
+En el selector de modo elige **Guatemala (Transporte Express)**: los 22 departamentos en su posición real (norte arriba,
+contorno del país, rosa de los vientos y escala) y 49 carreteras entre departamentos vecinos con km reales (OSRM),
+validadas una por una en Google Maps.
+
+| Función                         | Cómo se usa                                                                                                                                                                                                                       |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Calcular mejor ruta**         | Pregunta dónde está el paquete y a qué departamento debe llegar; muestra la ruta en el mapa, el listado de departamentos, la tabla de tramos (carretera, km del tramo y acumulado) y la suma total con su fórmula.                |
+| **Administrar red**             | Agregar, editar, eliminar y buscar departamentos y carreteras (todas las conexiones A→B, A→C, B→C…), con validaciones, autoguardado, exportar/importar JSON y restaurar los datos originales.                                     |
+| **Red mínima (Prim / Kruskal)** | Árbol de expansión mínima que conecta los 22 departamentos con el menor total de km; tabla paso a paso de ambos algoritmos (dan el mismo total). También: rutas más cortas desde una bodega y un recorrido de reparto aproximado. |
+| **Ejemplos y presentación**     | Botones QUE→IZA, GUA→PET, SMA→JUT y «Red mínima»; modo presentación a pantalla completa para proyector.                                                                                                                           |
+
+Comandos del Proyecto II:
+
+```bash
+npm run capturas       # capturas del módulo en docs/capturas/proyecto2 (BASE_URL=<url> para la versión publicada)
+npm run anexo-codigo   # anexo de código fuente en docs/proyecto2/codigo_fuente.md
+```
+
+Documentación: [`docs/proyecto2/`](docs/proyecto2/) (descripción y solución, guion de la presentación, solución a mano del
+árbol de expansión mínima) y [`docs/datos/VALIDACION_GUATEMALA.md`](docs/datos/VALIDACION_GUATEMALA.md).
+
+### Integrantes del grupo
+
+| Nombre                            | Carné         |
+| --------------------------------- | ------------- |
+| Cristopher Alexis Castellanos Paz | 2690-24-5972  |
+| Leonel Taracena Marroquín         | 2690-24-4072  |
+| Pablo Alexander Vásquez Rivera    | 2690-24-13123 |
+
+Universidad Mariano Gálvez de Guatemala — Ingeniería en Sistemas.
+
 ## Créditos
 
 Cristopher Alexis Castellanos Paz — carné 2690245972.

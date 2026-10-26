@@ -2,23 +2,22 @@
 
 _Última actualización: 2026-10-14 — Claude Code (orquestador)_
 
-## Proyecto II — Transporte Express (en curso; presentación: sábado 31 de octubre de 2026)
+## Proyecto II — Transporte Express: **publicado** (2026-10-26) · presentación: sábado 31 de octubre de 2026
 
-Plan: `docs/PLAN_PROYECTO2.md` · ids: `docs/agentes/proyecto2_ids.md` · respaldo del Proyecto I: etiqueta `v1-proyecto-1`.
+Plan: `docs/PLAN_PROYECTO2.md` · respaldo del Proyecto I: etiqueta `v1-proyecto-1`.
 
-| Tarea                                                                                                      | Dueño       | Estado                                                                                                                   |
-| ---------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Respaldo + puerta de regresión (33 unitarias, 112/112 E2E, networkx 648/648)                               | Claude Code | ✅                                                                                                                       |
-| Contrato ampliado (solo adiciones) + stubs                                                                 | Claude Code | ✅                                                                                                                       |
-| Prim / Kruskal / desglose de ruta / recorrido + pruebas (Prim = Kruskal en 500 grafos; networkx 6/6 AEM)   | Codex       | ✅ integrado                                                                                                             |
-| Store del módulo Guatemala (Mercator, formularios, desglose, AEM, recorrido, contorno, exportar/importar)  | Claude Code | ✅ 8 pruebas; probado con datos reales                                                                                   |
-| `npm run anexo-codigo` · `npm run capturas`                                                                | Claude Code | ✅ / espera el spec de capturas                                                                                          |
-| Dataset de 22 departamentos                                                                                | Gemini      | 🔄 ronda 2: criterio de vecindad (la ronda 1 dio 103 aristas que atraviesan el país) y retirar la tabla «DGC» sin fuente |
-| Interfaz del módulo (mapa, asistente, formularios, Prim/Kruskal, presentación, «Acerca de», E2E, capturas) | Antigravity | 🔄                                                                                                                       |
-| Validación Google Maps (20 aristas)                                                                        | Claude Code | ⏳ tras la ronda 2 de datos                                                                                              |
-| Documentación del curso (descripción, guion, solución a mano del AEM)                                      | Gemini      | 🔄 borrador                                                                                                              |
+| Puerta                                      | Resultado                                                                                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Proyecto I intacto                          | ✅ sus 112 E2E siguen en verde (la única adaptación: distancias mostradas con 1 decimal)                                                    |
+| Unitarias y cobertura                       | ✅ 47 pruebas · cobertura del núcleo 97.1 % sentencias, 91.4 % ramas                                                                        |
+| networkx vs programa                        | ✅ 1168/1168 pares de caminos mínimos y 10/10 totales de AEM                                                                                |
+| Datos de Guatemala                          | ✅ 22 cabeceras auditadas; 49 aristas entre vecinos; 49/49 medidas en Google Maps (35 recomendada, 9 alternativa, 5 con el valor de Google) |
+| E2E contra la URL publicada                 | ✅ 148/148 en escritorio, iPhone 13, Pixel 7 e iPad                                                                                         |
+| Lighthouse móvil (producción)               | ✅ rendimiento 91, accesibilidad 95, buenas prácticas 100, SEO 100                                                                          |
+| `npm run capturas` · `npm run anexo-codigo` | ✅ 13 capturas de producción · anexo de 4 896 líneas                                                                                        |
+| Documentación                               | ✅ descripción y solución, guion con valores reales, solución a mano del AEM                                                                |
 
-Pendiente de Cris: **curso, catedrático y sección** para la carátula.
+Pendiente de Cris: **curso, catedrático y sección** para la carátula; después se genera el PDF.
 
 Nota técnica: Vitest guarda un caché por contenido en `node_modules/.vitest-cache`; si se agrega un JSON a `src/data/`
 después de haber corrido pruebas, borrar ese caché (el `import.meta.glob` del store quedaría sin el archivo nuevo).

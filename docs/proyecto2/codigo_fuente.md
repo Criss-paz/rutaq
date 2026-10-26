@@ -3708,7 +3708,7 @@ export default function GuatemalaPresentation({ isOpen, onExit }: GuatemalaPrese
       </header>
 
       {/* Tarjeta flotante inferior de resultados en gran tamaño */}
-      <div className="pointer-events-auto max-w-xl self-start rounded-2xl border border-slate-700/80 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-md text-white">
+      <div className="pointer-events-auto w-full max-w-xl self-start overflow-y-auto rounded-2xl border border-slate-700/80 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-md text-white max-h-[36vh] lg:fixed lg:right-6 lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-[370px] lg:max-w-none">
         {isPathActive && currentBreakdown ? (
           <div className="space-y-3" data-testid="pres-route-card">
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
