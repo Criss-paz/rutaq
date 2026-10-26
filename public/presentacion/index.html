@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transporte Express — Presentación Proyecto II (RutaQ)</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: #18202f;
+      --bg-card-alt: #121926;
+      --border-card: #334155;
+      --border-accent: #475569;
+      --accent-green: #10b981;
+      --accent-green-dark: #059669;
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-cyan: #06b6d4;
+      --text-white: #f8fafc;
+      --text-light: #e2e8f0;
+      --text-muted: #94a3b8;
+      --badge-bg-green: #064e3b;
+      --badge-bg-blue: #1e3a8a;
+      --badge-bg-purple: #581c87;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Barra de progreso superior */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-blue), var(--accent-purple));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Contenedor principal de la presentación (16:9) */
+    #deck-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-dark);
+    }
+
+    .slide {
+      position: absolute;
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      aspect-ratio: 16 / 9;
+      background-color: var(--bg-dark);
+      padding: clamp(14px, 2.8vw, 38px);
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      opacity: 0;
+      transform: scale(0.985);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+      z-index: 10;
+    }
+
+    /* Encabezados de Diapositiva */
+    .slide-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: clamp(10px, 1.6vw, 20px);
+      flex-shrink: 0;
+    }
+
+    .slide-badge {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: clamp(9px, 0.85vw, 12px);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid var(--accent-green);
+      background-color: var(--badge-bg-green);
+      color: var(--accent-green);
+    }
+
+    .slide-badge.blue {
+      border-color: var(--accent-blue);
+      background-color: var(--badge-bg-blue);
+      color: var(--accent-blue);
+    }
+
+    .slide-badge.purple {
+      border-color: var(--accent-purple);
+      background-color: var(--badge-bg-purple);
+      color: var(--accent-purple);
+    }
+
+    .slide-title {
+      font-size: clamp(20px, 2.3vw, 34px);
+      font-weight: 800;
+      color: var(--text-white);
+      line-height: 1.15;
+    }
+
+    .slide-subtitle {
+      font-size: clamp(11px, 1.05vw, 15px);
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Contenido Principal de Diapositiva */
+    .slide-body {
+      flex: 1;
+      display: grid;
+      gap: clamp(12px, 1.8vw, 24px);
+      min-height: 0;
+    }
+
+    .grid-split {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-2x2 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .grid-3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Tarjetas */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: clamp(10px, 1.4vw, 18px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .card.alt {
+      background-color: var(--bg-card-alt);
+    }
+
+    .card.border-accent {
+      border-color: var(--border-accent);
+    }
+
+    .card-title {
+      font-size: clamp(11px, 1.0vw, 14px);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title.green { color: var(--accent-green); }
+    .card-title.blue { color: var(--accent-blue); }
+    .card-title.purple { color: var(--accent-purple); }
+    .card-title.amber { color: var(--accent-amber); }
+    .card-title.cyan { color: var(--accent-cyan); }
+
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(5px, 0.7vw, 10px);
+      font-size: clamp(10px, 0.95vw, 13.5px);
+      color: var(--text-light);
+      line-height: 1.4;
+    }
+
+    .bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .bullet-list li::before {
+      content: "•";
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .bullet-list.blue li::before { color: var(--accent-blue); }
+    .bullet-list.purple li::before { color: var(--accent-purple); }
+    .bullet-list.amber li::before { color: var(--accent-amber); }
+
+    /* Métricas destacadas */
+    .metric-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .metric-badge {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: clamp(8px, 1vw, 12px);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .metric-val {
+      font-size: clamp(18px, 2.1vw, 28px);
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .metric-val.green { color: var(--accent-green); }
+    .metric-val.blue { color: var(--accent-blue); }
+    .metric-val.purple { color: var(--accent-purple); }
+    .metric-val.amber { color: var(--accent-amber); }
+
+    .metric-lbl {
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 3px;
+      line-height: 1.2;
+    }
+
+    /* Imagen con Marco */
+    .image-frame {
+      position: relative;
+      background-color: var(--bg-card);
+      border: 1.5px solid var(--border-card);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 0;
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background-color: #030712;
+    }
+
+    .image-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 4px 10px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(4px);
+      font-size: clamp(8px, 0.75vw, 11px);
+      color: var(--text-muted);
+      text-align: center;
+      border-top: 1px solid var(--border-card);
+    }
+
+    /* Fórmula destacada */
+    .formula-box {
+      background-color: var(--bg-dark);
+      border: 1px dashed var(--accent-purple);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: Consolas, monospace;
+      font-size: clamp(11px, 1.1vw, 15px);
+      color: var(--accent-purple);
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    /* Diapositiva de Portada */
+    .cover-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(20px, 3.5vw, 48px);
+      background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 45%),
+                  radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.12), transparent 45%),
+                  var(--bg-card);
+      border: 1.5px solid var(--border-accent);
+      border-radius: 16px;
+    }
+
+    .cover-title {
+      font-size: clamp(28px, 3.8vw, 52px);
+      font-weight: 900;
+      color: var(--accent-green);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+
+    .cover-sub {
+      font-size: clamp(14px, 1.5vw, 22px);
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .cover-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(16px, 2.5vw, 36px);
+      margin-top: clamp(12px, 1.8vw, 24px);
+    }
+
+    /* Barra de Navegación y Controles Inferiores */
+    #toolbar {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(18, 25, 38, 0.92);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-card);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      z-index: 100;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+      user-select: none;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--accent-green);
+    }
+
+    .nav-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #slide-indicator {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-white);
+      padding: 0 8px;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background-color: var(--border-card);
+    }
+
+    /* Panel de Notas del Orador */
+    #notes-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(11, 15, 25, 0.96);
+      backdrop-filter: blur(12px);
+      border-top: 1.5px solid var(--accent-green);
+      padding: 16px 24px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 200;
+      max-height: 40vh;
+      overflow-y: auto;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    #notes-drawer.open {
+      transform: translateY(0);
+    }
+
+    #notes-drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-green);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    #notes-text {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text-light);
+      white-space: pre-line;
+    }
+
+    /* Modal de Ayuda (Atajos) */
+    #help-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+
+    #help-modal.open {
+      display: flex;
+    }
+
+    .help-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 24px 30px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    }
+
+    .help-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .help-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .help-table td {
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .kbd {
+      display: inline-block;
+      padding: 2px 7px;
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-accent);
+      border-radius: 5px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: var(--accent-cyan);
+    }
+
+    /* ESTILO DE IMPRESIÓN PARA PDF (Una diapositiva por página) */
+    @media print {
+      @page {
+        size: landscape;
+        margin: 0;
+      }
+
+      html, body {
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        background-color: var(--bg-dark) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      #progress-bar, #toolbar, #notes-drawer, #help-modal {
+        display: none !important;
+      }
+
+      #deck-container {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      .slide {
+        display: flex !important;
+        opacity: 1 !important;
+        transform: none !important;
+        position: relative !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        padding: 32px !important;
+        box-sizing: border-box !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de progreso -->
+  <div id="progress-bar"></div>
+
+  <!-- Contenedor del mazo de diapositivas -->
+  <div id="deck-container">
+
+    <!-- =====================================================================
+         DIAPOSITIVA 1: Portada
+         ===================================================================== -->
+    <section class="slide active" id="slide-1" data-slide="1">
+      <div class="cover-card">
+        <div>
+          <span class="slide-badge blue">UNIVERSIDAD MARIANO GÁLVEZ DE GUATEMALA · INGENIERÍA EN SISTEMAS</span>
+          <div style="margin-top: 14px;">
+            <h1 class="cover-title">Transporte Express — Ruta Más Corta</h1>
+            <p class="cover-sub">Optimización de Rutas Departamentales y Red Troncal Mínima (RutaQ)</p>
+          </div>
+        </div>
+
+        <div class="cover-grid">
+          <!-- Datos Académicos -->
+          <div class="card alt">
+            <span class="card-title cyan">DATOS ACADÉMICOS</span>
+            <ul class="bullet-list" style="margin-top: 6px;">
+              <li><strong>Curso:</strong> Investigación de Operaciones</li>
+              <li><strong>Catedrático:</strong> Ing. Samuel Isaac Gómez Moreno</li>
+              <li><strong>Semestre y Carrera:</strong> 6.º semestre, Ingeniería en Sistemas</li>
+              <li><strong>Fecha:</strong> Sábado 31 de octubre de 2026</li>
+              <li><strong>Plataforma:</strong> <span style="color: var(--accent-cyan); text-decoration: underline;">https://criss-paz.github.io/rutaq/</span></li>
+            </ul>
+          </div>
+
+          <!-- Integrantes -->
+          <div class="card alt">
+            <span class="card-title purple">INTEGRANTES DEL EQUIPO</span>
+            <ul class="bullet-list purple" style="margin-top: 6px;">
+              <li>
+                <div>
+                  <strong>Cristopher Alexis Castellanos Paz</strong><br>
+                  <span style="color: var(--text-muted); font-size: 0.9em;">Carné: 2690-24-5972</span>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <strong>Leonel Taracena Marroquín</strong><br>
+                  <span style="color: var(--text-muted); font-size: 0.9em;">Carné: 2690-24-4072</span>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <strong>Pablo Alexander Vásquez Rivera</strong><br>
+                  <span style="color: var(--text-muted); font-size: 0.9em;">Carné: 2690-24-13123</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="text-align: center; padding-top: 10px; border-top: 1px solid var(--border-card); font-size: clamp(10px, 0.9vw, 13px); color: var(--accent-amber); font-weight: 700;">
+          22 Cabeceras Departamentales · 49 Carreteras Directas · Algoritmos: Dijkstra, Prim y Kruskal
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Buenos días ingeniero Samuel Gómez y compañeros. Hoy les presentamos la solución al Proyecto II de Investigación de Operaciones: el Sistema de Optimización de Rutas Departamentales y Red Troncal Mínima para la empresa Transporte Express, desarrollado sobre nuestra plataforma web RutaQ. El equipo está integrado por Cristopher Alexis Castellanos Paz, Leonel Taracena Marroquín y Pablo Alexander Vásquez Rivera, del 6.º semestre de Ingeniería en Sistemas de la Universidad Mariano Gálvez de Guatemala.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 2: El Problema Logístico
+         ===================================================================== -->
+    <section class="slide" id="slide-2" data-slide="2">
+      <div class="slide-header">
+        <span class="slide-badge">DIAGNÓSTICO Y REQUERIMIENTOS</span>
+        <h2 class="slide-title">El Problema: Retrasos en Envíos Nacionales</h2>
+        <p class="slide-subtitle">Causas operativas en Transporte Express y especificaciones del Proyecto II</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="card">
+            <span class="card-title amber">PROBLEMÁTICA EN TRANSPORTE EXPRESS</span>
+            <ul class="bullet-list amber">
+              <li><strong>Retrasos Críticos:</strong> Paquetes con entregas tardías sistemáticas en todo el país.</li>
+              <li><strong>Rutas Empíricas:</strong> Conductores eligen trayectos por intuición sin planificación cuantitativa.</li>
+              <li><strong>Desvíos Innecesarios:</strong> Tránsito por vías secundarias que incrementa combustible y desgaste.</li>
+              <li><strong>Falta de Red Cuantificada:</strong> Carencia de un catálogo digital oficial con distancias reales.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title green">REQUERIMIENTOS FORMALES DEL ENUNCIADO</span>
+            <ul class="bullet-list">
+              <li><strong>1.</strong> Ingresar los 22 departamentos con cabeceras y coordenadas georreferenciadas.</li>
+              <li><strong>2.</strong> Registrar la red vial interdepartamental con distancias reales en kilómetros.</li>
+              <li><strong>3.</strong> Responder interactivamente: <em>¿Dónde está el paquete?</em> y <em>¿A dónde va?</em></li>
+              <li><strong>4.</strong> Determinar y presentar la mejor ruta con desglose de tramos y fórmula matemática.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/01-pantalla-inicio-guatemala.png" alt="Pantalla inicial Transporte Express en RutaQ">
+          <div class="image-caption">Figura 1: Vista general de RutaQ orientada al norte con los 22 departamentos</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Transporte Express es una compañía guatemalteca de logística que distribuye encomiendas a nivel nacional. La problemática central era que sus paquetes llegaban sistemáticamente tarde a destino debido a la falta de planificación. Los conductores tomaban rutas empíricas o hábitos individuales con desvíos innecesarios, sin contar con una red vial cuantificada con distancias reales ni una herramienta automatizada de despacho.
+
+El enunciado del Proyecto II solicita ingresar los 22 departamentos, registrar carreteras con kilometrajes reales, responder a las preguntas clave de dónde está el paquete y hacia dónde va, y presentar la ruta más corta de manera clara, visual y matemáticamente respaldada.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 3: Modelo Matemático del Grafo
+         ===================================================================== -->
+    <section class="slide" id="slide-3" data-slide="3">
+      <div class="slide-header">
+        <span class="slide-badge">MODELADO MATEMÁTICO</span>
+        <h2 class="slide-title">Modelo: Grafo No Dirigido Ponderado G = (V, E, W)</h2>
+        <p class="slide-subtitle">Abstracción determinista de la red vial nacional y criterios de vecindad directa</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="card">
+            <span class="card-title blue">V = 22 VÉRTICES (CABECERAS DEPARTAMENTALES)</span>
+            <ul class="bullet-list blue">
+              <li>Cada nodo representa la cabecera oficial con coordenadas latitud/longitud en proyección Web Mercator (norte arriba).</li>
+              <li>Códigos canónicos inmutables de 3 letras: <code>GUA</code>, <code>QUE</code>, <code>PET</code>, <code>IZA</code>, <code>SMA</code>, <code>JUT</code>...</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title green">E = 49 ARISTAS DIRECTAS ENTRE VECINOS</span>
+            <ul class="bullet-list">
+              <li><strong>Vecindad Territorial:</strong> Frontera geográfica compartida (contacto ≤ 200 m).</li>
+              <li><strong>Umbral de Paso:</strong> No cruzar ni aproximarse a &lt; 2.0 km de otra cabecera intermedia.</li>
+              <li><strong>Descartes Auditados:</strong> <code>JAL–ZAC</code> y <code>PET–QUI</code> descartadas por violar el umbral.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title purple">W(e) PESOS: DISTANCIA REAL DE CONDUCCIÓN (KM)</span>
+            <ul class="bullet-list purple">
+              <li>Pesos estrictamente positivos (W &gt; 0) en asfalto transitable con nomenclatura vial oficial.</li>
+              <li>Grafo 100 % conexo: conectividad garantizada entre todo par de departamentos.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/02-mapa-completo.png" alt="Grafo conexo de Guatemala con 22 nodos y 49 aristas">
+          <div class="image-caption">Figura 2: Grafo completo: 22 cabeceras departamentales y 49 carreteras directas</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Para resolver el problema con rigor científico, modelamos la red vial de Guatemala como un grafo no dirigido ponderado y conexo G = (V, E, W). Contamos con 22 vértices que corresponden a las cabeceras departamentales oficiales con coordenadas georreferenciadas exactas en proyección Web Mercator con orientación norte-arriba.
+
+Para definir las carreteras directas aplicamos un criterio objetivo y reproducible: los departamentos deben compartir frontera territorial y la carretera no debe cruzar a menos de 2 km de otra cabecera intermedia. De este modo descartamos conexiones compuestas o atajos irreales (como JAL-ZAC y PET-QUI), obteniendo 49 aristas directas con pesos estrictamente positivos correspondientes a distancias reales de conducción en kilómetros.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 4: Datos Reales y Validación
+         ===================================================================== -->
+    <section class="slide" id="slide-4" data-slide="4">
+      <div class="slide-header">
+        <span class="slide-badge">PRECISIÓN Y METODOLOGÍA CARTOGRÁFICA</span>
+        <h2 class="slide-title">Datos Reales y Auditoría Geográfica</h2>
+        <p class="slide-subtitle">Extracción satelital con OSRM/OpenStreetMap y verificación al 100 % en Google Maps</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="metric-row">
+            <div class="metric-badge">
+              <span class="metric-val green">35 / 49</span>
+              <span class="metric-lbl">Coincidencia Exacta<br>(Δ = 0 km)</span>
+            </div>
+            <div class="metric-badge">
+              <span class="metric-val blue">9 / 49</span>
+              <span class="metric-lbl">Variación Mínima<br>(Δ ≤ 2 km)</span>
+            </div>
+            <div class="metric-badge">
+              <span class="metric-val amber">5 / 49</span>
+              <span class="metric-lbl">Ajuste Urbano<br>(Documentado)</span>
+            </div>
+          </div>
+          <div class="card">
+            <span class="card-title cyan">METODOLOGÍA DE RECOLECCIÓN Y AUDITORÍA</span>
+            <ul class="bullet-list">
+              <li><strong>OpenStreetMap &amp; OSRM:</strong> Geocodificación y perfiles de conducción de alta precisión.</li>
+              <li><strong>Auditoría Manual 49/49:</strong> Cada carretera fue medida y contrastada en Google Maps.</li>
+              <li><strong>89.8 % de Fidelidad Directa:</strong> 44 de 49 tramos con variación nula o insignificante.</li>
+              <li><strong>Caso Crítico IZA–PET (287.0 km):</strong> Conexión troncal por la <strong>CA-13</strong>. Sin este tramo directo, el algoritmo desviaría camiones por Alta Verapaz sumando cientos de kilómetros innecesarios.</li>
+              <li><strong>Transparencia:</strong> Todas las distancias y fuentes están documentadas en el repositorio.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/04-formulario-carreteras.png" alt="Catálogo interactivo de carreteras auditadas">
+          <div class="image-caption">Figura 3: Catálogo interactivo de las 49 carreteras auditadas con kilometraje real</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Un aspecto fundamental de nuestro trabajo fue garantizar que los datos fueran 100 % reales y auditables. Extrajimos las distancias y geometrías mediante el motor OSRM sobre OpenStreetMap y validamos manualmente las 49 carreteras frente a Google Maps. El resultado fue contundente: 35 tramos con coincidencia idéntica, 9 con variación menor a 2 km y 5 con ajustes documentados por trazados urbanos o libramientos recientes.
+
+Un hallazgo crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: sin esta arteria troncal directa, cualquier algoritmo desviaría absurdamente los viajes por Alta Verapaz aumentando cientos de kilómetros innecesarios. Cada número en nuestro sistema proviene de carreteras reales de Guatemala.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 5: Algoritmo de Dijkstra
+         ===================================================================== -->
+    <section class="slide" id="slide-5" data-slide="5">
+      <div class="slide-header">
+        <span class="slide-badge purple">FUNDAMENTO ALGORÍTMICO</span>
+        <h2 class="slide-title">Dijkstra: Algoritmo de Camino Mínimo</h2>
+        <p class="slide-subtitle">Búsqueda voraz determinista para despacho punto a punto en la red vial</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="card">
+            <span class="card-title purple">PRINCIPIO VORAZ (GREEDY) Y RELAJACIÓN</span>
+            <ul class="bullet-list purple">
+              <li>Calcula la distancia mínima desde un origen único <code>s</code> hacia todos los demás nodos.</li>
+              <li><strong>Fórmula de Relajación:</strong> Para cada arista <code>(u, v)</code> con peso <code>W(u, v)</code>:<br>
+                <div style="padding: 4px 8px; margin: 4px 0; background: var(--bg-dark); border-radius: 4px; font-family: Consolas, monospace; font-size: 0.95em;">
+                  Si D[u] + W(u, v) &lt; D[v] &rArr; D[v] &larr; D[u] + W(u, v), prev[v] &larr; u
+                </div>
+              </li>
+              <li><strong>Optimalidad Definitiva:</strong> Al extraer un nodo del heap, su distancia calculada es final e insuperable.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title green">COMPLEJIDAD Y CONDICIÓN DE NO NEGATIVIDAD</span>
+            <ul class="bullet-list">
+              <li><strong>Complejidad Temporal:</strong> <code>O((V + E) log V)</code> implementado con min-heap binario.</li>
+              <li><strong>Tiempo de Ejecución:</strong> Menos de 5 ms en el navegador (respuesta instantánea).</li>
+              <li><strong>¿Por qué NO admite pesos negativos?</strong> Porque asume que agregar aristas no puede disminuir distancias acumuladas. Un peso negativo violaría la permanencia de nodos cerrados. En carreteras reales, <strong>W &gt; 0 siempre</strong>.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/02-asistente-paso1.png" alt="Asistente de despacho de Transporte Express">
+          <div class="image-caption">Figura 4: Paso 1 del Asistente: selección de origen en Transporte Express</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Para calcular la mejor ruta para cada paquete implementamos el Algoritmo de Dijkstra. Su funcionamiento se basa en una estrategia voraz o greedy: a partir de la cabecera origen, examina las aristas adyacentes y relaja las distancias tentativas hacia los vecinos. Gracias a una cola de prioridad basada en min-heap binario, su complejidad temporal es de O((V+E) log V), resolviendo cualquier consulta en menos de 5 milisegundos en el navegador.
+
+Es crucial enfatizar que Dijkstra exige pesos estrictamente no negativos (W > 0), lo cual se cumple naturalmente en distancias físicas de carreteras. Si existieran costos negativos o subsidios compensatorios, Dijkstra fallaría al fijar nodos permanentemente, obligando a usar algoritmos como Bellman-Ford.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 6: Demo 1 (QUE -> IZA = 494.0 km)
+         ===================================================================== -->
+    <section class="slide" id="slide-6" data-slide="6">
+      <div class="slide-header">
+        <span class="slide-badge purple">DEMOSTRACIÓN DE RUTA ÓPTIMA 1</span>
+        <h2 class="slide-title">Demo 1: Quetzaltenango a Puerto Barrios (QUE → IZA)</h2>
+        <p class="slide-subtitle">Envío transversal de costa a costa cruzando el altiplano, centro y litoral atlántico</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="metric-row">
+            <div class="metric-badge">
+              <span class="metric-val purple">494.0 km</span>
+              <span class="metric-lbl">Distancia Total Mínima</span>
+            </div>
+            <div class="metric-badge">
+              <span class="metric-val green">5 Tramos</span>
+              <span class="metric-lbl">Carreteras Conectadas</span>
+            </div>
+          </div>
+          <div class="card">
+            <span class="card-title cyan">SECUENCIA Y CARRETERAS OFICIALES</span>
+            <ul class="bullet-list">
+              <li><strong>1. QUE → TOT:</strong> 28.8 km &mdash; RN-01 (Quetzaltenango a Totonicapán)</li>
+              <li><strong>2. TOT → QUI:</strong> 36.2 km &mdash; RN-15 (Totonicapán a Quiché)</li>
+              <li><strong>3. QUI → BVE:</strong> 128.6 km &mdash; RN-15 (Santa Cruz del Quiché a Salamá)</li>
+              <li><strong>4. BVE → ZAC:</strong> 128.3 km &mdash; RN-17 / CA-09 (Salamá a Zacapa)</li>
+              <li><strong>5. ZAC → IZA:</strong> 172.1 km &mdash; CA-09 Norte (Zacapa a Puerto Barrios)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title amber">FÓRMULA ARITMÉTICA DE COMPROBACIÓN</span>
+            <div class="formula-box">
+              28.8 + 36.2 + 128.6 + 128.3 + 172.1 = 494.0 km
+            </div>
+            <p style="font-size: clamp(9px, 0.8vw, 11px); color: var(--text-muted); margin-top: 4px;">
+              Evita el paso por la Ciudad de Guatemala, ahorrando más de 60 km y evitando horas de congestión.
+            </p>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/04-ejemplo-que-iza.png" alt="Ruta óptima Quetzaltenango a Puerto Barrios">
+          <div class="image-caption">Figura 5: Ruta óptima QUE → IZA resaltada en púrpura sobre el mapa de RutaQ</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Veamos nuestro primer caso de demostración: un envío transversal de costa a costa, desde Quetzaltenango en el altiplano occidental hasta Puerto Barrios, Izabal en el litoral atlántico.
+
+El sistema determina una distancia óptima de 494.0 km a través de 5 tramos interdepartamentales: sale de Quetzaltenango por la RN-01 a Totonicapán (28.8 km), avanza a Quiché (36.2 km), enlaza por Baja Verapaz (128.6 km) y Zacapa (128.3 km), y se incorpora a la CA-9 Norte hasta Puerto Barrios (172.1 km). La interfaz no solo resalta la ruta en púrpura en el mapa interactivo, sino que desglosa cada tramo con su nomenclatura oficial y presenta la fórmula aritmética explícita de la suma para total transparencia.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 7: Demos 2 y 3 (GUA -> PET y SMA -> JUT)
+         ===================================================================== -->
+    <section class="slide" id="slide-7" data-slide="7">
+      <div class="slide-header">
+        <span class="slide-badge">DEMOSTRACIONES DE RUTAS ESTRATÉGICAS 2 Y 3</span>
+        <h2 class="slide-title">Demos 2 y 3: Conexiones Norte y Costa Sur</h2>
+        <p class="slide-subtitle">Trayectos clave: acceso al departamento más extenso y corredor fronterizo sur</p>
+      </div>
+      <div class="slide-body grid-split">
+        <!-- Columna Izquierda: Demo 2 -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="card">
+            <span class="card-title blue">DEMO 2: CIUDAD DE GUATEMALA → FLORES, PETÉN</span>
+            <ul class="bullet-list blue" style="font-size: clamp(9.5px, 0.85vw, 12px);">
+              <li><strong>Distancia Total:</strong> <span style="color: var(--accent-blue); font-weight: bold;">415.3 km</span> (3 tramos directos)</li>
+              <li><strong>Secuencia:</strong> GUA &rarr; BVE &rarr; AVE &rarr; PET</li>
+              <li><strong>Tramos:</strong> GUA–BVE (89.0 km, CA-09) &bull; BVE–AVE (69.0 km, CA-14) &bull; AVE–PET (257.3 km, Franja Transversal RD PET-11)</li>
+              <li><strong>Fórmula:</strong> <code>89.0 + 69.0 + 257.3 = 415.3 km</code></li>
+            </ul>
+          </div>
+          <div class="image-frame" style="flex: 1;">
+            <img src="img/05-ejemplo-gua-pet.png" alt="Ruta GUA a PET">
+            <div class="image-caption">Figura 6: Enlace capital-norte (GUA → PET = 415.3 km)</div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Demo 3 -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="card">
+            <span class="card-title green">DEMO 3: SAN MARCOS → JUTIAPA</span>
+            <ul class="bullet-list" style="font-size: clamp(9.5px, 0.85vw, 12px);">
+              <li><strong>Distancia Total:</strong> <span style="color: var(--accent-green); font-weight: bold;">368.3 km</span> (5 tramos Costa Sur)</li>
+              <li><strong>Secuencia:</strong> SMA &rarr; QUE &rarr; SUC &rarr; ESC &rarr; SRO &rarr; JUT</li>
+              <li><strong>Tramos:</strong> SMA–QUE (49.6 km) &bull; QUE–SUC (60.2 km, CITO-180) &bull; SUC–ESC (102.5 km, CA-02) &bull; ESC–SRO (100.0 km) &bull; SRO–JUT (56.0 km, CA-01)</li>
+              <li><strong>Fórmula:</strong> <code>49.6 + 60.2 + 102.5 + 100.0 + 56.0 = 368.3 km</code></li>
+            </ul>
+          </div>
+          <div class="image-frame" style="flex: 1;">
+            <img src="img/06-ejemplo-sma-jut.png" alt="Ruta SMA a JUT">
+            <div class="image-caption">Figura 7: Corredor Costa Sur y frontera oriental (SMA → JUT = 368.3 km)</div>
+          </div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        En el segundo ejemplo resolvemos el corredor norte: Ciudad de Guatemala a Flores, Petén. La ruta óptima es de 415.3 km recorriendo la CA-14 hacia Cobán y empalmando directamente con Petén a través de la Franja Transversal del Norte (RD PET-11, 257.3 km). El sistema preserva la geografía real norte-arriba sin deformación.
+
+En el tercer ejemplo conectamos el extremo occidental fronterizo de San Marcos con Jutiapa en el oriente, cruzando el país por la costa sur con un total de 368.3 km: desciende por la CITO-180 hacia Mazatenango, conecta con Escuintla y Santa Rosa por la CA-2 Occidente y culmina en Jutiapa por la CA-1 Oriente. Ambas rutas demuestran que el sistema encuentra de forma infalible la distancia mínima.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 8: Red Mínima (Prim y Kruskal)
+         ===================================================================== -->
+    <section class="slide" id="slide-8" data-slide="8">
+      <div class="slide-header">
+        <span class="slide-badge">INFRAESTRUCTURA Y ÁRBOL DE EXPANSIÓN MÍNIMA</span>
+        <h2 class="slide-title">Red Mínima Nacional: Prim y Kruskal</h2>
+        <p class="slide-subtitle">Infraestructura vial mínima para mantener comunicados los 22 departamentos</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="metric-row">
+            <div class="metric-badge">
+              <span class="metric-val green">21 Carreteras</span>
+              <span class="metric-lbl">Aristas del Árbol (V - 1)</span>
+            </div>
+            <div class="metric-badge">
+              <span class="metric-val blue">1 425.3 km</span>
+              <span class="metric-lbl">Longitud Total Mínima</span>
+            </div>
+          </div>
+          <div class="card">
+            <span class="card-title cyan">IMPLEMENTACIÓN DUAL DETERMINISTA</span>
+            <ul class="bullet-list">
+              <li><strong>Algoritmo de Prim:</strong> Crecimiento voraz por corte desde una raíz, incorporando siempre la arista incidente de menor peso.</li>
+              <li><strong>Algoritmo de Kruskal:</strong> Ordenamiento global de aristas con estructura Union-Find (conjuntos disjuntos) para evitar ciclos.</li>
+              <li><strong>Convergencia Idéntica:</strong> Ambos algoritmos producen exactamente <strong>1 425.3 km</strong> de asfalto y las mismas 21 carreteras troncales.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title amber">¿RUTA MÁS CORTA VS. ÁRBOL DE EXPANSIÓN MÍNIMA?</span>
+            <ul class="bullet-list amber">
+              <li><strong>Ruta Más Corta (Dijkstra):</strong> Optimiza el viaje de un paquete entre un par específico.</li>
+              <li><strong>Red Mínima (AEM):</strong> Optimiza el costo global de la red comunicando todos los nodos sin ciclos. Un camino dentro del AEM no siempre es la ruta más corta punto a punto.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/07-red-minima-prim.png" alt="Árbol de Expansión Mínima en RutaQ">
+          <div class="image-caption">Figura 8: Árbol de Expansión Mínima (1 425.3 km y 21 aristas) en el mapa nacional</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Además de calcular rutas para paquetes individuales, Transporte Express requería planificar su infraestructura: ¿cuál es la red vial mínima que mantiene conectados los 22 departamentos con el menor kilometraje total? Esto se modela con el Árbol de Expansión Mínima (AEM).
+
+En RutaQ implementamos tanto el Algoritmo de Prim como el de Kruskal con Union-Find para evitar ciclos. Ambos algoritmos convergen con precisión determinista en una red de exactamente 21 carreteras y 1 425.3 km.
+
+La diferencia conceptual es clave: la Ruta Más Corta de Dijkstra optimiza el trayecto individual entre dos puntos, mientras que el AEM optimiza el costo global de la red completa interconectando la totalidad del territorio nacional.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 9: Funcionalidades del Sistema
+         ===================================================================== -->
+    <section class="slide" id="slide-9" data-slide="9">
+      <div class="slide-header">
+        <span class="slide-badge blue">ARQUITECTURA Y USABILIDAD DEL SOFTWARE</span>
+        <h2 class="slide-title">Funcionalidades del Sistema RutaQ</h2>
+        <p class="slide-subtitle">Herramientas especializadas para despachadores, administradores y docencia</p>
+      </div>
+      <div class="slide-body grid-2x2">
+        <div class="card">
+          <span class="card-title green">1. ASISTENTE TRANSPORTE EXPRESS</span>
+          <ul class="bullet-list">
+            <li>Flujo guiado de 2 pasos (<em>«¿Dónde está?»</em> y <em>«¿A dónde va?»</em>).</li>
+            <li>Selección táctil en mapa o menú con cálculo instantáneo.</li>
+            <li>Hoja de ruta completa con distancias parciales y fórmula visible.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-title blue">2. ADMINISTRADOR DE RED VIAL</span>
+          <ul class="bullet-list blue">
+            <li>Catálogo interactivo para añadir, modificar o inhabilitar departamentos y carreteras.</li>
+            <li>Validación automática de conexidad topológica en tiempo real.</li>
+            <li>Simulación de bloqueos o mantenimiento de tramos viales.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-title purple">3. EJECUCIÓN TABULADA PASO A PASO</span>
+          <ul class="bullet-list purple">
+            <li>Tablas didácticas idénticas a los ejercicios y evaluaciones de clase.</li>
+            <li>Traza analítica de Prim, Kruskal, Dijkstra y Floyd-Warshall.</li>
+            <li>Registro explícito de nodos incorporados y aristas descartadas por ciclo.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-title amber">4. MODO PRESENTACIÓN Y RESPONSIVE</span>
+          <ul class="bullet-list amber">
+            <li>Vista de alto contraste 16:9 optimizada para proyectores de aula.</li>
+            <li>Diseño completamente adaptable a celulares, tablets y computadoras.</li>
+            <li>Control con atajos de teclado (F para pantalla completa, flechas de paso).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        RutaQ no es un prototipo estático, sino un sistema web interactivo de nivel profesional. Cuenta con cuatro módulos centrales:
+
+1. El Asistente guiado de Transporte Express en dos pasos («¿Dónde está el paquete?» y «¿A qué departamento debe entregarse?»).
+2. Un Administrador de Red completo para agregar, editar o deshabilitar departamentos y carreteras con validación de conexidad en tiempo real.
+3. Tablas pedagógicas paso a paso que replican la metodología vista en clase para Prim, Kruskal, Dijkstra y Floyd-Warshall.
+4. Un Modo Presentación panorámico integrado, optimizado para proyectores de aula y pantallas táctiles móviles.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 10: Verificación y Calidad
+         ===================================================================== -->
+    <section class="slide" id="slide-10" data-slide="10">
+      <div class="slide-header">
+        <span class="slide-badge">AUDITORÍA TÉCNICA Y ASEGURAMIENTO DE CALIDAD</span>
+        <h2 class="slide-title">Verificación Computacional y Rendimiento Web</h2>
+        <p class="slide-subtitle">Validación científica cruzada con NetworkX y pruebas de regresión automatizadas</p>
+      </div>
+      <div class="slide-body grid-split">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="card">
+            <span class="card-title green">1 168 / 1 168 PARES CON NETWORKX (PYTHON)</span>
+            <ul class="bullet-list">
+              <li>Contraste exhaustivo del 100 % de caminos mínimos: <strong>0 discrepancias</strong>.</li>
+              <li><strong>10 / 10</strong> instancias de Árbol de Expansión Mínima idénticas a <code>networkx.mst</code>.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title blue">148 / 148 PRUEBAS AUTOMATIZADAS (PLAYWRIGHT)</span>
+            <ul class="bullet-list blue">
+              <li>Pruebas E2E de regresión funcional, visual y de estado aprobadas al 100 %.</li>
+              <li>Evaluado en <strong>4 dispositivos y navegadores</strong>: Chromium, WebKit, Firefox y Mobile.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title amber">AUDITORÍA DE GOOGLE LIGHTHOUSE</span>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px;">
+              <div style="background: var(--bg-dark); padding: 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 1.2em; font-weight: 800; color: var(--accent-green);">91</div>
+                <div style="font-size: 0.7em; color: var(--text-muted);">Performance</div>
+              </div>
+              <div style="background: var(--bg-dark); padding: 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 1.2em; font-weight: 800; color: var(--accent-green);">95</div>
+                <div style="font-size: 0.7em; color: var(--text-muted);">Accessibility</div>
+              </div>
+              <div style="background: var(--bg-dark); padding: 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 1.2em; font-weight: 800; color: var(--accent-green);">100</div>
+                <div style="font-size: 0.7em; color: var(--text-muted);">Best Practices</div>
+              </div>
+              <div style="background: var(--bg-dark); padding: 6px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 1.2em; font-weight: 800; color: var(--accent-green);">100</div>
+                <div style="font-size: 0.7em; color: var(--text-muted);">SEO</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="image-frame">
+          <img src="img/10-acerca-de.png" alt="Verificación y Acerca de en RutaQ">
+          <div class="image-caption">Figura 9: Ficha técnica y verificación de integridad en la interfaz de usuario</div>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        La confiabilidad de nuestro sistema está respaldada por una verificación computacional rigurosa. Contrastamos el 100 % de los caminos mínimos y árboles de expansión contra la biblioteca científica NetworkX en Python: 1 168 de 1 168 pares analizados (incluyendo los 484 pares de Guatemala y grafos de control) arrojaron idénticos resultados con cero discrepancias, y 10 de 10 instancias de AEM fueron idénticas.
+
+En aseguramiento de calidad de software, ejecutamos 148 pruebas automatizadas End-to-End con Playwright en 4 dispositivos y motores de renderizado (Chromium, WebKit, Firefox y vista móvil) con 100 % de éxito. Finalmente, la auditoría oficial de Google Lighthouse certificó un rendimiento de 91, accesibilidad de 95, mejores prácticas de 100 y SEO de 100.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 11: Conclusiones
+         ===================================================================== -->
+    <section class="slide" id="slide-11" data-slide="11">
+      <div class="slide-header">
+        <span class="slide-badge">SÍNTESIS DEL PROYECTO</span>
+        <h2 class="slide-title">Conclusiones y Logros Alcanzados</h2>
+        <p class="slide-subtitle">Impacto operativo, rigor cartográfico y excelencia en ingeniería de software</p>
+      </div>
+      <div class="slide-body grid-2x2">
+        <div class="card">
+          <span class="card-title green">1. RESOLUCIÓN DE LA PROBLEMÁTICA REAL</span>
+          <ul class="bullet-list">
+            <li>Transporte Express erradica la selección empírica de rutas por intuición individual.</li>
+            <li>Dijkstra garantiza entregas puntuales, ahorro de combustible y hoja de ruta transparente.</li>
+            <li>Impacto cuantificable en la operación logística de distribución nacional.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-title blue">2. RIGOR CARTOGRÁFICO Y REPRODUCIBILIDAD</span>
+          <ul class="bullet-list blue">
+            <li>Red de 22 departamentos y 49 aristas sustentada en OpenStreetMap y auditada en Google Maps.</li>
+            <li>Inclusión del tramo IZA–PET (287 km) por la CA-13 que previene desvíos falsos por Cobán.</li>
+            <li>Criterios reproducibles de vecindad territorial y umbrales de proximidad.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-title purple">3. DOMINIO ALGORÍTMICO INTEGRAL</span>
+          <ul class="bullet-list purple">
+            <li>Coexistencia armónica: Dijkstra para paquetes puntuales y Prim/Kruskal para red troncal.</li>
+            <li>Ambos algoritmos de MST convergen en exactamente 21 carreteras y 1 425.3 km.</li>
+            <li>Comprensión teórica fundamentada de por qué Dijkstra exige pesos positivos.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-title amber">4. CALIDAD DE INGENIERÍA DE SOFTWARE</span>
+          <ul class="bullet-list amber">
+            <li>Código 100 % en TypeScript, modular, reactivo y con ejecución menor a 5 ms en navegador.</li>
+            <li>Verificación cruzada con NetworkX (1 168/1 168) y 148 pruebas automatizadas Playwright.</li>
+            <li>Despliegue activo en la web y repositorio con documentación exhaustiva.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        En conclusión, el proyecto demuestra el poder de la Investigación de Operaciones aplicada a la logística real:
+
+1. Transporte Express erradica la improvisación de rutas sustituyendo la intuición por algoritmos deterministas.
+2. El modelo matemático está fundamentado en datos reales de los 22 departamentos y 49 carreteras auditadas.
+3. Se integraron sinérgicamente Dijkstra para el despacho diario y Prim/Kruskal para la planeación de la red troncal (1 425.3 km).
+4. El código en TypeScript es modular, robusto y validado contra bibliotecas científicas de la industria, cumpliendo con creces los requerimientos del curso.
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DIAPOSITIVA 12: Gracias y Preguntas
+         ===================================================================== -->
+    <section class="slide" id="slide-12" data-slide="12">
+      <div class="cover-card" style="padding: clamp(16px, 2.5vw, 36px);">
+        <div>
+          <span class="slide-badge">SESIÓN DE PREGUNTAS Y DEMOSTRACIÓN EN VIVO</span>
+          <div style="margin-top: 10px;">
+            <h1 class="cover-title" style="font-size: clamp(24px, 3.2vw, 44px);">¡Muchas Gracias por su Atención!</h1>
+            <p class="cover-sub" style="font-size: clamp(13px, 1.3vw, 18px); color: var(--accent-cyan);">
+              Transporte Express — Sistema de Optimización de Rutas (RutaQ)
+            </p>
+          </div>
+        </div>
+
+        <div class="cover-grid" style="margin-top: 10px;">
+          <!-- Enlaces Oficiales -->
+          <div class="card alt">
+            <span class="card-title amber">ACCESO AL SISTEMA Y DOCUMENTACIÓN</span>
+            <ul class="bullet-list" style="margin-top: 8px;">
+              <li><strong>Aplicación en Vivo:</strong><br>
+                <a href="https://criss-paz.github.io/rutaq/" target="_blank" style="color: var(--accent-cyan); text-decoration: underline;">
+                  https://criss-paz.github.io/rutaq/
+                </a>
+              </li>
+              <li><strong>Presentación Web:</strong><br>
+                <a href="https://criss-paz.github.io/rutaq/presentacion/" target="_blank" style="color: var(--accent-green); text-decoration: underline;">
+                  https://criss-paz.github.io/rutaq/presentacion/
+                </a>
+              </li>
+              <li><strong>Repositorio GitHub:</strong><br>
+                <a href="https://github.com/Criss-paz/rutaq" target="_blank" style="color: var(--accent-blue); text-decoration: underline;">
+                  https://github.com/Criss-paz/rutaq
+                </a>
+              </li>
+              <li><strong>Universidad:</strong> Mariano Gálvez de Guatemala &bull; 6.º Semestre</li>
+            </ul>
+          </div>
+
+          <!-- Imagen / Q&A -->
+          <div class="card alt" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--accent-purple);">
+            <div class="image-frame" style="flex: 1; max-height: 200px;">
+              <img src="img/11-modo-presentacion.png" alt="RutaQ en Modo Presentación">
+              <div class="image-caption">RutaQ listo para demostraciones interactivas en vivo</div>
+            </div>
+            <div style="text-align: center; padding-top: 10px;">
+              <p style="font-size: clamp(12px, 1.2vw, 16px); font-weight: 800; color: var(--accent-purple);">
+                ¿Alguna pregunta o demostración en vivo adicional?
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; padding-top: 10px; border-top: 1px solid var(--border-card); font-size: clamp(9px, 0.85vw, 12px); color: var(--text-muted);">
+          Cristopher Castellanos (2690-24-5972) · Leonel Taracena (2690-24-4072) · Pablo Vásquez (2690-24-13123)
+        </div>
+      </div>
+      <div class="speaker-note-data" hidden>
+        Muchas gracias catedrático y compañeros por su tiempo y atención. El sistema se encuentra completamente desplegado y operativo en la web para que cualquiera pueda probarlo en su teléfono o computadora en criss-paz.github.io/rutaq/, y la versión web de estas diapositivas está en /presentacion/.
+
+El código fuente completo y los reportes de verificación están abiertos en GitHub. Quedamos a su entera disposición para responder cualquier pregunta o realizar las pruebas de ruta en vivo que deseen solicitar.
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Barra de Herramientas Inferior -->
+  <nav id="toolbar" aria-label="Navegación de Diapositivas">
+    <button class="nav-btn" id="btn-prev" title="Anterior (Flecha Izq / Arriba / Retroceso)">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <div id="slide-indicator">1 / 12</div>
+    <button class="nav-btn" id="btn-next" title="Siguiente (Flecha Der / Abajo / Espacio)">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+    <div class="toolbar-divider"></div>
+    <button class="nav-btn" id="btn-notes" title="Ver Notas del Orador (N)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+    </button>
+    <button class="nav-btn" id="btn-fullscreen" title="Pantalla Completa (F)">
+      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    </button>
+    <button class="nav-btn" id="btn-help" title="Atajos de Teclado (?)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    </button>
+    <div class="toolbar-divider"></div>
+    <a href="../" class="nav-btn" title="Ir al Sistema RutaQ" style="text-decoration: none;" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+    </a>
+  </nav>
+
+  <!-- Panel Desplegable de Notas del Orador -->
+  <div id="notes-drawer">
+    <div id="notes-drawer-header">
+      <span>Notas del Orador &bull; Diapositiva <span id="notes-slide-num">1</span></span>
+      <button class="nav-btn" id="btn-close-notes" style="width: 24px; height: 24px;" title="Cerrar (N)">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div id="notes-text"></div>
+  </div>
+
+  <!-- Modal de Atajos de Teclado -->
+  <div id="help-modal">
+    <div class="help-card">
+      <div class="help-title">
+        <span>Atajos de Teclado</span>
+        <button class="nav-btn" id="btn-close-help" style="width: 24px; height: 24px;">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <table class="help-table">
+        <tr>
+          <td><span class="kbd">&rarr;</span> <span class="kbd">&darr;</span> <span class="kbd">Espacio</span> <span class="kbd">AvPág</span></td>
+          <td>Avanzar diapositiva</td>
+        </tr>
+        <tr>
+          <td><span class="kbd">&larr;</span> <span class="kbd">&uarr;</span> <span class="kbd">Retroceso</span> <span class="kbd">RePág</span></td>
+          <td>Retroceder diapositiva</td>
+        </tr>
+        <tr>
+          <td><span class="kbd">Inicio</span> / <span class="kbd">Fin</span></td>
+          <td>Primera / Última diapositiva</td>
+        </tr>
+        <tr>
+          <td><span class="kbd">F</span></td>
+          <td>Alternar Pantalla Completa</td>
+        </tr>
+        <tr>
+          <td><span class="kbd">N</span></td>
+          <td>Abrir / Cerrar Notas del Orador</td>
+        </tr>
+        <tr>
+          <td><span class="kbd">?</span> o <span class="kbd">H</span></td>
+          <td>Mostrar esta ayuda</td>
+        </tr>
+        <tr>
+          <td><span class="kbd">Ctrl</span> + <span class="kbd">P</span></td>
+          <td>Guardar como PDF (estilo de impresión)</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let currentSlide = 1;
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const totalSlides = slides.length;
+
+      const progressBar = document.getElementById('progress-bar');
+      const indicator = document.getElementById('slide-indicator');
+      const notesDrawer = document.getElementById('notes-drawer');
+      const notesText = document.getElementById('notes-text');
+      const notesSlideNum = document.getElementById('notes-slide-num');
+      const helpModal = document.getElementById('help-modal');
+
+      function updateSlide(newIndex) {
+        if (newIndex < 1) newIndex = 1;
+        if (newIndex > totalSlides) newIndex = totalSlides;
+
+        slides.forEach((s, idx) => {
+          if (idx + 1 === newIndex) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+
+        currentSlide = newIndex;
+        indicator.textContent = currentSlide + ' / ' + totalSlides;
+        progressBar.style.width = ((currentSlide / totalSlides) * 100) + '%';
+
+        // Actualizar notas
+        const activeSlide = slides[currentSlide - 1];
+        const noteData = activeSlide.querySelector('.speaker-note-data');
+        notesText.textContent = noteData ? noteData.textContent.trim() : 'Sin notas.';
+        notesSlideNum.textContent = currentSlide;
+
+        // Actualizar hash en la URL sin saltos
+        if (history.replaceState) {
+          history.replaceState(null, null, '#slide-' + currentSlide);
+        }
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides) {
+          updateSlide(currentSlide + 1);
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 1) {
+          updateSlide(currentSlide - 1);
+        }
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          }
+        }
+      }
+
+      function toggleNotes() {
+        notesDrawer.classList.toggle('open');
+      }
+
+      function toggleHelp() {
+        helpModal.classList.toggle('open');
+      }
+
+      // Atajos de Teclado
+      window.addEventListener('keydown', (e) => {
+        // Si el modal de ayuda está abierto, Escape lo cierra
+        if (e.key === 'Escape') {
+          if (helpModal.classList.contains('open')) {
+            helpModal.classList.remove('open');
+            return;
+          }
+          if (notesDrawer.classList.contains('open')) {
+            notesDrawer.classList.remove('open');
+            return;
+          }
+        }
+
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'ArrowDown':
+          case ' ':
+          case 'PageDown':
+            e.preventDefault();
+            nextSlide();
+            break;
+          case 'ArrowLeft':
+          case 'ArrowUp':
+          case 'Backspace':
+          case 'PageUp':
+            e.preventDefault();
+            prevSlide();
+            break;
+          case 'Home':
+            e.preventDefault();
+            updateSlide(1);
+            break;
+          case 'End':
+            e.preventDefault();
+            updateSlide(totalSlides);
+            break;
+          case 'f':
+          case 'F':
+            e.preventDefault();
+            toggleFullscreen();
+            break;
+          case 'n':
+          case 'N':
+            e.preventDefault();
+            toggleNotes();
+            break;
+          case '?':
+          case 'h':
+          case 'H':
+            e.preventDefault();
+            toggleHelp();
+            break;
+        }
+      });
+
+      // Navegación con Clic
+      document.getElementById('btn-prev').addEventListener('click', (e) => { e.stopPropagation(); prevSlide(); });
+      document.getElementById('btn-next').addEventListener('click', (e) => { e.stopPropagation(); nextSlide(); });
+      document.getElementById('btn-fullscreen').addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
+      document.getElementById('btn-notes').addEventListener('click', (e) => { e.stopPropagation(); toggleNotes(); });
+      document.getElementById('btn-close-notes').addEventListener('click', (e) => { e.stopPropagation(); toggleNotes(); });
+      document.getElementById('btn-help').addEventListener('click', (e) => { e.stopPropagation(); toggleHelp(); });
+      document.getElementById('btn-close-help').addEventListener('click', (e) => { e.stopPropagation(); toggleHelp(); });
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) helpModal.classList.remove('open');
+      });
+
+      // Clic en la diapositiva avanza (evitando clics en enlaces o botones)
+      document.getElementById('deck-container').addEventListener('click', (e) => {
+        if (e.target.closest('a') || e.target.closest('button') || e.target.closest('#toolbar') || e.target.closest('#notes-drawer')) {
+          return;
+        }
+        nextSlide();
+      });
+
+      // Gestos Táctiles (Swipe)
+      let touchStartX = 0;
+      let touchStartY = 0;
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        const diffX = e.changedTouches[0].screenX - touchStartX;
+        const diffY = e.changedTouches[0].screenY - touchStartY;
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+          if (diffX < 0) nextSlide();
+          else prevSlide();
+        }
+      }, { passive: true });
+
+      // Carga inicial según hash (#slide-X)
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#slide-')) {
+        const slideNum = parseInt(hash.replace('#slide-', ''), 10);
+        if (!isNaN(slideNum) && slideNum >= 1 && slideNum <= totalSlides) {
+          currentSlide = slideNum;
+        }
+      }
+
+      updateSlide(currentSlide);
+    })();
+  </script>
+</body>
+</html>
