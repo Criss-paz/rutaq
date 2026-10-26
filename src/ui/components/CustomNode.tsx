@@ -15,6 +15,7 @@ export interface CustomNodeData {
   labelPosition?: 'right' | 'left' | 'top' | 'bottom';
   /** El nombre no cabe con este zoom (se muestra al acercar, al pasar el cursor o al seleccionarlo). */
   labelHidden?: boolean;
+  showCabecera?: boolean;
   [key: string]: unknown;
 }
 
@@ -45,6 +46,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(label);
+  const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -236,12 +238,18 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
     }
 
     const cabecera = departments[id]?.cabecera;
+    const showCabecera =
+      mode === 'guatemala' &&
+      Boolean(cabecera) &&
+      (nodeData.showCabecera || isOrigin || isTarget || selected || isHovered || zoom >= 1);
     const nodeTitle =
       mode === 'guatemala' && cabecera && cabecera !== label ? `${label} (Cabecera: ${cabecera})` : label;
 
     return (
       <div
         data-testid={`node-${id}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -292,7 +300,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
           >
             {label}
           </span>
-          {mode === 'guatemala' && cabecera && (
+          {showCabecera && (
             <span
               data-testid={`node-cabecera-${id}`}
               style={{ ...haloStyle, fontSize: `${10 / Math.min(zoom, 1)}px` }}
@@ -340,7 +348,7 @@ function CustomNodeComponent({ id, data, selected }: NodeProps) {
   } else if (isPermanent) {
     borderClasses = 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-950 dark:text-blue-100';
     badgeColor = 'bg-blue-500 text-white';
-    badgeText = typeof dist === 'number' && dist < Infinity ? `${dist} ${unit}` : 'Perm.';
+    badgeText = typeof dist === 'number' && dist < Infinity ? `${dist.toFixed(1)} ${unit}` : 'Perm.';
   }
 
   return (

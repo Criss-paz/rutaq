@@ -58,21 +58,46 @@ test.describe('Capturas automáticas de alta fidelidad — Proyecto II (Transpor
     await expect(page.getByTestId('mst-same-total-notice')).toBeVisible();
     await page.screenshot({ path: `${OUT_DIR}/07-arbol-expansion-minima.png`, fullPage: true });
 
-    // 08. Tabla tabulada de Prim
+    // 08. Tabla tabulada de Prim (panel maximizado y desplazado para ver las filas de Prim)
     await page.getByTestId('tab-mst-prim').click();
     await expect(page.getByTestId('table-prim-steps')).toBeVisible();
-    await page.screenshot({ path: `${OUT_DIR}/08-prim-tabulado.png`, fullPage: true });
+    await page.getByTestId('btn-maximize-panel').click();
+    await page.waitForTimeout(300);
+    await page.locator('[data-testid="table-prim-steps"]').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: `${OUT_DIR}/08-prim-tabulado.png` });
+    await page.getByTestId('btn-restore-panel').click();
+    await page.waitForTimeout(200);
 
-    // 09. Tabla de Kruskal
+    // 09. Tabla de Kruskal (panel maximizado y desplazado para ver las filas de Kruskal)
     await page.getByTestId('tab-mst-kruskal').click();
     await expect(page.getByTestId('table-kruskal-steps')).toBeVisible();
-    await page.screenshot({ path: `${OUT_DIR}/09-kruskal-tabulado.png`, fullPage: true });
+    await page.getByTestId('btn-maximize-panel').click();
+    await page.waitForTimeout(300);
+    await page.locator('[data-testid="table-kruskal-steps"]').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: `${OUT_DIR}/09-kruskal-tabulado.png` });
+    await page.getByTestId('btn-restore-panel').click();
+    await page.waitForTimeout(200);
 
-    // 11. Modo presentación
+    // 11. Modo presentación a pantalla completa (1280×720 y 1920×1080)
     await page.getByTestId('btn-presentation-mode').click();
     await expect(page.getByTestId('guatemala-presentation-overlay')).toBeVisible();
-    await page.screenshot({ path: `${OUT_DIR}/11-modo-presentacion.png`, fullPage: true });
+
+    // Captura en 1280×720
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${OUT_DIR}/11-modo-presentacion.png` });
+    await page.screenshot({ path: `${OUT_DIR}/11-modo-presentacion-1280x720.png` });
+
+    // Captura en 1920×1080
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${OUT_DIR}/12-modo-presentacion-1920x1080.png` });
+
+    // Salir con Escape
     await page.keyboard.press('Escape');
+    await expect(page.getByTestId('guatemala-presentation-overlay')).not.toBeVisible();
   });
 
   test('Captura de vista en celular (Pixel 7)', async ({ page }, testInfo) => {

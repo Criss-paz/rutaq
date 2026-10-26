@@ -128,7 +128,7 @@ export default function GuatemalaPresentation({ isOpen, onExit }: GuatemalaPrese
           onClick={onExit}
           className="min-h-[44px] rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-rose-700 transition-colors focus-visible:ring-2 focus-visible:ring-rose-400"
         >
-          ✕ Salir de presentación (Esc)
+          ✕ Salir (Esc)
         </button>
       </header>
 
@@ -178,7 +178,9 @@ export default function GuatemalaPresentation({ isOpen, onExit }: GuatemalaPrese
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
                 Red Mínima Departamental (Prim / Kruskal)
               </span>
-              <span className="text-xs text-emerald-300 font-mono">21 carreteras</span>
+              <span className="text-xs text-emerald-300 font-mono">
+                {mst ? `${mst.prim.edges.length} carreteras` : '21 carreteras'}
+              </span>
             </div>
 
             <div className="flex items-baseline justify-between gap-4">
@@ -190,7 +192,8 @@ export default function GuatemalaPresentation({ isOpen, onExit }: GuatemalaPrese
 
             <p className="text-xs text-slate-300 leading-relaxed">
               ✓ Algoritmos de Prim y Kruskal verificados: ambos conectan todos los departamentos con un coste total
-              idéntico de <strong>{mst.prim.total.toFixed(1)} km</strong> sin formar ciclos.
+              idéntico de <strong>{mst.prim.total.toFixed(1)} km</strong> y {mst.prim.edges.length} carreteras sin
+              formar ciclos.
             </p>
           </div>
         ) : (

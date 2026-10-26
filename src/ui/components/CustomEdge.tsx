@@ -349,9 +349,13 @@ function CustomEdgeComponent({
                 className={`font-semibold tracking-tight whitespace-nowrap ${
                   mode === 'design' ? 'cursor-pointer hover:text-blue-600 dark:hover:text-blue-400' : 'cursor-default'
                 }`}
-                title={mode === 'design' ? 'Doble clic para editar peso, clic para forma' : `${weight} ${unit}`}
+                title={
+                  mode === 'design'
+                    ? 'Doble clic para editar peso, clic para forma'
+                    : `${mode === 'guatemala' ? weight.toFixed(1) : weight} ${unit}`
+                }
               >
-                {weight} {unit}
+                {mode === 'guatemala' ? weight.toFixed(1) : weight} {unit}
               </span>
             )}
           </div>

@@ -33,93 +33,91 @@ export default function GuatemalaToolbar({
   return (
     <div
       data-testid="guatemala-toolbar"
-      className="shrink-0 flex flex-wrap items-center justify-between gap-2 border-b border-blue-100 bg-blue-50/70 px-3 py-1.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900/80"
+      className="shrink-0 flex items-center gap-2 border-b border-blue-100 bg-blue-50/70 px-2 py-1 shadow-2xs dark:border-slate-800 dark:bg-slate-900/80 sm:flex-wrap sm:justify-between sm:px-3 sm:py-1.5"
     >
-      {/* Botón principal del Asistente y Ejemplos rápidos */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      {/* Botón principal del Asistente */}
+      <button
+        type="button"
+        data-testid="btn-calculate-route"
+        onClick={onOpenAssistant}
+        className="shrink-0 flex min-h-[38px] items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all focus-visible:ring-2 focus-visible:ring-blue-500"
+      >
+        <span>📦</span>
+        <span className="whitespace-nowrap">Calcular mejor ruta</span>
+      </button>
+
+      {/* Separador sutil en escritorio */}
+      <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+
+      {/* Fila con desplazamiento horizontal en móvil para ejemplos y acciones secundarias */}
+      <div className="flex flex-1 items-center gap-1 overflow-x-auto no-scrollbar py-0.5 sm:flex-initial sm:overflow-visible sm:py-0">
+        <span className="hidden lg:inline text-[11px] font-semibold text-slate-500 dark:text-slate-400 mr-0.5">
+          Ejemplos:
+        </span>
         <button
           type="button"
-          data-testid="btn-calculate-route"
-          onClick={onOpenAssistant}
-          className="flex min-h-[40px] items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all focus-visible:ring-2 focus-visible:ring-blue-500"
+          data-testid="btn-example-que-iza"
+          onClick={() => setPathQuery('QUE', 'IZA')}
+          title="Quetzaltenango a Puerto Barrios (QUE → IZA)"
+          className={`shrink-0 min-h-[36px] whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+            query?.kind === 'path' && query.source === 'QUE' && query.target === 'IZA'
+              ? 'bg-blue-600 text-white shadow-2xs'
+              : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+          }`}
         >
-          <span>📦</span>
-          <span>Calcular mejor ruta</span>
+          QUE → IZA
+        </button>
+        <button
+          type="button"
+          data-testid="btn-example-gua-pet"
+          onClick={() => setPathQuery('GUA', 'PET')}
+          title="Ciudad de Guatemala a Flores (GUA → PET)"
+          className={`shrink-0 min-h-[36px] whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+            query?.kind === 'path' && query.source === 'GUA' && query.target === 'PET'
+              ? 'bg-blue-600 text-white shadow-2xs'
+              : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          GUA → PET
+        </button>
+        <button
+          type="button"
+          data-testid="btn-example-sma-jut"
+          onClick={() => setPathQuery('SMA', 'JUT')}
+          title="San Marcos a Jutiapa (SMA → JUT)"
+          className={`shrink-0 min-h-[36px] whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+            query?.kind === 'path' && query.source === 'SMA' && query.target === 'JUT'
+              ? 'bg-blue-600 text-white shadow-2xs'
+              : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          SMA → JUT
+        </button>
+        <button
+          type="button"
+          data-testid="btn-example-mst"
+          onClick={() => {
+            setCoverMode('mst');
+            clearQuery();
+          }}
+          title="Red mínima completa con Prim y Kruskal"
+          className={`shrink-0 min-h-[36px] whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+            coverMode === 'mst' && !query
+              ? 'bg-emerald-600 text-white shadow-2xs'
+              : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          🌳 Red Mínima
         </button>
 
-        {/* Separador sutil */}
-        <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+        <span className="shrink-0 text-slate-300 dark:text-slate-700 sm:hidden">|</span>
 
-        {/* Ejemplos rápidos */}
-        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Ejemplos rápidos">
-          <span className="hidden lg:inline text-[11px] font-semibold text-slate-500 dark:text-slate-400 mr-0.5">
-            Ejemplos:
-          </span>
-          <button
-            type="button"
-            data-testid="btn-example-que-iza"
-            onClick={() => setPathQuery('QUE', 'IZA')}
-            title="Quetzaltenango a Puerto Barrios (QUE → IZA)"
-            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-              query?.kind === 'path' && query.source === 'QUE' && query.target === 'IZA'
-                ? 'bg-blue-600 text-white shadow-2xs'
-                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            QUE → IZA
-          </button>
-          <button
-            type="button"
-            data-testid="btn-example-gua-pet"
-            onClick={() => setPathQuery('GUA', 'PET')}
-            title="Ciudad de Guatemala a Flores (GUA → PET)"
-            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-              query?.kind === 'path' && query.source === 'GUA' && query.target === 'PET'
-                ? 'bg-blue-600 text-white shadow-2xs'
-                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            GUA → PET
-          </button>
-          <button
-            type="button"
-            data-testid="btn-example-sma-jut"
-            onClick={() => setPathQuery('SMA', 'JUT')}
-            title="San Marcos a Jutiapa (SMA → JUT)"
-            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-              query?.kind === 'path' && query.source === 'SMA' && query.target === 'JUT'
-                ? 'bg-blue-600 text-white shadow-2xs'
-                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            SMA → JUT
-          </button>
-          <button
-            type="button"
-            data-testid="btn-example-mst"
-            onClick={() => {
-              setCoverMode('mst');
-              clearQuery();
-            }}
-            title="Red mínima completa con Prim y Kruskal"
-            className={`min-h-[38px] rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-              coverMode === 'mst' && !query
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            🌳 Red Mínima
-          </button>
-        </div>
-      </div>
-
-      {/* Acciones de gestión, presentación e información */}
-      <div className="flex items-center gap-1.5">
+        {/* Acciones de gestión, presentación e información */}
         <button
           type="button"
           data-testid="btn-admin-network"
           onClick={onOpenAdmin}
-          className="flex min-h-[38px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          className="shrink-0 flex min-h-[36px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           title="Administrar departamentos y carreteras"
         >
           <span>⚙️</span>
@@ -130,7 +128,7 @@ export default function GuatemalaToolbar({
           type="button"
           data-testid="btn-presentation-mode"
           onClick={onStartPresentation}
-          className="flex min-h-[38px] items-center gap-1 rounded-lg border border-purple-300 bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 shadow-2xs hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300"
+          className="shrink-0 flex min-h-[36px] items-center gap-1 rounded-lg border border-purple-300 bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 shadow-2xs hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300"
           title="Modo pantalla completa para exposición"
         >
           <span>📽️</span>
@@ -141,7 +139,7 @@ export default function GuatemalaToolbar({
           type="button"
           data-testid="btn-about"
           onClick={onOpenAbout}
-          className="flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          className="shrink-0 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
           title="Acerca de los desarrolladores e institución"
         >
           ℹ️

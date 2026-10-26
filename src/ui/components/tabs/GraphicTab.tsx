@@ -48,7 +48,7 @@ export default function GraphicTab() {
                   >
                     <span>
                       ℹ Empate detectado: existen {shortest.length} rutas mínimas con la misma distancia (
-                      {shortest[0]?.distance} {unit}). Se muestran todas:
+                      {shortest[0]?.distance.toFixed(1)} {unit}). Se muestran todas:
                     </span>
                     {highlightedPath?.from === 'shortest' && (
                       <button
@@ -91,7 +91,7 @@ export default function GraphicTab() {
                             </span>
                           )}
                           <span className="text-base font-bold">
-                            Distancia Total: {path.distance} {unit}
+                            Distancia Total: {path.distance.toFixed(1)} {unit}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">

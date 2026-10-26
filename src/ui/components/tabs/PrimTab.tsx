@@ -173,7 +173,7 @@ export default function PrimTab() {
                 <strong className="underline">
                   {getEdgeInfo(currentStep.chosenEdge)?.source} ↔ {getEdgeInfo(currentStep.chosenEdge)?.target}
                 </strong>{' '}
-                ({getEdgeInfo(currentStep.chosenEdge)?.weight} km{getEdgeInfo(currentStep.chosenEdge)?.road})
+                ({getEdgeInfo(currentStep.chosenEdge)?.weight.toFixed(1)} km{getEdgeInfo(currentStep.chosenEdge)?.road})
               </span>
             ) : (
               <span>

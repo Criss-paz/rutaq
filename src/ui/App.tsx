@@ -64,10 +64,10 @@ export default function App() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-50 font-sans text-slate-900 select-none dark:bg-slate-950 dark:text-slate-100">
       {/* Barra superior */}
-      <Header />
+      {!isPresentationMode && <Header />}
 
       {/* Barra de herramientas específica de Guatemala (Transporte Express) */}
-      {mode === 'guatemala' && (
+      {!isPresentationMode && mode === 'guatemala' && (
         <GuatemalaToolbar
           onOpenAssistant={() => setIsAssistantOpen(true)}
           onOpenAdmin={() => setIsAdminOpen(true)}
@@ -77,14 +77,14 @@ export default function App() {
       )}
 
       {/* Alerta de validación en caso de advertencia o error en el grafo */}
-      <ValidationAlert />
+      {!isPresentationMode && <ValidationAlert />}
 
       {/* Contenedor principal: en pantallas >= 1024px divide en lienzo a la izquierda y panel a la derecha */}
       <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden lg:flex-row">
         {/* Área central del lienzo con React Flow */}
         <main
           className={`relative flex flex-1 min-h-0 flex-col overflow-hidden lg:!mb-0 ${
-            mobileSheetPos === 'maximized'
+            isPresentationMode || mobileSheetPos === 'maximized'
               ? 'mb-0'
               : mobileSheetPos === 'expanded'
                 ? 'mb-[85vh]'
@@ -100,7 +100,7 @@ export default function App() {
         </main>
 
         {/* Panel de resultados con pestañas (hoja inferior en móvil/tablet, lateral derecho en escritorio) */}
-        <ResultsPanel />
+        {!isPresentationMode && <ResultsPanel />}
       </div>
 
       {/* Modales y vistas del Módulo Guatemala */}

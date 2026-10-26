@@ -389,7 +389,11 @@ export default function TabularTab() {
                     {getNodeLabel(id)} ({id})
                   </td>
                   <td className="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">
-                    {dist === Infinity ? 'Inalcanzable' : `${dist} ${unit}`}
+                    {typeof dist === 'number' && Number.isFinite(dist)
+                      ? `${dist.toFixed(1)} ${unit}`
+                      : dist === Infinity
+                        ? 'Inalcanzable'
+                        : '—'}
                     {isSource && ' (Origen)'}
                   </td>
                   <td className="p-2.5 text-slate-600 dark:text-slate-300">{buildPathString(id)}</td>
