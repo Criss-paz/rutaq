@@ -301,7 +301,7 @@ def build_slide_01(prs):
     items_info = [
         ("Curso:", "Investigación de Operaciones"),
         ("Catedrático:", "Ing. Samuel Isaac Gómez Moreno"),
-        ("Semestre:", "6.º semestre, Sección A"),
+        ("Semestre:", "6.º semestre, Ingeniería en Sistemas"),
         ("Fecha:", "Sábado 31 de octubre de 2026"),
         ("Plataforma:", "https://criss-paz.github.io/rutaq/"),
     ]
@@ -559,11 +559,11 @@ def build_slide_04(prs):
     gap = Inches(0.17)
 
     add_metric_box(slide, c_left, Inches(1.95), metric_w, metric_h,
-                   "35 / 49", "Coincidencia Idéntica\n(Δ = 0 km)", ACCENT_GREEN)
+                   "35 / 49", "Ruta Recomendada\n(OSRM a ±10 %)", ACCENT_GREEN)
     add_metric_box(slide, c_left + metric_w + gap, Inches(1.95), metric_w, metric_h,
-                   "9 / 49", "Variación Mínima\n(Δ ≤ 2 km)", ACCENT_BLUE)
+                   "9 / 49", "Ruta Alternativa\n(OSRM a ±10 %)", ACCENT_BLUE)
     add_metric_box(slide, c_left + (metric_w + gap) * 2, Inches(1.95), metric_w, metric_h,
-                   "5 / 49", "Ajuste Urbano\n(Documentado)", ACCENT_AMBER)
+                   "5 / 49", "Valor Google Maps\n(Sin coincidencia)", ACCENT_AMBER)
 
     # Tarjeta de Metodología
     add_card(slide, c_left, Inches(3.35), c_w, Inches(3.60))
@@ -580,10 +580,10 @@ def build_slide_04(prs):
 
     bullets = [
         "Fuente Primaria: Geocodificación con Nominatim y cálculo de distancias de conducción sobre OpenStreetMap mediante OSRM.",
-        "Auditoría Manual 49/49: Cada una de las 49 carreteras fue medida y contrastada punto a punto en Google Maps.",
-        "Alineación 100 % Confiable: 44 de 49 tramos (89.8 %) tienen desviación nula o insignificante (≤ 2 km).",
-        "Caso Crítico IZA–PET (287.0 km): Conexión directa por la CA-13. Sin este tramo troncal, cualquier algoritmo desviaría las encomiendas por Alta Verapaz sumando cientos de kilómetros erróneos.",
-        "Transparencia: Todas las aristas y sus fuentes se documentan en el repositorio institucional."
+        "Auditoría 49/49 en Google Maps: Cada una de las 49 carreteras fue validada punto a punto en Google Maps.",
+        "Tolerancia ±10 %: 35 tramos coinciden con la ruta recomendada y 9 con una ruta alternativa de Google Maps.",
+        "5 Tramos Ajustados a Google Maps: Al no coincidir OSRM a ±10 %, se usa el valor de Google Maps (CHI-SOL, CHI-SUC, JAL-PRO, IZA-PET, QUE-TOT).",
+        "Caso Crítico IZA–PET (287.0 km): Conexión directa por la CA-13 adoptada de Google Maps (OSRM daba 387.1 km) para evitar desvíos falsos por Alta Verapaz."
     ]
     for b in bullets:
         p = tf_m.add_paragraph()
@@ -605,11 +605,13 @@ def build_slide_04(prs):
         slide,
         "Un aspecto fundamental de nuestro trabajo fue garantizar que los datos fueran 100 % reales y auditables. "
         "Extrajimos las distancias y geometrías mediante el motor OSRM sobre OpenStreetMap y validamos manualmente "
-        "las 49 carreteras frente a Google Maps. El resultado fue contundente: 35 tramos con coincidencia idéntica, "
-        "9 con variación menor a 2 km y 5 con ajustes documentados por trazados urbanos o libramientos recientes.\n\n"
-        "Un hallazgo crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: sin esta arteria troncal directa, "
-        "cualquier algoritmo desviaría absurdamente los viajes por Alta Verapaz aumentando cientos de kilómetros innecesarios. "
-        "Cada número en nuestro sistema proviene de carreteras reales de Guatemala."
+        "las 49 carreteras frente a Google Maps bajo un criterio técnico de tolerancia a ±10 %:\n\n"
+        "35 tramos con OSRM a ±10 % de la ruta recomendada por Google Maps; 9 tramos con OSRM a ±10 % de una ruta "
+        "alternativa que ofrece Google Maps; y 5 tramos donde ninguna coincidió (CHI-SOL, CHI-SUC, JAL-PRO, IZA-PET, "
+        "QUE-TOT), en los cuales se utiliza directamente el valor de Google Maps.\n\n"
+        "Un caso crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: OSRM arrojaba 387.1 km por un trazado "
+        "indirecto, por lo que adoptar el valor oficial de Google Maps evita desviar las encomiendas por Alta Verapaz. "
+        "Cada número en nuestro sistema proviene de carreteras reales de Guatemala debidamente auditadas."
     )
 
 
@@ -659,7 +661,6 @@ def build_slide_05(prs):
 
     p = tf_c.add_paragraph()
     p.text = "• Complejidad: O((V + E) log V) implementado con min-heap binario.\n" \
-             "• Rendimiento: Resuelve la consulta en el navegador en < 5 milisegundos.\n" \
              "• ¿Por qué NO admite pesos negativos?\n" \
              "    Dijkstra asume que añadir aristas no puede reducir el costo acumulado.\n" \
              "    Una arista negativa invalidaría nodos ya cerrados, produciendo rutas subóptimas.\n" \
@@ -682,7 +683,7 @@ def build_slide_05(prs):
         "Para calcular la mejor ruta para cada paquete implementamos el Algoritmo de Dijkstra. Su funcionamiento se basa "
         "en una estrategia voraz o greedy: a partir de la cabecera origen, examina las aristas adyacentes y relaja las "
         "distancias tentativas hacia los vecinos. Gracias a una cola de prioridad basada en min-heap binario, su complejidad "
-        "temporal es de O((V+E) log V), resolviendo cualquier consulta en menos de 5 milisegundos en el navegador.\n\n"
+        "temporal es de O((V+E) log V).\n\n"
         "Es crucial enfatizar que Dijkstra exige pesos estrictamente no negativos (W > 0), lo cual se cumple naturalmente "
         "en distancias físicas de carreteras. Si existieran costos negativos o subsidios compensatorios, Dijkstra fallaría "
         "al fijar nodos permanentemente, obligando a usar algoritmos como Bellman-Ford."
@@ -718,11 +719,11 @@ def build_slide_06(prs):
     p.font.color.rgb = ACCENT_CYAN
 
     tramos = [
-        ("1. QUE → TOT", "28.8 km", "RN-01 (Quetzaltenango a Totonicapán)"),
-        ("2. TOT → QUI", "36.2 km", "RN-15 (Totonicapán a Quiché)"),
-        ("3. QUI → BVE", "128.6 km", "RN-15 (Santa Cruz del Quiché a Salamá)"),
-        ("4. BVE → ZAC", "128.3 km", "RN-17 / CA-09 (Salamá a Zacapa)"),
-        ("5. ZAC → IZA", "172.1 km", "CA-09 Norte (Zacapa a Puerto Barrios)"),
+        ("1. QUE → TOT", "28.8 km", "RN-1 / RN-1B"),
+        ("2. TOT → QUI", "36.2 km", "RD QUI-04"),
+        ("3. QUI → BVE", "128.6 km", "RD QUI-2 / RN-5"),
+        ("4. BVE → ZAC", "128.3 km", "CA-9 Nor / CA-14"),
+        ("5. ZAC → IZA", "172.1 km", "CA-9 Nor"),
     ]
     for seg, dist, nom in tramos:
         p = tf_s.add_paragraph()
@@ -750,12 +751,6 @@ def build_slide_06(prs):
     p.font.bold = True
     p.font.color.rgb = TEXT_WHITE
 
-    p = tf_f.add_paragraph()
-    p.text = "Evita el paso por la Ciudad de Guatemala, ahorrando 60+ km y horas de congestión."
-    p.font.name = FONT_FAMILY
-    p.font.size = Pt(9.5)
-    p.font.color.rgb = TEXT_MUTED
-
     # Columna derecha: Imagen
     img_left = Inches(6.65)
     img_top = Inches(1.95)
@@ -767,13 +762,15 @@ def build_slide_06(prs):
 
     set_speaker_notes(
         slide,
-        "Veamos nuestro primer caso de demostración: un envío transversal de costa a costa, desde Quetzaltenango "
-        "en el altiplano occidental hasta Puerto Barrios, Izabal en el litoral atlántico.\n\n"
-        "El sistema determina una distancia óptima de 494.0 km a través de 5 tramos interdepartamentales: "
-        "sale de Quetzaltenango por la RN-01 a Totonicapán (28.8 km), avanza a Quiché (36.2 km), enlaza por Baja Verapaz (128.6 km) "
-        "y Zacapa (128.3 km), y se incorpora a la CA-9 Norte hasta Puerto Barrios (172.1 km). "
-        "La interfaz no solo resalta la ruta en púrpura en el mapa interactivo, sino que desglosa cada tramo con su "
-        "nomenclatura oficial y presenta la fórmula aritmética explícita de la suma para total transparencia."
+        "Veamos nuestro primer caso de demostración: un envío desde Quetzaltenango hasta Puerto Barrios, Izabal.\n\n"
+        "El sistema determina una distancia óptima de 494.0 km a través de 5 tramos interdepartamentales:\n"
+        "1. QUE → TOT: 28.8 km por RN-1 / RN-1B\n"
+        "2. TOT → QUI: 36.2 km por RD QUI-04\n"
+        "3. QUI → BVE: 128.6 km por RD QUI-2 / RN-5\n"
+        "4. BVE → ZAC: 128.3 km por CA-9 Nor / CA-14\n"
+        "5. ZAC → IZA: 172.1 km por CA-9 Nor\n\n"
+        "La interfaz resalta la ruta sobre el mapa interactivo, desglosa cada tramo con su carretera oficial "
+        "y presenta la fórmula aritmética de comprobación."
     )
 
 
@@ -805,9 +802,9 @@ def build_slide_07(prs):
     p.text = "• Distancia Total: 415.3 km  (3 tramos directos)\n" \
              "• Secuencia Óptima: GUA → BVE → AVE → PET\n" \
              "• Tramos Oficiales:\n" \
-             "    - GUA → BVE: 89.0 km (CA-09 Norte a Salamá)\n" \
-             "    - BVE → AVE: 69.0 km (CA-14 hacia Cobán)\n" \
-             "    - AVE → PET: 257.3 km (Franja Transversal del Norte RD PET-11)\n" \
+             "    - GUA → BVE: 89.0 km (RD BV-12 / RD GUA-12)\n" \
+             "    - BVE → AVE: 69.0 km (CA-14 / RN-5)\n" \
+             "    - AVE → PET: 257.3 km (RD PET-11 / RD AV-09)\n" \
              "• Fórmula: 89.0 + 69.0 + 257.3 = 415.3 km"
     p.font.name = FONT_FAMILY
     p.font.size = Pt(10)
@@ -836,9 +833,9 @@ def build_slide_07(prs):
     p.text = "• Distancia Total: 368.3 km  (5 tramos por Costa Sur)\n" \
              "• Secuencia Óptima: SMA → QUE → SUC → ESC → SRO → JUT\n" \
              "• Tramos Oficiales:\n" \
-             "    - SMA → QUE: 49.6 km (RN-01)  |  QUE → SUC: 60.2 km (CITO-180)\n" \
-             "    - SUC → ESC: 102.5 km (CA-02)  |  ESC → SRO: 100.0 km (CA-02)\n" \
-             "    - SRO → JUT: 56.0 km (CA-01 Oriente)\n" \
+             "    - SMA → QUE: 49.6 km (RN-1)  |  QUE → SUC: 60.2 km (CITO-180 / SCH-02)\n" \
+             "    - SUC → ESC: 102.5 km (CA-02 OCC)  |  ESC → SRO: 100.0 km (CA-2 OR / RN-16)\n" \
+             "    - SRO → JUT: 56.0 km (CA-1 Or)\n" \
              "• Fórmula: 49.6 + 60.2 + 102.5 + 100.0 + 56.0 = 368.3 km"
     p.font.name = FONT_FAMILY
     p.font.size = Pt(10)
@@ -851,13 +848,18 @@ def build_slide_07(prs):
 
     set_speaker_notes(
         slide,
-        "En el segundo ejemplo resolvemos el corredor norte: Ciudad de Guatemala a Flores, Petén. La ruta óptima es "
-        "de 415.3 km recorriendo la CA-14 hacia Cobán y empalmando directamente con Petén a través de la Franja Transversal "
-        "del Norte (RD PET-11, 257.3 km). El sistema preserva la geografía real norte-arriba sin deformación.\n\n"
-        "En el tercer ejemplo conectamos el extremo occidental fronterizo de San Marcos con Jutiapa en el oriente, cruzando "
-        "el país por la costa sur con un total de 368.3 km: desciende por la CITO-180 hacia Mazatenango, conecta con Escuintla "
-        "y Santa Rosa por la CA-2 Occidente y culmina en Jutiapa por la CA-1 Oriente. Ambas rutas demuestran que el sistema "
-        "encuentra de forma infalible la distancia mínima."
+        "En la Demo 2 resolvemos el corredor norte: Ciudad de Guatemala a Flores, Petén. La ruta óptima es "
+        "de 415.3 km recorriendo tres tramos:\n"
+        "- GUA → BVE: 89.0 km por RD BV-12 / RD GUA-12\n"
+        "- BVE → AVE: 69.0 km por CA-14 / RN-5\n"
+        "- AVE → PET: 257.3 km por RD PET-11 / RD AV-09\n\n"
+        "En la Demo 3 conectamos San Marcos con Jutiapa, totalizando 368.3 km a través de cinco tramos:\n"
+        "- SMA → QUE: 49.6 km por RN-1\n"
+        "- QUE → SUC: 60.2 km por CITO-180 / SCH-02\n"
+        "- SUC → ESC: 102.5 km por CA-02 OCC\n"
+        "- ESC → SRO: 100.0 km por CA-2 OR / RN-16\n"
+        "- SRO → JUT: 56.0 km por CA-1 Or\n\n"
+        "Ambas rutas demuestran que el sistema encuentra de forma infalible la distancia mínima con las carreteras exactas del modelo."
     )
 
 
@@ -981,9 +983,9 @@ def build_slide_09(prs):
     p.font.bold = True
     p.font.color.rgb = ACCENT_BLUE
     p = tf2.add_paragraph()
-    p.text = "• Modales para agregar, modificar o deshabilitar cabeceras y carreteras.\n" \
-             "• Validación en vivo de conexidad territorial y topológica.\n" \
-             "• Capacidad de simular cierres viales o bloqueos y recalcular al instante."
+    p.text = "• Agregar, editar, eliminar y buscar departamentos y carreteras con validaciones.\n" \
+             "• Al eliminar una carretera la ruta se recalcula al instante.\n" \
+             "• Aviso y alerta automática si la red vial queda desconectada."
     p.font.name = FONT_FAMILY
     p.font.size = Pt(11)
     p.font.color.rgb = TEXT_LIGHT
@@ -1031,7 +1033,7 @@ def build_slide_09(prs):
         "RutaQ no es un prototipo estático, sino un sistema web interactivo de nivel profesional. Cuenta con cuatro "
         "módulos centrales:\n\n"
         "1. El Asistente guiado de Transporte Express en dos pasos («¿Dónde está el paquete?» y «¿A qué departamento debe entregarse?»).\n"
-        "2. Un Administrador de Red completo para agregar, editar o deshabilitar departamentos y carreteras con validación de conexidad en tiempo real.\n"
+        "2. Un Administrador de Red para agregar, editar, eliminar y buscar departamentos y carreteras con validaciones; al eliminar una carretera la ruta se recalcula al instante y se muestra un aviso si la red queda desconectada.\n"
         "3. Tablas pedagógicas paso a paso que replican la metodología vista en clase para Prim, Kruskal, Dijkstra y Floyd-Warshall.\n"
         "4. Un Modo Presentación panorámico integrado, optimizado para proyectores de aula y pantallas táctiles móviles."
     )
@@ -1079,7 +1081,7 @@ def build_slide_10(prs):
     p.font.color.rgb = ACCENT_BLUE
     p = tf2.add_paragraph()
     p.text = "• Suite de pruebas de regresión funcional, visual y de estado en 4 dispositivos.\n" \
-             "• Aprobación del 100 % en Chromium, WebKit (Safari), Firefox y vista móvil."
+             "• Pruebas ejecutadas en Desktop Chrome, iPhone 13 (WebKit), Pixel 7 e iPad."
     p.font.name = FONT_FAMILY
     p.font.size = Pt(10.5)
     p.font.color.rgb = TEXT_LIGHT
@@ -1120,7 +1122,7 @@ def build_slide_10(prs):
         "NetworkX en Python: 1 168 de 1 168 pares analizados (incluyendo los 484 pares de Guatemala y grafos de control) "
         "arrojaron idénticos resultados con cero discrepancias, y 10 de 10 instancias de AEM fueron idénticas.\n\n"
         "En aseguramiento de calidad de software, ejecutamos 148 pruebas automatizadas End-to-End con Playwright "
-        "en 4 dispositivos y motores de renderizado (Chromium, WebKit, Firefox y vista móvil) con 100 % de éxito. "
+        "en 4 dispositivos (Desktop Chrome, iPhone 13 en WebKit, Pixel 7 e iPad) con 100 % de éxito. "
         "Finalmente, la auditoría oficial de Google Lighthouse certificó un rendimiento de 91, accesibilidad de 95, "
         "mejores prácticas de 100 y SEO de 100."
     )
@@ -1207,7 +1209,7 @@ def build_slide_11(prs):
     p.font.bold = True
     p.font.color.rgb = ACCENT_AMBER
     p = tf4.add_paragraph()
-    p.text = "• Arquitectura modular 100 % TypeScript ejecutable en navegador con respuesta en < 5 ms.\n" \
+    p.text = "• Arquitectura modular 100 % TypeScript, reactiva y ejecutable directamente en el navegador.\n" \
              "• Verificación cruzada contra NetworkX (1 168/1 168) y 148 pruebas automatizadas Playwright.\n" \
              "• Despliegue web activo, accesible y con código abierto para auditoría comunitaria."
     p.font.name = FONT_FAMILY

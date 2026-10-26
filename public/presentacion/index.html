@@ -721,25 +721,25 @@ Para definir las carreteras directas aplicamos un criterio objetivo y reproducib
           <div class="metric-row">
             <div class="metric-badge">
               <span class="metric-val green">35 / 49</span>
-              <span class="metric-lbl">Coincidencia Exacta<br>(Δ = 0 km)</span>
+              <span class="metric-lbl">Ruta Recomendada<br>(OSRM a ±10 %)</span>
             </div>
             <div class="metric-badge">
               <span class="metric-val blue">9 / 49</span>
-              <span class="metric-lbl">Variación Mínima<br>(Δ ≤ 2 km)</span>
+              <span class="metric-lbl">Ruta Alternativa<br>(OSRM a ±10 %)</span>
             </div>
             <div class="metric-badge">
               <span class="metric-val amber">5 / 49</span>
-              <span class="metric-lbl">Ajuste Urbano<br>(Documentado)</span>
+              <span class="metric-lbl">Valor Google Maps<br>(Sin coincidencia)</span>
             </div>
           </div>
           <div class="card">
             <span class="card-title cyan">METODOLOGÍA DE RECOLECCIÓN Y AUDITORÍA</span>
             <ul class="bullet-list">
-              <li><strong>OpenStreetMap &amp; OSRM:</strong> Geocodificación y perfiles de conducción de alta precisión.</li>
-              <li><strong>Auditoría Manual 49/49:</strong> Cada carretera fue medida y contrastada en Google Maps.</li>
-              <li><strong>89.8 % de Fidelidad Directa:</strong> 44 de 49 tramos con variación nula o insignificante.</li>
-              <li><strong>Caso Crítico IZA–PET (287.0 km):</strong> Conexión troncal por la <strong>CA-13</strong>. Sin este tramo directo, el algoritmo desviaría camiones por Alta Verapaz sumando cientos de kilómetros innecesarios.</li>
-              <li><strong>Transparencia:</strong> Todas las distancias y fuentes están documentadas en el repositorio.</li>
+              <li><strong>OpenStreetMap &amp; OSRM:</strong> Geocodificación con Nominatim y cálculo de distancias de conducción.</li>
+              <li><strong>Auditoría Manual 49/49:</strong> Cada carretera fue validada punto a punto en Google Maps.</li>
+              <li><strong>Tolerancia ±10 %:</strong> 35 tramos coinciden con la ruta recomendada y 9 con una ruta alternativa de Google Maps.</li>
+              <li><strong>5 Tramos con Valor de Google Maps:</strong> Ninguna ruta coincidió a ±10 %, usándose el valor de Google Maps (CHI-SOL, CHI-SUC, JAL-PRO, IZA-PET, QUE-TOT).</li>
+              <li><strong>Caso Crítico IZA–PET (287.0 km):</strong> Conexión por la <strong>CA-13</strong> tomada de Google Maps (OSRM daba 387.1 km), evitando desvíos falsos por Alta Verapaz.</li>
             </ul>
           </div>
         </div>
@@ -749,9 +749,9 @@ Para definir las carreteras directas aplicamos un criterio objetivo y reproducib
         </div>
       </div>
       <div class="speaker-note-data" hidden>
-        Un aspecto fundamental de nuestro trabajo fue garantizar que los datos fueran 100 % reales y auditables. Extrajimos las distancias y geometrías mediante el motor OSRM sobre OpenStreetMap y validamos manualmente las 49 carreteras frente a Google Maps. El resultado fue contundente: 35 tramos con coincidencia idéntica, 9 con variación menor a 2 km y 5 con ajustes documentados por trazados urbanos o libramientos recientes.
+        Un aspecto fundamental de nuestro trabajo fue garantizar que los datos fueran 100 % reales y auditables. Extrajimos las distancias y geometrías mediante OSRM sobre OpenStreetMap y validamos manualmente las 49 carreteras frente a Google Maps bajo un criterio técnico de tolerancia a ±10 %: 35 tramos con OSRM a ±10 % de la ruta recomendada por Google Maps; 9 tramos con OSRM a ±10 % de una ruta alternativa que ofrece Google Maps; y 5 tramos donde ninguna coincidió (CHI-SOL, CHI-SUC, JAL-PRO, IZA-PET, QUE-TOT), en los cuales se utiliza directamente el valor de Google Maps.
 
-Un hallazgo crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: sin esta arteria troncal directa, cualquier algoritmo desviaría absurdamente los viajes por Alta Verapaz aumentando cientos de kilómetros innecesarios. Cada número en nuestro sistema proviene de carreteras reales de Guatemala.
+Un caso crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: OSRM arrojaba 387.1 km por un trazado indirecto, por lo que adoptar el valor oficial de Google Maps evita desviar las encomiendas por Alta Verapaz. Cada número en nuestro sistema proviene de carreteras reales de Guatemala debidamente auditadas.
       </div>
     </section>
 
@@ -782,7 +782,6 @@ Un hallazgo crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: sin
             <span class="card-title green">COMPLEJIDAD Y CONDICIÓN DE NO NEGATIVIDAD</span>
             <ul class="bullet-list">
               <li><strong>Complejidad Temporal:</strong> <code>O((V + E) log V)</code> implementado con min-heap binario.</li>
-              <li><strong>Tiempo de Ejecución:</strong> Menos de 5 ms en el navegador (respuesta instantánea).</li>
               <li><strong>¿Por qué NO admite pesos negativos?</strong> Porque asume que agregar aristas no puede disminuir distancias acumuladas. Un peso negativo violaría la permanencia de nodos cerrados. En carreteras reales, <strong>W &gt; 0 siempre</strong>.</li>
             </ul>
           </div>
@@ -793,7 +792,7 @@ Un hallazgo crítico fue la arista Izabal–Petén de 287.0 km por la CA-13: sin
         </div>
       </div>
       <div class="speaker-note-data" hidden>
-        Para calcular la mejor ruta para cada paquete implementamos el Algoritmo de Dijkstra. Su funcionamiento se basa en una estrategia voraz o greedy: a partir de la cabecera origen, examina las aristas adyacentes y relaja las distancias tentativas hacia los vecinos. Gracias a una cola de prioridad basada en min-heap binario, su complejidad temporal es de O((V+E) log V), resolviendo cualquier consulta en menos de 5 milisegundos en el navegador.
+        Para calcular la mejor ruta para cada paquete implementamos el Algoritmo de Dijkstra. Su funcionamiento se basa en una estrategia voraz o greedy: a partir de la cabecera origen, examina las aristas adyacentes y relaja las distancias tentativas hacia los vecinos. Gracias a una cola de prioridad basada en min-heap binario, su complejidad temporal es de O((V+E) log V).
 
 Es crucial enfatizar que Dijkstra exige pesos estrictamente no negativos (W > 0), lo cual se cumple naturalmente en distancias físicas de carreteras. Si existieran costos negativos o subsidios compensatorios, Dijkstra fallaría al fijar nodos permanentemente, obligando a usar algoritmos como Bellman-Ford.
       </div>
@@ -823,11 +822,11 @@ Es crucial enfatizar que Dijkstra exige pesos estrictamente no negativos (W > 0)
           <div class="card">
             <span class="card-title cyan">SECUENCIA Y CARRETERAS OFICIALES</span>
             <ul class="bullet-list">
-              <li><strong>1. QUE → TOT:</strong> 28.8 km &mdash; RN-01 (Quetzaltenango a Totonicapán)</li>
-              <li><strong>2. TOT → QUI:</strong> 36.2 km &mdash; RN-15 (Totonicapán a Quiché)</li>
-              <li><strong>3. QUI → BVE:</strong> 128.6 km &mdash; RN-15 (Santa Cruz del Quiché a Salamá)</li>
-              <li><strong>4. BVE → ZAC:</strong> 128.3 km &mdash; RN-17 / CA-09 (Salamá a Zacapa)</li>
-              <li><strong>5. ZAC → IZA:</strong> 172.1 km &mdash; CA-09 Norte (Zacapa a Puerto Barrios)</li>
+              <li><strong>1. QUE → TOT:</strong> 28.8 km &mdash; RN-1 / RN-1B</li>
+              <li><strong>2. TOT → QUI:</strong> 36.2 km &mdash; RD QUI-04</li>
+              <li><strong>3. QUI → BVE:</strong> 128.6 km &mdash; RD QUI-2 / RN-5</li>
+              <li><strong>4. BVE → ZAC:</strong> 128.3 km &mdash; CA-9 Nor / CA-14</li>
+              <li><strong>5. ZAC → IZA:</strong> 172.1 km &mdash; CA-9 Nor</li>
             </ul>
           </div>
           <div class="card">
@@ -835,9 +834,6 @@ Es crucial enfatizar que Dijkstra exige pesos estrictamente no negativos (W > 0)
             <div class="formula-box">
               28.8 + 36.2 + 128.6 + 128.3 + 172.1 = 494.0 km
             </div>
-            <p style="font-size: clamp(9px, 0.8vw, 11px); color: var(--text-muted); margin-top: 4px;">
-              Evita el paso por la Ciudad de Guatemala, ahorrando más de 60 km y evitando horas de congestión.
-            </p>
           </div>
         </div>
         <div class="image-frame">
@@ -846,9 +842,16 @@ Es crucial enfatizar que Dijkstra exige pesos estrictamente no negativos (W > 0)
         </div>
       </div>
       <div class="speaker-note-data" hidden>
-        Veamos nuestro primer caso de demostración: un envío transversal de costa a costa, desde Quetzaltenango en el altiplano occidental hasta Puerto Barrios, Izabal en el litoral atlántico.
+        Veamos nuestro primer caso de demostración: un envío desde Quetzaltenango hasta Puerto Barrios, Izabal.
 
-El sistema determina una distancia óptima de 494.0 km a través de 5 tramos interdepartamentales: sale de Quetzaltenango por la RN-01 a Totonicapán (28.8 km), avanza a Quiché (36.2 km), enlaza por Baja Verapaz (128.6 km) y Zacapa (128.3 km), y se incorpora a la CA-9 Norte hasta Puerto Barrios (172.1 km). La interfaz no solo resalta la ruta en púrpura en el mapa interactivo, sino que desglosa cada tramo con su nomenclatura oficial y presenta la fórmula aritmética explícita de la suma para total transparencia.
+El sistema determina una distancia óptima de 494.0 km a través de 5 tramos interdepartamentales:
+1. QUE → TOT: 28.8 km por RN-1 / RN-1B
+2. TOT → QUI: 36.2 km por RD QUI-04
+3. QUI → BVE: 128.6 km por RD QUI-2 / RN-5
+4. BVE → ZAC: 128.3 km por CA-9 Nor / CA-14
+5. ZAC → IZA: 172.1 km por CA-9 Nor
+
+La interfaz resalta la ruta sobre el mapa interactivo, desglosa cada tramo con su carretera oficial y presenta la fórmula aritmética de comprobación.
       </div>
     </section>
 
@@ -869,7 +872,7 @@ El sistema determina una distancia óptima de 494.0 km a través de 5 tramos int
             <ul class="bullet-list blue" style="font-size: clamp(9.5px, 0.85vw, 12px);">
               <li><strong>Distancia Total:</strong> <span style="color: var(--accent-blue); font-weight: bold;">415.3 km</span> (3 tramos directos)</li>
               <li><strong>Secuencia:</strong> GUA &rarr; BVE &rarr; AVE &rarr; PET</li>
-              <li><strong>Tramos:</strong> GUA–BVE (89.0 km, CA-09) &bull; BVE–AVE (69.0 km, CA-14) &bull; AVE–PET (257.3 km, Franja Transversal RD PET-11)</li>
+              <li><strong>Tramos:</strong> GUA–BVE (89.0 km, RD BV-12 / RD GUA-12) &bull; BVE–AVE (69.0 km, CA-14 / RN-5) &bull; AVE–PET (257.3 km, RD PET-11 / RD AV-09)</li>
               <li><strong>Fórmula:</strong> <code>89.0 + 69.0 + 257.3 = 415.3 km</code></li>
             </ul>
           </div>
@@ -886,7 +889,7 @@ El sistema determina una distancia óptima de 494.0 km a través de 5 tramos int
             <ul class="bullet-list" style="font-size: clamp(9.5px, 0.85vw, 12px);">
               <li><strong>Distancia Total:</strong> <span style="color: var(--accent-green); font-weight: bold;">368.3 km</span> (5 tramos Costa Sur)</li>
               <li><strong>Secuencia:</strong> SMA &rarr; QUE &rarr; SUC &rarr; ESC &rarr; SRO &rarr; JUT</li>
-              <li><strong>Tramos:</strong> SMA–QUE (49.6 km) &bull; QUE–SUC (60.2 km, CITO-180) &bull; SUC–ESC (102.5 km, CA-02) &bull; ESC–SRO (100.0 km) &bull; SRO–JUT (56.0 km, CA-01)</li>
+              <li><strong>Tramos:</strong> SMA–QUE (49.6 km, RN-1) &bull; QUE–SUC (60.2 km, CITO-180 / SCH-02) &bull; SUC–ESC (102.5 km, CA-02 OCC) &bull; ESC–SRO (100.0 km, CA-2 OR / RN-16) &bull; SRO–JUT (56.0 km, CA-1 Or)</li>
               <li><strong>Fórmula:</strong> <code>49.6 + 60.2 + 102.5 + 100.0 + 56.0 = 368.3 km</code></li>
             </ul>
           </div>
@@ -897,9 +900,19 @@ El sistema determina una distancia óptima de 494.0 km a través de 5 tramos int
         </div>
       </div>
       <div class="speaker-note-data" hidden>
-        En el segundo ejemplo resolvemos el corredor norte: Ciudad de Guatemala a Flores, Petén. La ruta óptima es de 415.3 km recorriendo la CA-14 hacia Cobán y empalmando directamente con Petén a través de la Franja Transversal del Norte (RD PET-11, 257.3 km). El sistema preserva la geografía real norte-arriba sin deformación.
+        En la Demo 2 resolvemos el corredor norte: Ciudad de Guatemala a Flores, Petén. La ruta óptima es de 415.3 km recorriendo tres tramos:
+- GUA → BVE: 89.0 km por RD BV-12 / RD GUA-12
+- BVE → AVE: 69.0 km por CA-14 / RN-5
+- AVE → PET: 257.3 km por RD PET-11 / RD AV-09
 
-En el tercer ejemplo conectamos el extremo occidental fronterizo de San Marcos con Jutiapa en el oriente, cruzando el país por la costa sur con un total de 368.3 km: desciende por la CITO-180 hacia Mazatenango, conecta con Escuintla y Santa Rosa por la CA-2 Occidente y culmina en Jutiapa por la CA-1 Oriente. Ambas rutas demuestran que el sistema encuentra de forma infalible la distancia mínima.
+En la Demo 3 conectamos San Marcos con Jutiapa, totalizando 368.3 km a través de cinco tramos:
+- SMA → QUE: 49.6 km por RN-1
+- QUE → SUC: 60.2 km por CITO-180 / SCH-02
+- SUC → ESC: 102.5 km por CA-02 OCC
+- ESC → SRO: 100.0 km por CA-2 OR / RN-16
+- SRO → JUT: 56.0 km por CA-1 Or
+
+Ambas rutas demuestran que el sistema encuentra de forma infalible la distancia mínima con las carreteras exactas del modelo.
       </div>
     </section>
 
@@ -975,9 +988,9 @@ La diferencia conceptual es clave: la Ruta Más Corta de Dijkstra optimiza el tr
         <div class="card">
           <span class="card-title blue">2. ADMINISTRADOR DE RED VIAL</span>
           <ul class="bullet-list blue">
-            <li>Catálogo interactivo para añadir, modificar o inhabilitar departamentos y carreteras.</li>
-            <li>Validación automática de conexidad topológica en tiempo real.</li>
-            <li>Simulación de bloqueos o mantenimiento de tramos viales.</li>
+            <li>Agregar, editar, eliminar y buscar departamentos y carreteras con validaciones.</li>
+            <li>Al eliminar una carretera, la ruta se recalcula al instante.</li>
+            <li>Aviso automático si la red vial queda desconectada.</li>
           </ul>
         </div>
         <div class="card">
@@ -1001,7 +1014,7 @@ La diferencia conceptual es clave: la Ruta Más Corta de Dijkstra optimiza el tr
         RutaQ no es un prototipo estático, sino un sistema web interactivo de nivel profesional. Cuenta con cuatro módulos centrales:
 
 1. El Asistente guiado de Transporte Express en dos pasos («¿Dónde está el paquete?» y «¿A qué departamento debe entregarse?»).
-2. Un Administrador de Red completo para agregar, editar o deshabilitar departamentos y carreteras con validación de conexidad en tiempo real.
+2. Un Administrador de Red para agregar, editar, eliminar y buscar departamentos y carreteras con validaciones; al eliminar una carretera la ruta se recalcula al instante y se muestra un aviso si la red queda desconectada.
 3. Tablas pedagógicas paso a paso que replican la metodología vista en clase para Prim, Kruskal, Dijkstra y Floyd-Warshall.
 4. Un Modo Presentación panorámico integrado, optimizado para proyectores de aula y pantallas táctiles móviles.
       </div>
@@ -1029,7 +1042,7 @@ La diferencia conceptual es clave: la Ruta Más Corta de Dijkstra optimiza el tr
             <span class="card-title blue">148 / 148 PRUEBAS AUTOMATIZADAS (PLAYWRIGHT)</span>
             <ul class="bullet-list blue">
               <li>Pruebas E2E de regresión funcional, visual y de estado aprobadas al 100 %.</li>
-              <li>Evaluado en <strong>4 dispositivos y navegadores</strong>: Chromium, WebKit, Firefox y Mobile.</li>
+              <li>Pruebas ejecutadas en <strong>4 dispositivos</strong>: Desktop Chrome, iPhone 13 (WebKit), Pixel 7 e iPad.</li>
             </ul>
           </div>
           <div class="card">
@@ -1062,7 +1075,7 @@ La diferencia conceptual es clave: la Ruta Más Corta de Dijkstra optimiza el tr
       <div class="speaker-note-data" hidden>
         La confiabilidad de nuestro sistema está respaldada por una verificación computacional rigurosa. Contrastamos el 100 % de los caminos mínimos y árboles de expansión contra la biblioteca científica NetworkX en Python: 1 168 de 1 168 pares analizados (incluyendo los 484 pares de Guatemala y grafos de control) arrojaron idénticos resultados con cero discrepancias, y 10 de 10 instancias de AEM fueron idénticas.
 
-En aseguramiento de calidad de software, ejecutamos 148 pruebas automatizadas End-to-End con Playwright en 4 dispositivos y motores de renderizado (Chromium, WebKit, Firefox y vista móvil) con 100 % de éxito. Finalmente, la auditoría oficial de Google Lighthouse certificó un rendimiento de 91, accesibilidad de 95, mejores prácticas de 100 y SEO de 100.
+En aseguramiento de calidad de software, ejecutamos 148 pruebas automatizadas End-to-End con Playwright en 4 dispositivos (Desktop Chrome, iPhone 13 en WebKit, Pixel 7 e iPad) con 100 % de éxito. Finalmente, la auditoría oficial de Google Lighthouse certificó un rendimiento de 91, accesibilidad de 95, mejores prácticas de 100 y SEO de 100.
       </div>
     </section>
 
@@ -1088,7 +1101,7 @@ En aseguramiento de calidad de software, ejecutamos 148 pruebas automatizadas En
           <span class="card-title blue">2. RIGOR CARTOGRÁFICO Y REPRODUCIBILIDAD</span>
           <ul class="bullet-list blue">
             <li>Red de 22 departamentos y 49 aristas sustentada en OpenStreetMap y auditada en Google Maps.</li>
-            <li>Inclusión del tramo IZA–PET (287 km) por la CA-13 que previene desvíos falsos por Cobán.</li>
+            <li>Inclusión del tramo IZA–PET (287.0 km) por la CA-13 que previene desvíos falsos por Alta Verapaz.</li>
             <li>Criterios reproducibles de vecindad territorial y umbrales de proximidad.</li>
           </ul>
         </div>
@@ -1103,7 +1116,7 @@ En aseguramiento de calidad de software, ejecutamos 148 pruebas automatizadas En
         <div class="card">
           <span class="card-title amber">4. CALIDAD DE INGENIERÍA DE SOFTWARE</span>
           <ul class="bullet-list amber">
-            <li>Código 100 % en TypeScript, modular, reactivo y con ejecución menor a 5 ms en navegador.</li>
+            <li>Código 100 % en TypeScript, modular, reactivo y ejecutable directamente en el navegador.</li>
             <li>Verificación cruzada con NetworkX (1 168/1 168) y 148 pruebas automatizadas Playwright.</li>
             <li>Despliegue activo en la web y repositorio con documentación exhaustiva.</li>
           </ul>
