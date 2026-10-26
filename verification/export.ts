@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { dijkstra } from '../src/core/dijkstra';
+import { kruskal, prim } from '../src/core/mst';
 import type { Graph } from '../src/core/types';
 
 const example: Graph = {
@@ -25,7 +26,12 @@ const example: Graph = {
     shapeAuto: true,
   })),
 };
-const files = ['src/data/ejemplo6.json', 'src/data/quetzaltenango.json'];
+const files = [
+  'src/data/ejemplo6.json',
+  'src/data/ejemplo_mst.json',
+  'src/data/quetzaltenango.json',
+  'src/data/guatemala.json',
+];
 const out: Record<string, unknown> = {};
 for (const file of files) {
   try {
@@ -57,10 +63,12 @@ for (const file of files) {
   }
 }
 out['grafo-prueba'] = example;
-for (const [name, g] of Object.entries(out) as [string, Graph][])
-  out[name] = { graph: g, distances: Object.fromEntries(g.nodes.map((n) => [n.id, dijkstra(g, n.id).labels])) };
-out['grafo-prueba'] = {
-  graph: example,
-  distances: Object.fromEntries(example.nodes.map((n) => [n.id, dijkstra(example, n.id).labels])),
-};
+for (const [name, value] of Object.entries(out) as [string, Graph][]) {
+  const g = value;
+  out[name] = {
+    graph: g,
+    distances: Object.fromEntries(g.nodes.map((n) => [n.id, dijkstra(g, n.id).labels])),
+    mst: { prim: prim(g).total, kruskal: kruskal(g).total },
+  };
+}
 await writeFile('verification/programa.json', JSON.stringify(out));

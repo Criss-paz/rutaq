@@ -1,6 +1,7 @@
 import type { CoreApi, DijkstraStep, Graph, NodeId, PathResult } from './types';
 import { adjacencyList } from './graph';
 
+/** Heap binario mínimo ordenado por distancia y NodeId. */
 class Heap {
   a: { id: string; d: number }[] = [];
   push(x: { id: string; d: number }) {
@@ -38,6 +39,11 @@ class Heap {
 const assert = (g: Graph, s: NodeId) => {
   if (!g.nodes.some((n) => n.id === s)) throw new Error(`No existe el nodo «${s}».`);
 };
+/**
+ * Calcula caminos mínimos con Dijkstra y conserva una instantánea por iteración para la tabla.
+ * Complejidad: O((V + E) log V) con heap binario; memoria O(V + E).
+ * Referencia: Cormen et al., Introduction to Algorithms, capítulo 24.
+ */
 export const dijkstra: CoreApi['dijkstra'] = (g, s) => {
   assert(g, s);
   const adj = adjacencyList(g),
@@ -63,6 +69,7 @@ export const dijkstra: CoreApi['dijkstra'] = (g, s) => {
   const done = new Set<string>();
   let iter = 0;
   while (true) {
+    // Se omiten entradas antiguas del heap cuando la distancia del nodo mejoró posteriormente.
     let item = heap.pop();
     while (item && (done.has(item.id) || item.d !== labels[item.id]!.dist)) item = heap.pop();
     if (!item) break;
@@ -76,6 +83,7 @@ export const dijkstra: CoreApi['dijkstra'] = (g, s) => {
       if (done.has(v.node)) continue;
       evaluatedEdges.push(v.edgeId);
       const nd = item.d + v.weight;
+      // Solo una mejora estricta cambia la etiqueta; los empates conservan el predecesor previo.
       if (nd < labels[v.node]!.dist) {
         labels[v.node] = { dist: nd, pred: u };
         updated.push(v.node);
