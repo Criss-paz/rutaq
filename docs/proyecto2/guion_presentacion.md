@@ -56,7 +56,7 @@ _Al seleccionar origen y destino, el sistema ejecuta el **Algoritmo de Dijkstra*
 **Qué decir:**  
 _«Veamos nuestro primer caso: un envío transversal de costa a costa, desde el altiplano occidental en **Quetzaltenango (QUE)** hasta la costa del Caribe en **Puerto Barrios, Izabal (IZA)**._
 
-_Observen cómo el algoritmo encuentra la ruta más corta con una distancia total de **465.2 km** ([km: QUE→IZA]). El camino desciende por la autopista hacia la capital o atraviesa los nudos centrales conectando con la carretera al Atlántico **CA-9 Norte**, mostrando en pantalla cada tramo: desde Quetzaltenango hasta la llegada al puerto, eliminando cualquier desvío innecesario.»_
+_Observen cómo el algoritmo encuentra la ruta óptima sobre las carreteras entre departamentos vecinos con una distancia total de **515.1 km** ([km: QUE→IZA]). El camino transita desde Quetzaltenango por Totonicapán y Quiché, enlaza con Baja Verapaz y El Progreso hacia el corredor del Motagua en Zacapa, conectando con la **CA-9 Norte** hasta Puerto Barrios, mostrando en pantalla cada tramo y eliminando cualquier desvío innecesario.»_
 
 ---
 
@@ -67,7 +67,7 @@ _Observen cómo el algoritmo encuentra la ruta más corta con una distancia tota
 **Qué decir:**  
 _«Nuestro segundo ejemplo conecta la sede central en **Ciudad de Guatemala (GUA)** con el destino más septentrional de la república: **Flores, Petén (PET)**._
 
-_Petén se encuentra a una gran distancia hacia el norte. El sistema calcula una distancia total de **415.3 km** ([km: GUA→PET]). Noten cómo el algoritmo toma la **CA-9 Norte** a través de El Progreso e Izabal, y luego empalma con la **CA-13** hacia el corazón de Petén. El mapa proyectado en Web Mercator mantiene la orientación geográfica real norte-arriba, permitiendo hacer zoom fluido y ajustar la pantalla sin deformar la geografía nacional.»_
+_Petén se encuentra a una gran distancia hacia el norte. El sistema calcula una distancia total de **415.3 km** ([km: GUA→PET]). Noten cómo el algoritmo avanza por la ruta norte conectando con Baja Verapaz (Salamá), asciende hacia Alta Verapaz por la **CA-14** y empalma directamente con Petén a través de la **Franja Transversal del Norte (RD PET-11 / RD AV-09)**. El mapa proyectado en Web Mercator mantiene la orientación geográfica real norte-arriba, permitiendo hacer zoom fluido y ajustar la pantalla sin deformar la geografía nacional.»_
 
 ---
 
@@ -78,7 +78,7 @@ _Petén se encuentra a una gran distancia hacia el norte. El sistema calcula una
 **Qué decir:**  
 _«El tercer ejemplo une el extremo occidental fronterizo de **San Marcos (SMA)** con el oriente del país en **Jutiapa (JUT)**._
 
-_Aquí el paquete recorre el país de oeste a este, cubriendo un trayecto óptimo de **345.4 km** ([km: SMA→JUT]). El desglose muestra el paso por las rutas del altiplano y la conexión con la **CA-1 Oriente**, permitiendo al despachador calcular con exactitud la hora estimada de llegada a la bodega receptora.»_
+_Aquí el paquete recorre el país de oeste a este, cubriendo un trayecto óptimo de **368.3 km** ([km: SMA→JUT]). El desglose muestra el descenso desde el altiplano por San Marcos y Quetzaltenango (RN-1 / CITO-180) hacia la costa sur en Suchitepéquez (CA-2 Occidente), conectando por Escuintla y Santa Rosa hasta la **CA-1 Oriente** en Jutiapa, permitiendo al despachador calcular con exactitud la hora estimada de llegada a la bodega receptora.»_
 
 ---
 

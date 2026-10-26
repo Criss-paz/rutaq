@@ -78,13 +78,15 @@ Cada nodo representa la cabecera departamental oficial de uno de los 22 departam
 | **REU** | Retalhuleu     | Retalhuleu             | $14.53596^\circ$ | $-91.67807^\circ$ |
 | **SUC** | Suchitepéquez  | Mazatenango            | $14.53315^\circ$ | $-91.50600^\circ$ |
 
-### 2.2. Conjunto de Aristas ($E$): Carreteras Directas
+### 2.2. Conjunto de Aristas ($E$): Carreteras Directas entre Departamentos Vecinos
 
-Una arista $\{u, v\} \in E$ representa una **conexión vial directa** entre las cabeceras $u$ y $v$. Para evitar aristas artificiales compuestas (por ejemplo, considerar una ruta directa entre Ciudad de Guatemala y Quetzaltenango que atraviesa Chimaltenango), se aplica el **criterio objetivo de arista directa**:
+Una arista $\{u, v\} \in E$ representa una **conexión vial directa** entre departamentos vecinos. Para evitar aristas artificiales compuestas o transversales (por ejemplo, conectar directamente Huehuetenango con Izabal o Chiquimula, o Ciudad de Guatemala con Quetzaltenango a través de Chimaltenango), se aplica un **triple criterio objetivo y reproducible**:
 
-- La trayectoria vehicular entre $u$ y $v$ obtenida mediante OSRM **no debe aproximarse a menos de $2.0\text{ km}$** de la cabecera de ninguna otra ciudad $w \notin \{u, v\}$.
-- El umbral de $2.0\text{ km}$ (superior al de $1.0\text{ km}$ utilizado en el ámbito municipal de Quetzaltenango en el Proyecto I) obedece a que los cascos urbanos y periferias de las capitales departamentales abarcan una huella geográfica significativamente mayor.
-- Todo par que viola este criterio es descartado y documentado con la cabecera intermedia y la distancia mínima en [`docs/datos/aristas_descartadas_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/aristas_descartadas_guatemala.csv).
+1. **Vecindad Territorial:** Los departamentos $u$ y $v$ deben compartir frontera geográfica según sus polígonos oficiales de OSM/Nominatim (tolerancia de contacto $\le 200\text{ m}$).
+2. **Trayecto Intra-Departamental ($\ge 85.0\ \%$):** La ruta OSRM debe recorrer al menos el $85\ \%$ de su longitud dentro del territorio de los departamentos $u \cup v$. Si transita de forma prolongada por terceros departamentos, no constituye un enlace directo entre vecinos.
+3. **Umbral de Proximidad a Cabeceras Intermedias ($\ge 2.0\text{ km}$):** La ruta no debe aproximarse a menos de $2.0\text{ km}$ del casco urbano de ninguna otra cabecera departamental $w \notin \{u, v\}$.
+
+Todo par que no satisface simultáneamente las tres condiciones es descartado y auditado con su motivo en [`docs/datos/aristas_descartadas_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/aristas_descartadas_guatemala.csv). El grafo final consta de **36 aristas directas** y es 100 % conexo.
 
 ### 2.3. Función de Ponderación ($W$): Distancia de Conducción Real
 
@@ -154,9 +156,9 @@ El despliegue de RutaQ soluciona las deficiencias identificadas a través de cua
 ### 5.1. Fuentes Oficiales Utilizadas
 
 - **Instituto Nacional de Estadística (INE):** División administrativa y nómina oficial de departamentos y cabeceras de Guatemala.
-- **OpenStreetMap / Nominatim:** Georreferenciación de las 22 cabeceras departamentales y contorno territorial de la república.
+- **OpenStreetMap / Nominatim:** Georreferenciación de las 22 cabeceras departamentales, contorno territorial de la república y polígonos vectoriales oficiales de los 22 departamentos.
 - **OSRM (Open Source Routing Machine):** Ruteo vehicular real sobre la red vial nacional, cálculo métrico de distancias y pasos de navegación (_steps_).
-- **Dirección General de Caminos (DGC / CIV):** Tabla oficial de distancias viales de la República de Guatemala.
+- **Protocolo de Validación:** Al no existir una tabla oficial verificable de distancias publicada por la Dirección General de Caminos (DGC), las distancias mínimas interdepartamentales se calculan de manera determinista con el algoritmo de Dijkstra sobre la red OSRM y quedan sujetas a validación externa en Google Maps.
 
 ### 5.2. Auditoría de Coordenadas y Lección de Santa Cruz del Quiché (`QUI`)
 
@@ -168,4 +170,4 @@ Siguiendo la metodología rigurosa del Proyecto I (donde se descubrió la reubic
 ### 5.3. Reproducibilidad y Validación
 
 - El script de construcción [`scripts/build_guatemala.py`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/scripts/build_guatemala.py) cuenta con almacenamiento persistente en caché local bajo `scripts/cache/`, lo que permite regenerar el archivo [`src/data/guatemala.json`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/src/data/guatemala.json) y [`src/data/guatemala_contorno.json`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/src/data/guatemala_contorno.json) de manera 100 % desconectada y determinista.
-- El grafo resultante es **completamente conexo** y enlaza a todas las regiones de la república, incluyendo la conectividad estratégica del departamento de Petén (`PET`).
+- El grafo resultante consta de **36 aristas directas**, es **completamente conexo** y enlaza a todas las regiones de la república, incluyendo la conectividad estratégica del departamento de Petén (`PET`) a través de Alta Verapaz (`AVE-PET`).

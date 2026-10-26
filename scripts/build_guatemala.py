@@ -6,9 +6,14 @@ Cumple con el contrato GuatemalaDataset de src/core/types.ts:
 1. Nodos: 22 cabeceras departamentales oficiales según docs/agentes/proyecto2_ids.md (fuente Nominatim con caché).
 2. Auditoría de coordenadas: contraste contra la API de Wikipedia (prop=coordinates), guardado en
    docs/datos/auditoria_coordenadas_guatemala.csv y corrección documentada en docs/datos/coordenadas_corregidas_guatemala.csv.
-3. Candidatas: los 231 pares no dirigidos (22·21/2) consultados a OSRM con overview=full, geometries=polyline y steps=true.
-4. Criterio de arista directa: la ruta A–B no pasa a menos de 2.0 km de ninguna otra cabecera departamental C != A, B.
-   Descartes registrados en docs/datos/aristas_descartadas_guatemala.csv.
+3. Polígonos departamentales y vecindad: polígonos oficiales de OSM/Nominatim (polygon_geojson=1, addresstype=state)
+   con caché en scripts/cache/departamentos_geojson/. Cálculo topológico de vecindad con tolerancia de ~200 m, guardado
+   en docs/datos/vecindad_departamentos.csv.
+4. Criterio de arista directa reproducible (las tres condiciones deben cumplirse simultáneamente):
+   - Condición 1: Los departamentos A y B son vecinos (comparten frontera geográfica).
+   - Condición 2: La ruta OSRM A->B recorre al menos el 85 % de su longitud dentro de los polígonos de A ∪ B.
+   - Condición 3: La ruta no pasa a menos de 2.0 km de ninguna otra cabecera departamental C != A, B.
+   Descartes registrados en docs/datos/aristas_descartadas_guatemala.csv indicando la condición fallida.
 5. carretera: derivada de los steps de OSRM sumando distancias de ref (CA-1, CA-9, CA-13, RN-…) o name.
 6. Grafo conexo: verificación topológica de conectividad completa (especialmente Petén conectado a la red nacional).
 7. Contorno simplificado de Guatemala: GeoJSON Polygon (<= 400 puntos) en src/data/guatemala_contorno.json.
@@ -23,27 +28,37 @@ import math
 import csv
 import urllib.request
 import urllib.parse
+from shapely.geometry import shape, LineString
+from shapely.ops import unary_union
+import networkx as nx
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_NOMINATIM = os.path.join(BASE_DIR, 'scripts', 'cache', 'nominatim_guatemala')
 CACHE_OSRM = os.path.join(BASE_DIR, 'scripts', 'cache', 'osrm_guatemala')
 CACHE_WIKIPEDIA = os.path.join(BASE_DIR, 'scripts', 'cache', 'wikipedia_guatemala')
+CACHE_DEPT_GEOJSON = os.path.join(BASE_DIR, 'scripts', 'cache', 'departamentos_geojson')
 
 OUTPUT_DATASET = os.path.join(BASE_DIR, 'src', 'data', 'guatemala.json')
 OUTPUT_CONTORNO = os.path.join(BASE_DIR, 'src', 'data', 'guatemala_contorno.json')
 OUTPUT_AUDITORIA = os.path.join(BASE_DIR, 'docs', 'datos', 'auditoria_coordenadas_guatemala.csv')
 INPUT_COORDENADAS_CORREGIDAS = os.path.join(BASE_DIR, 'docs', 'datos', 'coordenadas_corregidas_guatemala.csv')
+OUTPUT_VECINDAD = os.path.join(BASE_DIR, 'docs', 'datos', 'vecindad_departamentos.csv')
 OUTPUT_DISCARDED = os.path.join(BASE_DIR, 'docs', 'datos', 'aristas_descartadas_guatemala.csv')
 
 os.makedirs(CACHE_NOMINATIM, exist_ok=True)
 os.makedirs(CACHE_OSRM, exist_ok=True)
 os.makedirs(CACHE_WIKIPEDIA, exist_ok=True)
+os.makedirs(CACHE_DEPT_GEOJSON, exist_ok=True)
 os.makedirs(os.path.dirname(OUTPUT_DATASET), exist_ok=True)
 os.makedirs(os.path.dirname(OUTPUT_DISCARDED), exist_ok=True)
 
 USER_AGENT = 'RutaQ-proyecto-academico/1.0 (https://github.com/Criss-paz/rutaq; estudiante@miumg.edu.gt)'
 EARTH_RADIUS_KM = 6371.0088
-DIRECT_EDGE_THRESHOLD_KM = 2.0
+
+# Umbrales metodológicos exactos
+VECINDAD_TOLERANCE_DEG = 0.002  # ~220 m (tolerancia de contacto entre polígonos departamentales)
+MIN_LENGTH_IN_UNION_PCT = 85.0  # Al menos 85.0 % del trayecto dentro de A ∪ B
+DIRECT_EDGE_THRESHOLD_KM = 2.0  # Distancia mínima a cabecera intermedia distinta de A y B
 
 # 22 departamentos con id de 3 letras, nombre oficial, cabecera departamental, consulta Nominatim y título Wikipedia
 DEPARTAMENTOS = [
@@ -312,6 +327,73 @@ def audit_coordinates(nodes):
     print(f"  Guardada auditoría en: {OUTPUT_AUDITORIA}")
     return discrepancies
 
+# ─────────────────── Polígonos Departamentales y Vecindad ───────────────────
+
+def get_department_polygon(m_id, label):
+    """Obtiene de caché o consulta a Nominatim el polígono GeoJSON del departamento."""
+    cache_path = os.path.join(CACHE_DEPT_GEOJSON, f"{m_id}.json")
+    if os.path.exists(cache_path):
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            item = json.load(f)
+    else:
+        print(f"  [Nominatim] Consultando polígono para departamento {label} ({m_id})...")
+        if m_id == 'GUA':
+            params = {'q': 'Departamento de Guatemala, Guatemala', 'polygon_geojson': '1', 'format': 'json'}
+        else:
+            params = {'country': 'Guatemala', 'state': label, 'polygon_geojson': '1', 'format': 'json'}
+        url = f"https://nominatim.openstreetmap.org/search?{urllib.parse.urlencode(params)}"
+        req = urllib.request.Request(url, headers={'User-Agent': USER_AGENT})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        item = next((x for x in data if x.get('addresstype') == 'state'), None)
+        if not item and data:
+            item = data[0]
+        if not item:
+            raise ValueError(f"Nominatim no devolvió polígono para el departamento {label} ({m_id})")
+        with open(cache_path, 'w', encoding='utf-8') as f:
+            json.dump(item, f, ensure_ascii=False, indent=2)
+        time.sleep(1.05)
+
+    geom = shape(item['geojson'])
+    if not geom.is_valid:
+        geom = geom.buffer(0)
+    return geom
+
+def build_vecindad_matrix(dept_codes, geoms):
+    """
+    Calcula la matriz de vecindad entre departamentos (distancia <= ~200 m)
+    y la guarda en docs/datos/vecindad_departamentos.csv.
+    """
+    print("\n--- Cálculo de Matriz de Vecindad Departamental ---")
+    adjacency = {}
+    matrix_rows = []
+
+    for c1 in dept_codes:
+        g1 = geoms[c1]
+        row_dict = {'departamento': c1}
+        for c2 in dept_codes:
+            if c1 == c2:
+                is_adj = 0
+            else:
+                g2 = geoms[c2]
+                dist = g1.distance(g2)
+                is_adj = 1 if dist <= VECINDAD_TOLERANCE_DEG else 0
+                pair = (min(c1, c2), max(c1, c2))
+                adjacency[pair] = (is_adj == 1)
+            row_dict[c2] = is_adj
+        matrix_rows.append(row_dict)
+
+    fieldnames = ['departamento'] + dept_codes
+    with open(OUTPUT_VECINDAD, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(matrix_rows)
+
+    num_vecinos = sum(1 for is_v in adjacency.values() if is_v)
+    print(f"  Total pares vecinos identificados: {num_vecinos}")
+    print(f"  Guardada matriz de vecindad en: {OUTPUT_VECINDAD}")
+    return adjacency
+
 # ─────────────────── Consulta y Caché OSRM ───────────────────
 
 def get_osrm_route(u, v, nodes_dict):
@@ -450,7 +532,6 @@ def build_guatemala_contorno():
 
     if gtype == 'Polygon':
         raw_ring = raw_geojson['coordinates'][0] # lista de [lon, lat]
-        # Invertir temporalmente a (lat, lon) para rdp
         latlon_ring = [(p[1], p[0]) for p in raw_ring]
         simplified_latlon = rdp_simplify(latlon_ring, epsilon=0.005)
         simplified_ring = [[round(p[1], 5), round(p[0], 5)] for p in simplified_latlon]
@@ -492,6 +573,7 @@ def build():
     # 1. Cargar coordenadas de los 22 departamentos
     nodes = []
     nodes_dict = {}
+    dept_codes = [m[0] for m in DEPARTAMENTOS]
     print("\n--- 1. Coordenadas de las 22 cabeceras departamentales ---")
     for m_id, label, cabecera, query, _ in DEPARTAMENTOS:
         node = get_node_coords(m_id, label, cabecera, query)
@@ -520,30 +602,71 @@ def build():
     if len(nodes) != 22:
         raise ValueError(f"Se esperaban 22 nodos departamentales, se obtuvieron {len(nodes)}")
 
-    # 4. Generar todos los 231 pares candidatos
+    # 4. Cargar polígonos departamentales y calcular matriz de vecindad
+    print("\n--- 3. Polígonos Departamentales y Matriz de Vecindad ---")
+    geoms = {}
+    for m_id, label, _, _, _ in DEPARTAMENTOS:
+        geoms[m_id] = get_department_polygon(m_id, label)
+    adjacency = build_vecindad_matrix(dept_codes, geoms)
+
+    # 5. Evaluar los 231 pares candidatos con el nuevo triple criterio
     all_pairs = []
-    n = len(DEPARTAMENTOS)
+    n = len(dept_codes)
     for i in range(n):
         for j in range(i + 1, n):
-            u = DEPARTAMENTOS[i][0]
-            v = DEPARTAMENTOS[j][0]
+            u = dept_codes[i]
+            v = dept_codes[j]
             src = min(u, v)
             tgt = max(u, v)
             all_pairs.append((src, tgt))
 
-    print(f"\n--- 3. Evaluando los {len(all_pairs)} pares candidatos con OSRM ---")
+    print(f"\n--- 4. Evaluando los {len(all_pairs)} pares candidatos (Triple Criterio) ---")
 
     accepted_edges = []
     discarded_pairs = []
 
-    for idx, (src, tgt) in enumerate(all_pairs, 1):
+    for src, tgt in all_pairs:
+        pair_tuple = (src, tgt)
+        is_vecino = adjacency.get(pair_tuple, False)
+
+        # Cargar ruta OSRM
         route = get_osrm_route(src, tgt, nodes_dict)
         raw_geom = route['geometry']
         route_points = decode_polyline(raw_geom)
         distance_km = round(route['distance'] / 1000.0, 1)
 
-        # Criterio de arista directa:
-        # La ruta NO debe pasar a < 2.0 km de la cabecera de NINGÚN otro departamento C
+        # Condición 1: Departamentos vecinos (frontera compartida)
+        if not is_vecino:
+            discarded_pairs.append({
+                'origen': src,
+                'destino': tgt,
+                'condicion_fallida': 'Condicion 1 (Vecindad)',
+                'motivo': 'Los departamentos no comparten frontera geográfica',
+                'porcentaje_ab': '',
+                'distancia_minima_km': '',
+                'cabecera_intermedia': ''
+            })
+            continue
+
+        # Condición 2: Recorrido >= 85 % dentro de A ∪ B
+        line = LineString([(p[1], p[0]) for p in route_points])
+        u_ab = unary_union([geoms[src], geoms[tgt]])
+        inter = line.intersection(u_ab)
+        pct_in_ab = round((inter.length / line.length) * 100.0, 1) if line.length > 0 else 0.0
+
+        if pct_in_ab < MIN_LENGTH_IN_UNION_PCT:
+            discarded_pairs.append({
+                'origen': src,
+                'destino': tgt,
+                'condicion_fallida': 'Condicion 2 (Longitud en A ∪ B)',
+                'motivo': f'Ruta recorre solo {pct_in_ab:.1f}% dentro de {src} ∪ {tgt} (umbral >= {MIN_LENGTH_IN_UNION_PCT}%)',
+                'porcentaje_ab': pct_in_ab,
+                'distancia_minima_km': '',
+                'cabecera_intermedia': ''
+            })
+            continue
+
+        # Condición 3: No pasar a menos de 2.0 km de otra cabecera departamental
         min_dist_to_other = float('inf')
         closest_intermediate = None
 
@@ -558,90 +681,83 @@ def build():
                 closest_intermediate = c_id
 
         if min_dist_to_other < DIRECT_EDGE_THRESHOLD_KM:
-            # Descartada: pasa a menos de 2.0 km de otra cabecera
             cabecera_inter = nodes_dict[closest_intermediate]['cabecera']
             motivo = f"Pasa a {min_dist_to_other:.3f} km de la cabecera de {closest_intermediate} ({cabecera_inter})"
             discarded_pairs.append({
                 'origen': src,
                 'destino': tgt,
-                'cabecera_intermedia': closest_intermediate,
+                'condicion_fallida': 'Condicion 3 (Proximidad a otra cabecera)',
+                'motivo': motivo,
+                'porcentaje_ab': pct_in_ab,
                 'distancia_minima_km': round(min_dist_to_other, 3),
-                'motivo': motivo
+                'cabecera_intermedia': closest_intermediate
             })
-        else:
-            # Aceptada como arista directa
-            carretera = derive_carretera_from_steps(route)
-            simplified_points = rdp_simplify(route_points, epsilon=0.0001)
-            simplified_geom = encode_polyline(simplified_points)
+            continue
 
-            edge_id = f"{src}-{tgt}"
-            accepted_edges.append({
-                'id': edge_id,
-                'source': src,
-                'target': tgt,
-                'km': distance_km,
-                'carretera': carretera,
-                'fuente': 'OSRM (router.project-osrm.org) sobre OpenStreetMap',
-                'verificado_google': False,
-                'km_google': None,
-                'nota': '',
-                'geometry': simplified_geom
-            })
-            print(f"  [ACEPTADA] {edge_id:<10} | {distance_km:>6.1f} km | {carretera:<25}")
+        # Aceptada como arista directa
+        carretera = derive_carretera_from_steps(route)
+        simplified_points = rdp_simplify(route_points, epsilon=0.0001)
+        simplified_geom = encode_polyline(simplified_points)
 
-    print(f"\n--- 4. Resumen de filtrado de aristas ---")
+        edge_id = f"{src}-{tgt}"
+        accepted_edges.append({
+            'id': edge_id,
+            'source': src,
+            'target': tgt,
+            'km': distance_km,
+            'carretera': carretera,
+            'fuente': 'OSRM (router.project-osrm.org) sobre OpenStreetMap',
+            'verificado_google': False,
+            'km_google': None,
+            'nota': '',
+            'geometry': simplified_geom
+        })
+        print(f"  [ACEPTADA] {edge_id:<10} | {distance_km:>6.1f} km | {pct_in_ab:>5.1f}% en A∪B | {carretera:<25}")
+
+    print(f"\n--- 5. Resumen de filtrado de aristas ---")
     print(f"  Total pares consultados   : {len(all_pairs)}")
     print(f"  Aristas directas aceptadas: {len(accepted_edges)}")
     print(f"  Pares descartados         : {len(discarded_pairs)}")
 
     # Guardar descartadas
     with open(OUTPUT_DISCARDED, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=['origen', 'destino', 'cabecera_intermedia', 'distancia_minima_km', 'motivo'])
+        writer = csv.DictWriter(f, fieldnames=[
+            'origen', 'destino', 'condicion_fallida', 'motivo', 'porcentaje_ab', 'distancia_minima_km', 'cabecera_intermedia'
+        ])
         writer.writeheader()
         writer.writerows(discarded_pairs)
     print(f"  Guardado reporte de descartes: {OUTPUT_DISCARDED}")
 
-    # 5. Verificación de conexidad topológica
-    adj = {n['id']: [] for n in nodes}
+    # 6. Verificación de conexidad topológica
+    G = nx.Graph()
+    G.add_nodes_from(dept_codes)
     for e in accepted_edges:
-        adj[e['source']].append(e['target'])
-        adj[e['target']].append(e['source'])
+        G.add_edge(e['source'], e['target'], weight=e['km'])
 
-    visited = set()
-    queue = [nodes[0]['id']]
-    visited.add(nodes[0]['id'])
-    while queue:
-        curr = queue.pop(0)
-        for nxt in adj[curr]:
-            if nxt not in visited:
-                visited.add(nxt)
-                queue.append(nxt)
+    if not nx.is_connected(G):
+        comps = list(nx.connected_components(G))
+        raise ValueError(f"¡El grafo NO es conexo! Componentes ({len(comps)}): {comps}")
 
-    if len(visited) != len(nodes):
-        missing = [n['id'] for n in nodes if n['id'] not in visited]
-        raise ValueError(f"¡El grafo NO es conexo! Nodos desconectados: {missing}")
+    if not nx.has_path(G, 'PET', 'GUA'):
+        raise ValueError("¡Petén (PET) no quedó conectado al grafo nacional!")
 
-    if 'PET' not in visited:
-        raise ValueError("¡Petén (PET) no quedó conectado al grafo!")
-
-    pet_neighbors = adj['PET']
+    pet_neighbors = list(G.neighbors('PET'))
     print(f"  [OK] Grafo 100 % CONEXO con los 22 departamentos.")
     print(f"  [OK] Petén (PET) conectado directamente con: {', '.join(pet_neighbors)}")
 
-    # 6. Construir contorno simplificado de Guatemala
-    print("\n--- 5. Construcción de contorno simplificado de Guatemala ---")
+    # 7. Construir contorno simplificado de Guatemala
+    print("\n--- 6. Construcción de contorno simplificado de Guatemala ---")
     build_guatemala_contorno()
 
-    # 7. Guardar dataset JSON
+    # 8. Guardar dataset JSON
     dataset = {
         'meta': {
             'nombre': 'Red Vial Nacional de la República de Guatemala (Transporte Express)',
             'unidad': 'km',
             'fuentes': [
                 'Instituto Nacional de Estadística de Guatemala (INE)',
-                'OpenStreetMap / Nominatim (coordenadas oficiales de las 22 cabeceras departamentales)',
-                'OSRM (router.project-osrm.org) sobre OpenStreetMap (rutas, distancias y steps)',
-                'Ministerio de Comunicaciones, Infraestructura y Vivienda (CIV / DGC)'
+                'OpenStreetMap / Nominatim (coordenadas oficiales de las 22 cabeceras departamentales y límites territoriales)',
+                'OSRM (router.project-osrm.org) sobre OpenStreetMap (rutas, distancias y steps)'
             ],
             'fecha': '2026-10-25'
         },
@@ -649,7 +765,7 @@ def build():
         'edges': accepted_edges
     }
 
-    with open(OUTPUT_DATASET, 'w', encoding='utf-8') as f:
+    with open(OUTPUT_DATASET, 'w', encoding='utf-8', newline='') as f:
         json.dump(dataset, f, ensure_ascii=False, indent=2)
 
     print(f"\n  [EXITO] Dataset JSON generado en: {OUTPUT_DATASET}")
