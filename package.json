@@ -19,7 +19,9 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "e2e:install": "playwright install --with-deps chromium webkit",
-    "ci": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "ci": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "anexo-codigo": "node tools/anexo-codigo.mjs",
+    "capturas": "playwright test tests/e2e/capturas.spec.ts --project=desktop-chrome --project=pixel-7 --workers=1"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.19",
