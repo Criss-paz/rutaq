@@ -90,9 +90,9 @@ Para garantizar que ningún nodo sufriera problemas de deslocalización territor
 
 ---
 
-## 4. Criterio de Arista Directa y Filtrado Topológico (Triple Criterio)
+## 4. Criterio de Arista Directa y Filtrado Topológico (Criterio Definitivo)
 
-Entre los 22 departamentos existen $\frac{22 \times 21}{2} = 231$ pares no dirigidos posibles. Para que un par $\{A, B\}$ sea admitido como **arista directa** en la red vial nacional, debe satisfacer simultáneamente tres condiciones objetivas y reproducibles:
+Entre los 22 departamentos existen $\frac{22 \times 21}{2} = 231$ pares no dirigidos posibles. Para que un par $\{A, B\}$ sea admitido como **arista directa** en la red vial nacional, debe satisfacer simultáneamente dos condiciones objetivas y reproducibles:
 
 ### 4.1. Condición 1: Vecindad Geográfica (Frontera Compartida)
 
@@ -104,30 +104,35 @@ $$\text{distancia}(P_A, P_B) \le \epsilon_{\text{vecindad}}$$
 - **Resultado:** De los 231 pares, exactamente **51 pares** comparten frontera geográfica en la República de Guatemala. La matriz completa de adyacencia binaria se encuentra documentada en [`docs/datos/vecindad_departamentos.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/vecindad_departamentos.csv).
 - **Descartes por Condición 1:** Los 180 pares que no comparten frontera quedan inmediatamente descartados como aristas directas.
 
-### 4.2. Condición 2: Recorrido Intra-Departamental ($\ge 85.0\ \%$ en $A \cup B$)
+### 4.2. Condición 2: Umbral de Proximidad a Cabeceras Intermedias ($\ge 2.0\text{ km}$)
 
-Aun cuando dos departamentos compartan frontera, la carretera real que conecta sus cabeceras no debe transitar extensamente por el territorio de departamentos intermediarios. La longitud de la ruta OSRM contenida dentro de la unión de los polígonos $A$ y $B$ debe cumplir:
-
-$$\frac{\text{longitud}\big(\text{ruta}(A \leftrightarrow B) \cap (P_A \cup P_B)\big)}{\text{longitud}\big(\text{ruta}(A \leftrightarrow B)\big)} \ge 85.0\ \%$$
-
-- **Justificación:** Si una carretera entre vecinos cruza un tercer departamento en un tramo prolongado (por ejemplo, `CHI-GUA` que recorre Sacatepéquez por la CA-1 en un $46.2\ \%$, o `GUA-JAL` que pasa por El Progreso en un $48.7\ \%$, o `IZA-PET` que transita por Alta Verapaz en un $28.6\ \%$), el desplazamiento no constituye un enlace interdepartamental directo sino una composición a través de un corredor vial vecino.
-- **Descartes por Condición 2:** 15 pares vecinos fueron descartados por no alcanzar el $85.0\ \%$ dentro de sus propios territorios.
-
-### 4.3. Condición 3: Umbral de Proximidad a Cabeceras Intermedias ($\ge 2.0\text{ km}$)
-
-La trayectoria vehicular vehicular entre $A$ y $B$ no debe aproximarse al casco urbano de ninguna otra cabecera departamental $C \notin \{A, B\}$:
+La trayectoria vehicular entre las cabeceras de $A$ y $B$ no debe cruzar ni aproximarse al casco urbano de ninguna otra cabecera departamental $C \notin \{A, B\}$:
 
 $$\min_{C \notin \{A, B\}} \text{distancia}(C, \text{geometría}(A \leftrightarrow B)) \ge 2.0\text{ km}$$
 
-- **Justificación:** A escala departamental, una aproximación a menos de $2.0\text{ km}$ de una cabecera implica transitar por su zona urbana céntrica o su anillo de circunvalación inmediata, dividiendo físicamente el trayecto en $A \to C \to B$.
-- **Registro de descartes:** Cada par descartado (195 en total) queda registrado con el desglose exacto de la condición incumplida, porcentaje en $A \cup B$ y cabecera intermedia más próxima en [`docs/datos/aristas_descartadas_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/aristas_descartadas_guatemala.csv).
+- **Justificación:** A escala departamental, una aproximación a menos de $2.0\text{ km}$ de una cabecera implica transitar directamente por su zona urbana céntrica o su anillo de circunvalación inmediata, dividiendo físicamente el trayecto en dos etapas operativas $A \to C \to B$.
+- **Descartes por Condición 2:** De los 51 pares vecinos, únicamente **2 pares** fueron descartados por interceptar una cabecera intermedia:
+  - `JAL-ZAC`: La ruta vehicular pasa a escasos $0.443\text{ km}$ de la cabecera departamental de Chiquimula (`CHQ`), dividiéndose en `JAL -> CHQ -> ZAC`.
+  - `PET-QUI`: La ruta vehicular pasa a $1.412\text{ km}$ de la cabecera departamental de Cobán (`AVE`), dividiéndose en `QUI -> AVE -> PET`.
+- **Registro de descartes:** Los 182 pares descartados en total (180 por no vecindad y 2 por proximidad urbana) quedan minuciosamente documentados en [`docs/datos/aristas_descartadas_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/aristas_descartadas_guatemala.csv).
 
-### 4.4. Conexidad Topológica y Enlace de Petén
+### 4.3. Descarte de la Condición Preliminar del 85 % (Análisis Crítico y Justificación)
 
-La red resultante contiene exactamente **36 aristas directas** (dentro del rango meta de 35 a 50 aristas). El grafo es **100 % conexo** y cubre la totalidad de los 22 departamentos:
+En las fases exploratorias del modelo, se evaluó una condición adicional: exigir que al menos el $85.0\ \%$ de la longitud de la ruta OSRM estuviera contenida dentro de la unión de los polígonos de los dos departamentos involucrados ($A \cup B$). No obstante, el análisis cartográfico riguroso y la validación de distancias demostraron que **esta condición resultó incorrecta y fue formalmente descartada**.
 
-- **Conectividad de Petén (`PET`):** Petén queda conectado formalmente a la red nacional a través de su enlace directo con Alta Verapaz (`AVE-PET`, $257.3\text{ km}$), siguiendo la Franja Transversal del Norte (RD PET-11 / RD AV-09).
-- **Sin aristas artificiales:** Ninguna arista fue inventada o forzada; todas provienen de cálculos geométricos estrictos y reproducibles sobre datos oficiales.
+El motivo radica en que el porcentaje territorial no discrimina con precisión entre conexiones directas reales y rutas indirectas, penalizando severamente a carreteras troncales directas de primer orden que cruzan tangencialmente un departamento intermedio debido a la geografía política guatemalteca:
+
+- **El caso crítico de `GUA–CHI` (Carretera Interamericana CA-1 Occidente):** La distancia física directa entre la Ciudad de Guatemala y Chimaltenango por la CA-1 Occidente es de **$52.2\text{ km}$**. Sin embargo, la CA-1 cruza un segmento del departamento de Sacatepéquez (a la altura de San Lucas Sacatepéquez), por lo que solo el $53.8\ \%$ de su trayecto queda dentro de $GUA \cup CHI$. Al aplicar la regla del $85\ \%$, esta arteria fundamental quedaba descartada y el algoritmo de Dijkstra se veía obligado a desviar la ruta por el casco urbano de Antigua Guatemala (`GUA -> SAC -> CHI`), reportando $37.8 + 19.0 = \mathbf{56.8\text{ km}}$ (un error de sobreestimación de $+4.6\text{ km}$ respecto a la realidad).
+- **Mismo fallo en el Altiplano Occidental y Costa:** Fenómenos análogos eliminaban carreteras directas plenamente operativas como `HUE–QUE` ($91.7\text{ km}$ sobre la CA-1), `HUE–SMA` ($87.1\text{ km}$), `HUE–TOT` ($89.7\text{ km}$) y `QUE–SOL` ($79.4\text{ km}$ sobre la CA-1), o corredores como `AVE–IZA` ($42.6\ \%$ dentro de $A \cup B$) y `REU–SMA` ($40.7\ \%$).
+
+Omitir carreteras directas consolidadas obligaba al programa a calcular trayectos más largos e irreales. Por tanto, el orquestador y el equipo técnico definieron el criterio definitivo y robusto: **vecindad geográfica + distancia $\ge 2.0\text{ km}$ a cabeceras intermedias**.
+
+### 4.4. Conexidad Topológica y Red Nacional
+
+La red vial definitiva consta de exactamente **49 aristas directas** (dentro del rango meta de 35 a 50 aristas). El grafo es **100 % conexo** y cubre armónicamente la totalidad de los 22 departamentos:
+
+- **Conectividad de Petén (`PET`):** Petén queda conectado de manera robusta y bimodal a la red nacional a través de sus dos fronteras departamentales directas: con Alta Verapaz (`AVE-PET`, $257.3\text{ km}$ por la Franja Transversal del Norte) y con Izabal (`IZA-PET`, $387.1\text{ km}$ por la RD PET-11 / FTN).
+- **Integridad del modelo:** No se inventó ninguna arista. Todas las 49 conexiones corresponden a trayectorias reales de navegación OSRM entre cabeceras de departamentos geográficamente adyacentes.
 
 ---
 

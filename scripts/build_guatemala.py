@@ -9,10 +9,9 @@ Cumple con el contrato GuatemalaDataset de src/core/types.ts:
 3. Polígonos departamentales y vecindad: polígonos oficiales de OSM/Nominatim (polygon_geojson=1, addresstype=state)
    con caché en scripts/cache/departamentos_geojson/. Cálculo topológico de vecindad con tolerancia de ~200 m, guardado
    en docs/datos/vecindad_departamentos.csv.
-4. Criterio de arista directa reproducible (las tres condiciones deben cumplirse simultáneamente):
+4. Criterio de arista directa reproducible (ambas condiciones deben cumplirse simultáneamente):
    - Condición 1: Los departamentos A y B son vecinos (comparten frontera geográfica).
-   - Condición 2: La ruta OSRM A->B recorre al menos el 85 % de su longitud dentro de los polígonos de A ∪ B.
-   - Condición 3: La ruta no pasa a menos de 2.0 km de ninguna otra cabecera departamental C != A, B.
+   - Condición 2: La ruta OSRM no pasa a menos de 2.0 km de ninguna otra cabecera departamental C != A, B.
    Descartes registrados en docs/datos/aristas_descartadas_guatemala.csv indicando la condición fallida.
 5. carretera: derivada de los steps de OSRM sumando distancias de ref (CA-1, CA-9, CA-13, RN-…) o name.
 6. Grafo conexo: verificación topológica de conectividad completa (especialmente Petén conectado a la red nacional).
@@ -28,8 +27,7 @@ import math
 import csv
 import urllib.request
 import urllib.parse
-from shapely.geometry import shape, LineString
-from shapely.ops import unary_union
+from shapely.geometry import shape
 import networkx as nx
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,7 +55,6 @@ EARTH_RADIUS_KM = 6371.0088
 
 # Umbrales metodológicos exactos
 VECINDAD_TOLERANCE_DEG = 0.002  # ~220 m (tolerancia de contacto entre polígonos departamentales)
-MIN_LENGTH_IN_UNION_PCT = 85.0  # Al menos 85.0 % del trayecto dentro de A ∪ B
 DIRECT_EDGE_THRESHOLD_KM = 2.0  # Distancia mínima a cabecera intermedia distinta de A y B
 
 # 22 departamentos con id de 3 letras, nombre oficial, cabecera departamental, consulta Nominatim y título Wikipedia
@@ -620,7 +617,7 @@ def build():
             tgt = max(u, v)
             all_pairs.append((src, tgt))
 
-    print(f"\n--- 4. Evaluando los {len(all_pairs)} pares candidatos (Triple Criterio) ---")
+    print(f"\n--- 4. Evaluando los {len(all_pairs)} pares candidatos (Criterio Definitivo: Vecindad + Proximidad >= 2.0 km) ---")
 
     accepted_edges = []
     discarded_pairs = []
@@ -642,31 +639,12 @@ def build():
                 'destino': tgt,
                 'condicion_fallida': 'Condicion 1 (Vecindad)',
                 'motivo': 'Los departamentos no comparten frontera geográfica',
-                'porcentaje_ab': '',
                 'distancia_minima_km': '',
                 'cabecera_intermedia': ''
             })
             continue
 
-        # Condición 2: Recorrido >= 85 % dentro de A ∪ B
-        line = LineString([(p[1], p[0]) for p in route_points])
-        u_ab = unary_union([geoms[src], geoms[tgt]])
-        inter = line.intersection(u_ab)
-        pct_in_ab = round((inter.length / line.length) * 100.0, 1) if line.length > 0 else 0.0
-
-        if pct_in_ab < MIN_LENGTH_IN_UNION_PCT:
-            discarded_pairs.append({
-                'origen': src,
-                'destino': tgt,
-                'condicion_fallida': 'Condicion 2 (Longitud en A ∪ B)',
-                'motivo': f'Ruta recorre solo {pct_in_ab:.1f}% dentro de {src} ∪ {tgt} (umbral >= {MIN_LENGTH_IN_UNION_PCT}%)',
-                'porcentaje_ab': pct_in_ab,
-                'distancia_minima_km': '',
-                'cabecera_intermedia': ''
-            })
-            continue
-
-        # Condición 3: No pasar a menos de 2.0 km de otra cabecera departamental
+        # Condición 2: No pasar a menos de 2.0 km de otra cabecera departamental
         min_dist_to_other = float('inf')
         closest_intermediate = None
 
@@ -686,9 +664,8 @@ def build():
             discarded_pairs.append({
                 'origen': src,
                 'destino': tgt,
-                'condicion_fallida': 'Condicion 3 (Proximidad a otra cabecera)',
+                'condicion_fallida': 'Condicion 2 (Proximidad a otra cabecera)',
                 'motivo': motivo,
-                'porcentaje_ab': pct_in_ab,
                 'distancia_minima_km': round(min_dist_to_other, 3),
                 'cabecera_intermedia': closest_intermediate
             })
@@ -712,7 +689,7 @@ def build():
             'nota': '',
             'geometry': simplified_geom
         })
-        print(f"  [ACEPTADA] {edge_id:<10} | {distance_km:>6.1f} km | {pct_in_ab:>5.1f}% en A∪B | {carretera:<25}")
+        print(f"  [ACEPTADA] {edge_id:<10} | {distance_km:>6.1f} km | {carretera:<25}")
 
     print(f"\n--- 5. Resumen de filtrado de aristas ---")
     print(f"  Total pares consultados   : {len(all_pairs)}")
@@ -722,7 +699,7 @@ def build():
     # Guardar descartadas
     with open(OUTPUT_DISCARDED, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
-            'origen', 'destino', 'condicion_fallida', 'motivo', 'porcentaje_ab', 'distancia_minima_km', 'cabecera_intermedia'
+            'origen', 'destino', 'condicion_fallida', 'motivo', 'distancia_minima_km', 'cabecera_intermedia'
         ])
         writer.writeheader()
         writer.writerows(discarded_pairs)

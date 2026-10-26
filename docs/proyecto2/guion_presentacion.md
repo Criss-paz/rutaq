@@ -56,7 +56,7 @@ _Al seleccionar origen y destino, el sistema ejecuta el **Algoritmo de Dijkstra*
 **Qué decir:**  
 _«Veamos nuestro primer caso: un envío transversal de costa a costa, desde el altiplano occidental en **Quetzaltenango (QUE)** hasta la costa del Caribe en **Puerto Barrios, Izabal (IZA)**._
 
-_Observen cómo el algoritmo encuentra la ruta óptima sobre las carreteras entre departamentos vecinos con una distancia total de **515.1 km** ([km: QUE→IZA]). El camino transita desde Quetzaltenango por Totonicapán y Quiché, enlaza con Baja Verapaz y El Progreso hacia el corredor del Motagua en Zacapa, conectando con la **CA-9 Norte** hasta Puerto Barrios, mostrando en pantalla cada tramo y eliminando cualquier desvío innecesario.»_
+_Observen cómo el algoritmo encuentra la ruta óptima sobre las carreteras entre departamentos vecinos con una distancia total de **490.3 km** ([km: QUE→IZA]). El camino transita desde Quetzaltenango por Totonicapán y Quiché, enlaza directamente a través de Baja Verapaz hacia Zacapa, conectando con la **CA-9 Norte** hasta Puerto Barrios, mostrando en pantalla cada tramo y eliminando cualquier desvío innecesario.»_
 
 ---
 

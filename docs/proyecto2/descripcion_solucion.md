@@ -80,13 +80,14 @@ Cada nodo representa la cabecera departamental oficial de uno de los 22 departam
 
 ### 2.2. Conjunto de Aristas ($E$): Carreteras Directas entre Departamentos Vecinos
 
-Una arista $\{u, v\} \in E$ representa una **conexión vial directa** entre departamentos vecinos. Para evitar aristas artificiales compuestas o transversales (por ejemplo, conectar directamente Huehuetenango con Izabal o Chiquimula, o Ciudad de Guatemala con Quetzaltenango a través de Chimaltenango), se aplica un **triple criterio objetivo y reproducible**:
+Una arista $\{u, v\} \in E$ representa una **conexión vial directa** entre departamentos vecinos. Para evitar aristas artificiales compuestas o transversales (por ejemplo, conectar directamente Huehuetenango con Izabal o Chiquimula, o Ciudad de Guatemala con Quetzaltenango a través de Chimaltenango), se aplica un **criterio objetivo y reproducible**:
 
-1. **Vecindad Territorial:** Los departamentos $u$ y $v$ deben compartir frontera geográfica según sus polígonos oficiales de OSM/Nominatim (tolerancia de contacto $\le 200\text{ m}$).
-2. **Trayecto Intra-Departamental ($\ge 85.0\ \%$):** La ruta OSRM debe recorrer al menos el $85\ \%$ de su longitud dentro del territorio de los departamentos $u \cup v$. Si transita de forma prolongada por terceros departamentos, no constituye un enlace directo entre vecinos.
-3. **Umbral de Proximidad a Cabeceras Intermedias ($\ge 2.0\text{ km}$):** La ruta no debe aproximarse a menos de $2.0\text{ km}$ del casco urbano de ninguna otra cabecera departamental $w \notin \{u, v\}$.
+1. **Vecindad Territorial:** Los departamentos $u$ y $v$ deben compartir frontera geográfica según sus polígonos oficiales de OSM/Nominatim (tolerancia de contacto $\le 200\text{ m}$, identificando 51 pares vecinos).
+2. **Umbral de Proximidad a Cabeceras Intermedias ($\ge 2.0\text{ km}$):** La ruta no debe cruzar ni aproximarse a menos de $2.0\text{ km}$ del casco urbano de ninguna otra cabecera departamental $w \notin \{u, v\}$. Solo dos pares vecinos (`JAL-ZAC` por cruzar Chiquimula y `PET-QUI` por cruzar Cobán) se descartan por este concepto.
 
-Todo par que no satisface simultáneamente las tres condiciones es descartado y auditado con su motivo en [`docs/datos/aristas_descartadas_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/aristas_descartadas_guatemala.csv). El grafo final consta de **36 aristas directas** y es 100 % conexo.
+> **Nota metodológica sobre la condición del 85 %:** Se evaluó y descartó formalmente una condición previa que requería $\ge 85\ \%$ del trayecto dentro de $u \cup v$, tras comprobar empíricamente que eliminaba arterias directas reales de primer orden como `GUA–CHI` sobre la CA-1 Occidente (que cruza brevemente Sacatepéquez), lo que provocaba que Dijkstra desviara la ruta por Antigua reportando distancias mayores a las reales ($56.8\text{ km}$ frente a $52.2\text{ km}$).
+
+Todo par que no satisface las condiciones es descartado y auditado con su motivo en [`docs/datos/aristas_descartadas_guatemala.csv`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/docs/datos/aristas_descartadas_guatemala.csv). El grafo final consta de **49 aristas directas** y es 100 % conexo.
 
 ### 2.3. Función de Ponderación ($W$): Distancia de Conducción Real
 
@@ -170,4 +171,4 @@ Siguiendo la metodología rigurosa del Proyecto I (donde se descubrió la reubic
 ### 5.3. Reproducibilidad y Validación
 
 - El script de construcción [`scripts/build_guatemala.py`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/scripts/build_guatemala.py) cuenta con almacenamiento persistente en caché local bajo `scripts/cache/`, lo que permite regenerar el archivo [`src/data/guatemala.json`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/src/data/guatemala.json) y [`src/data/guatemala_contorno.json`](file:///C:/Users/DELL/orca/workspaces/Ruta%20Mas%20Corta/gemini-data/src/data/guatemala_contorno.json) de manera 100 % desconectada y determinista.
-- El grafo resultante consta de **36 aristas directas**, es **completamente conexo** y enlaza a todas las regiones de la república, incluyendo la conectividad estratégica del departamento de Petén (`PET`) a través de Alta Verapaz (`AVE-PET`).
+- El grafo resultante consta de **49 aristas directas**, es **completamente conexo** y enlaza a todas las regiones de la república, incluyendo la conectividad estratégica del departamento de Petén (`PET`) a través de Alta Verapaz (`AVE-PET`) e Izabal (`IZA-PET`).
