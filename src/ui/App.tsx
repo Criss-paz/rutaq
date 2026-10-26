@@ -84,6 +84,10 @@ export default function App() {
         {/* Área central del lienzo con React Flow */}
         <main
           className={`relative flex flex-1 min-h-0 flex-col overflow-hidden lg:!mb-0 ${
+            // Presentación: se reserva espacio para la barra superior y la tarjeta (derecha en escritorio,
+            // abajo en pantallas angostas) para que el mapa se ajuste al área libre y nada lo tape.
+            isPresentationMode && mode === 'guatemala' ? 'pt-24 pb-[38vh] lg:pb-0 lg:pr-[400px] ' : ''
+          }${
             isPresentationMode || mobileSheetPos === 'maximized'
               ? 'mb-0'
               : mobileSheetPos === 'expanded'
